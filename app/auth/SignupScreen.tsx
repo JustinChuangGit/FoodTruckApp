@@ -21,8 +21,7 @@ export default function SignupScreen() {
             console.log("User signed up:", user);
             router.replace('/user/UserHomeScreen'); // Redirect to home or other screen after signup
         } catch (error) {
-            // Alert.alert("Sign Up Failed", error.message);
-            Alert.alert("Sign Up Failed");
+            Alert.alert("Sign Up Failed", (error as Error).message);
         }
     };
 
