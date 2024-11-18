@@ -19,7 +19,7 @@ export default function SignupScreen() {
     try {
       const user = await signUp(email, password);
       console.log("User signed up:", user);
-      router.replace("/user/UserHomeScreen"); // Redirect to home or other screen after signup
+      router.replace("../user"); // Correctly navigates to the /user route
     } catch (error) {
       Alert.alert("Sign Up Failed", (error as Error).message);
     }
