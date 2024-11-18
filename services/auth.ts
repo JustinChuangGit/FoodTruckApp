@@ -7,6 +7,7 @@ import {
   User,
 } from "firebase/auth";
 import { app } from "../firebaseConfig"; // Adjust the path if needed
+import { saveUserData, getUserData } from "./firestore"; // Adjust the path as needed
 
 const auth = getAuth(app);
 
@@ -18,19 +19,27 @@ interface UserSignupData {
 }
 
 // Function to sign up a new user
-export const signUp = async (email: string, password: string): Promise<User> => {
+
+export const signUp = async (
+  email: string,
+  password: string,
+  isVendor: boolean,
+  name: string
+): Promise<User> => {
   try {
-    const userCredential = await createUserWithEmailAndPassword(
-      auth,
-      email,
-      password
-    );
-    return userCredential.user;
+    const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+    const user = userCredential.user;
+
+    // Save additional user data to Firestore
+    await saveUserData(user.uid, { email, name, isVendor });
+
+    return user;
   } catch (error) {
-    console.error("Error signing up:", error);
+    console.error("Error during sign-up:", error);
     throw error;
   }
 };
+
 
 // Function to sign in an existing user
 export const signIn = async (email: string, password: string): Promise<User> => {
@@ -58,15 +67,29 @@ export const signOutUser = async (): Promise<void> => {
   }
 };
 
-// Function to monitor authentication state
 export const onAuthStateChange = (
-  callback: (user: User | null) => void
+  callback: (user: { uid: string; email: string; isVendor: boolean } | null) => void
 ): (() => void) => {
-  return onAuthStateChanged(auth, (user) => {
-    if (user) {
-      callback(user);
+  return onAuthStateChanged(auth, async (firebaseUser) => {
+    if (firebaseUser) {
+      try {
+        const userData = await getUserData(firebaseUser.uid);
+        if (userData) {
+          callback({
+            uid: firebaseUser.uid,
+            email: firebaseUser.email || "",
+            isVendor: userData.isVendor || false,
+          });
+        } else {
+          callback(null);
+        }
+      } catch (error) {
+        console.error("Error fetching user data:", error);
+        callback(null);
+      }
     } else {
       callback(null);
     }
   });
 };
+
