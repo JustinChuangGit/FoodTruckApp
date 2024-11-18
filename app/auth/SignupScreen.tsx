@@ -3,6 +3,8 @@ import React, { useState } from "react";
 import { View, Text, TextInput, Button, Alert, Switch } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { signUp } from "../../services/auth"; // Adjust the path if necessary
+import { useDispatch } from "react-redux";
+import { AppDispatch } from "../../redux/store";
 
 export default function SignupScreen() {
   const router = useRouter();
@@ -12,15 +14,19 @@ export default function SignupScreen() {
   const [isVendor, setIsVendor] = useState(false); // Field to indicate if the user is a vendor
   const [name, setName] = useState(""); // Additional field for user name
 
+  const dispatch = useDispatch<AppDispatch>(); // Correctly typed dispatch
+
   const handleSignUp = async () => {
     if (password !== confirmPassword) {
       Alert.alert("Passwords do not match!");
       return;
     }
     try {
-      const user = await signUp(email, password, isVendor, name); // Pass additional fields to signUp
+      const user = await signUp(dispatch, email, password, isVendor, name); // Pass dispatch
       console.log("User signed up:", user);
-      router.replace(isVendor ? "../vendor" : "../user"); // Navigate based on user type
+      router.replace(
+        isVendor ? "/vendor/VendorHomeScreen" : "/user/UserHomeScreen"
+      ); // Navigate based on user type
     } catch (error) {
       Alert.alert("Sign Up Failed", (error as Error).message);
     }

@@ -2,20 +2,22 @@
 import React, { useState, useEffect } from "react";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import LoginScreen from "./auth/LoginScreen";
-import { Auth } from "firebase/auth";
-import { onAuthStateChange } from "@/services/auth";
+import { Provider } from "react-redux";
+import { store } from "../redux/store";
 
 const Stack = createNativeStackNavigator();
 
 export default function App() {
   return (
-    <Stack.Navigator>
-      <Stack.Screen
-        name="Login"
-        component={LoginScreen}
-        options={{ title: "Login" }}
-      />
-    </Stack.Navigator>
+    <Provider store={store}>
+      <Stack.Navigator>
+        <Stack.Screen
+          name="Login"
+          component={LoginScreen}
+          options={{ title: "Login" }}
+        />
+      </Stack.Navigator>
+    </Provider>
   );
 }
 

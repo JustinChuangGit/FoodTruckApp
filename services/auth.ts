@@ -8,6 +8,8 @@ import {
 } from "firebase/auth";
 import { app } from "../firebaseConfig"; // Adjust the path if needed
 import { saveUserData, getUserData } from "./firestore"; // Adjust the path as needed
+import { setUser } from "../redux/authSlice"; // Adjust the path as needed
+import { AppDispatch } from "../redux/store"; // Adjust the path as needed
 
 const auth = getAuth(app);
 
@@ -21,17 +23,21 @@ interface UserSignupData {
 // Function to sign up a new user
 
 export const signUp = async (
+  dispatch: AppDispatch, // Pass dispatch
   email: string,
   password: string,
   isVendor: boolean,
   name: string
-): Promise<User> => {
+) => {
   try {
     const userCredential = await createUserWithEmailAndPassword(auth, email, password);
     const user = userCredential.user;
 
-    // Save additional user data to Firestore
+    // Save additional user data in Firestore
     await saveUserData(user.uid, { email, name, isVendor });
+
+    // Dispatch Redux action to update state
+    dispatch(setUser({ uid: user.uid, email, name, isVendor }));
 
     return user;
   } catch (error) {
@@ -42,20 +48,23 @@ export const signUp = async (
 
 
 // Function to sign in an existing user
-export const signIn = async (email: string, password: string): Promise<User> => {
+export const signIn = async (dispatch: AppDispatch, email: string, password: string) => {
   try {
-    const userCredential = await signInWithEmailAndPassword(
-      auth,
-      email,
-      password
-    );
-    return userCredential.user;
+    const userCredential = await signInWithEmailAndPassword(auth, email, password);
+    const user = userCredential.user;
+
+    // Fetch additional user data from Firestore
+    const userData = await getUserData(user.uid);
+
+    // Update Redux state
+    dispatch(setUser({ uid: user.uid, email: user.email, ...userData }));
+
+    return { uid: user.uid, email: user.email, ...userData }; // Include `isVendor` in return
   } catch (error) {
-    console.error("Error signing in:", error);
+    console.error("Error during sign-in:", error);
     throw error;
   }
 };
-
 // Function to sign out the user
 export const signOutUser = async (): Promise<void> => {
   try {
