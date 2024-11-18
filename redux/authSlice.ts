@@ -1,9 +1,16 @@
 // store/authSlice.ts
 import { createSlice } from "@reduxjs/toolkit";
 
+export interface User {
+  uid: string;
+  email: string;
+  name: string;
+  isVendor: boolean;
+}
+
 const initialState = {
-  user: null, // Will hold user details (e.g., uid, email, etc.)
-  isAuthenticated: false, // Tracks authentication state
+  user: null as User | null,
+  isAuthenticated: false,
 };
 
 const authSlice = createSlice({

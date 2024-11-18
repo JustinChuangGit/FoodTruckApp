@@ -1,18 +1,21 @@
 import {
-  getAuth,
+  initializeAuth,
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
   signOut,
   onAuthStateChanged,
-  User,
+  getReactNativePersistence,
 } from "firebase/auth";
 import { app } from "../firebaseConfig"; // Adjust the path if needed
 import { saveUserData, getUserData } from "./firestore"; // Adjust the path as needed
 import { setUser } from "../redux/authSlice"; // Adjust the path as needed
 import { AppDispatch } from "../redux/store"; // Adjust the path as needed
+import ReactNativeAsyncStorage from "@react-native-async-storage/async-storage";
 
-const auth = getAuth(app);
 
+const auth = initializeAuth(app, {
+  persistence: getReactNativePersistence(ReactNativeAsyncStorage),
+});
 // Type definitions
 interface UserSignupData {
   email: string;
