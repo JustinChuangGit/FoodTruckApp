@@ -1,12 +1,12 @@
 import React from "react";
 import { View, StyleSheet } from "react-native";
-import { Slot } from "expo-router";
+import { Slot, Stack } from "expo-router";
 
 export default function UserLayout() {
   return (
-    <View style={styles.container}>
-      <Slot />
-    </View>
+    <Stack>
+      <Stack.Screen name="UserHomeScreen" />
+    </Stack>
   );
 }
 
