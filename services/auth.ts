@@ -4,13 +4,21 @@ import {
   signInWithEmailAndPassword,
   signOut,
   onAuthStateChanged,
+  User,
 } from "firebase/auth";
-import { app } from "../firebaseConfig.js"; // Adjust the path if needed
+import { app } from "../firebaseConfig"; // Adjust the path if needed
 
 const auth = getAuth(app);
 
+// Type definitions
+interface UserSignupData {
+  email: string;
+  password: string;
+  isVendor?: boolean; // Optional field to indicate if the user is a vendor
+}
+
 // Function to sign up a new user
-export const signUp = async (email, password) => {
+export const signUp = async (email: string, password: string): Promise<User> => {
   try {
     const userCredential = await createUserWithEmailAndPassword(
       auth,
@@ -25,7 +33,7 @@ export const signUp = async (email, password) => {
 };
 
 // Function to sign in an existing user
-export const signIn = async (email, password) => {
+export const signIn = async (email: string, password: string): Promise<User> => {
   try {
     const userCredential = await signInWithEmailAndPassword(
       auth,
@@ -40,7 +48,7 @@ export const signIn = async (email, password) => {
 };
 
 // Function to sign out the user
-export const signOutUser = async () => {
+export const signOutUser = async (): Promise<void> => {
   try {
     await signOut(auth);
     console.log("User signed out successfully");
@@ -51,17 +59,14 @@ export const signOutUser = async () => {
 };
 
 // Function to monitor authentication state
-export const onAuthStateChange = (callback) => {
+export const onAuthStateChange = (
+  callback: (user: User | null) => void
+): (() => void) => {
   return onAuthStateChanged(auth, (user) => {
     if (user) {
-      // User is signed in, see docs for a list of available properties
-      // https://firebase.google.com/docs/reference/js/auth.user
-      const user = user.uid;
-      const userJson = user.toJSON();
-      // ...
+      callback(user);
     } else {
-      // User is signed out
-      // ...
+      callback(null);
     }
   });
 };
