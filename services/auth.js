@@ -1,4 +1,10 @@
-import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "firebase/auth";
+import {
+  getAuth,
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
+  signOut,
+  onAuthStateChanged,
+} from "firebase/auth";
 import { app } from "../firebaseConfig.js"; // Adjust the path if needed
 
 const auth = getAuth(app);
@@ -6,7 +12,11 @@ const auth = getAuth(app);
 // Function to sign up a new user
 export const signUp = async (email, password) => {
   try {
-    const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+    const userCredential = await createUserWithEmailAndPassword(
+      auth,
+      email,
+      password
+    );
     return userCredential.user;
   } catch (error) {
     console.error("Error signing up:", error);
@@ -17,7 +27,11 @@ export const signUp = async (email, password) => {
 // Function to sign in an existing user
 export const signIn = async (email, password) => {
   try {
-    const userCredential = await signInWithEmailAndPassword(auth, email, password);
+    const userCredential = await signInWithEmailAndPassword(
+      auth,
+      email,
+      password
+    );
     return userCredential.user;
   } catch (error) {
     console.error("Error signing in:", error);
@@ -38,5 +52,16 @@ export const signOutUser = async () => {
 
 // Function to monitor authentication state
 export const onAuthStateChange = (callback) => {
-  return onAuthStateChanged(auth, callback);
+  return onAuthStateChanged(auth, (user) => {
+    if (user) {
+      // User is signed in, see docs for a list of available properties
+      // https://firebase.google.com/docs/reference/js/auth.user
+      const user = user.uid;
+      const userJson = user.toJSON();
+      // ...
+    } else {
+      // User is signed out
+      // ...
+    }
+  });
 };

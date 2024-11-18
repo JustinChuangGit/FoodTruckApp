@@ -1,7 +1,9 @@
 // app/index.tsx
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import LoginScreen from "./auth/LoginScreen";
+import { Auth } from "firebase/auth";
+import { onAuthStateChange } from "@/services/auth";
 
 const Stack = createNativeStackNavigator();
 
@@ -14,5 +16,13 @@ export default function App() {
         options={{ title: "Login" }}
       />
     </Stack.Navigator>
+  );
+}
+
+function SplashScreen() {
+  return (
+    <div>
+      <h1>Loading...</h1>
+    </div>
   );
 }
