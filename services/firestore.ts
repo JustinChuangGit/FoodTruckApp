@@ -10,8 +10,15 @@ export const saveUserData = async (
   data: { email: string; name: string; isVendor: boolean }
 ): Promise<void> => {
   try {
-    await setDoc(doc(db, "users", uid), data);
-    console.log("User data saved successfully");
+    console.log("isVendor:", data.isVendor);
+
+    if(data.isVendor){
+      await setDoc(doc(db, "vendors", uid), data);
+      console.log("Vendor data saved successfully");
+    }else{
+      await setDoc(doc(db, "users", uid), data);
+      console.log("User data saved successfully");
+    }
   } catch (error) {
     console.error("Error saving user data:", error);
     throw error;
