@@ -1,15 +1,20 @@
-// app/auth/SignupScreen.tsx
 import { useRouter } from "expo-router";
 import React, { useState } from "react";
-import { View, Text, TextInput, Button, Alert } from "react-native";
+import { View, Text, TextInput, Button, Alert, Switch } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { signUp } from "../../services/auth.js"; // Adjust the path if necessary
+import { signUp } from "../../services/auth"; // Adjust the path if necessary
+import { useDispatch } from "react-redux";
+import { AppDispatch } from "../../redux/store";
 
 export default function SignupScreen() {
   const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [isVendor, setIsVendor] = useState(false); // Field to indicate if the user is a vendor
+  const [name, setName] = useState(""); // Additional field for user name
+
+  const dispatch = useDispatch<AppDispatch>(); // Correctly typed dispatch
 
   const handleSignUp = async () => {
     if (password !== confirmPassword) {
@@ -17,9 +22,11 @@ export default function SignupScreen() {
       return;
     }
     try {
-      const user = await signUp(email, password);
+      const user = await signUp(dispatch, email, password, isVendor, name); // Pass dispatch
       console.log("User signed up:", user);
-      router.replace("../user"); // Correctly navigates to the /user route
+      router.replace(
+        isVendor ? "/vendor/VendorHomeScreen" : "/user/UserHomeScreen"
+      ); // Navigate based on user type
     } catch (error) {
       Alert.alert("Sign Up Failed", (error as Error).message);
     }
@@ -31,11 +38,20 @@ export default function SignupScreen() {
         Sign Up
       </Text>
 
+      {/* Name Input */}
+      <TextInput
+        className="h-12 border border-gray-400 rounded mb-4 px-3 bg-white"
+        placeholder="Name"
+        placeholderTextColor="#A9A9A9"
+        value={name}
+        onChangeText={setName}
+      />
+
       {/* Email Input */}
       <TextInput
         className="h-12 border border-gray-400 rounded mb-4 px-3 bg-white"
         placeholder="Email"
-        placeholderTextColor="#A9A9A9" // Light gray placeholder color
+        placeholderTextColor="#A9A9A9"
         autoCapitalize="none"
         keyboardType="email-address"
         value={email}
@@ -61,6 +77,17 @@ export default function SignupScreen() {
         value={confirmPassword}
         onChangeText={setConfirmPassword}
       />
+
+      {/* Vendor Toggle */}
+      <View className="flex-row justify-between items-center mb-4">
+        <Text className="text-black">Are you a vendor?</Text>
+        <Switch
+          value={isVendor}
+          onValueChange={setIsVendor}
+          trackColor={{ false: "#767577", true: "#81b0ff" }}
+          thumbColor={isVendor ? "#f5dd4b" : "#f4f3f4"}
+        />
+      </View>
 
       {/* Sign Up Button */}
       <View className="mb-3">

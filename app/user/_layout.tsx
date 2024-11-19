@@ -1,12 +1,16 @@
 import React from "react";
 import { View, StyleSheet } from "react-native";
 import { Slot, Stack } from "expo-router";
+import { Provider } from "react-redux";
+import { store } from "../../redux/store";
 
 export default function UserLayout() {
   return (
-    <Stack>
-      <Stack.Screen name="UserHomeScreen" />
-    </Stack>
+    <Provider store={store}>
+      <Stack>
+        <Stack.Screen name="UserHomeScreen" />
+      </Stack>
+    </Provider>
   );
 }
 

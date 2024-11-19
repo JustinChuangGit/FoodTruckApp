@@ -3,21 +3,34 @@ import { useRouter } from "expo-router";
 import React, { useState } from "react";
 import { View, Text, TextInput, Button, Alert } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { signIn } from "../../services/auth.js"; // Adjust the path if necessary
+import { signIn } from "../../services/auth"; // Adjust the path if necessary
+import { useDispatch } from "react-redux";
+import { AppDispatch } from "../../redux/store";
 
 export default function LoginScreen() {
   const router = useRouter();
+  const dispatch = useDispatch<AppDispatch>();
+
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
   const handleLogin = async () => {
     try {
-      const user = await signIn(email, password);
-      router.replace("/user/UserHomeScreen"); // Redirect to home or other screen after login
+      const user = await signIn(dispatch, email, password); // Pass dispatch
+      console.log("User signed in:", user);
+
+      // Redirect based on user type
+      if (user?.isVendor) {
+        router.replace("/vendor/VendorHomeScreen");
+      } else {
+        router.replace("/user/UserHomeScreen");
+      }
     } catch (error) {
-      Alert.alert("Login Failed");
+      console.error("Login Failed:", error);
+      Alert.alert("Login Failed", (error as Error).message);
     }
   };
+
   return (
     <SafeAreaView className="flex-1 justify-center px-6 bg-gray-100">
       <Text className="text-3xl font-bold text-center mb-6 text-black">
