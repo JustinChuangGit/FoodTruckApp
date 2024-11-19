@@ -8,7 +8,7 @@ export default function VendorLayout() {
   return (
     <Provider store={store}>
       <Stack>
-        <Stack.Screen name="UserHomeScreen" />
+        <Stack.Screen name="VendorHomeScreen" />
       </Stack>
     </Provider>
   );
