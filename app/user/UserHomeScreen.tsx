@@ -1,128 +1,108 @@
-// import React, { useState } from "react";
-// import { View, ScrollView, Text, StyleSheet, Dimensions } from "react-native";
+// import React from "react";
+// import { StyleSheet, View } from "react-native";
 // import MapView, { Marker } from "react-native-maps";
 
-// const { height: SCREEN_HEIGHT } = Dimensions.get("window");
-
 // export default function UserHomeScreen() {
-//   const [region, setRegion] = useState({
-//     latitude: 37.78825,
-//     longitude: -122.4324,
-//     latitudeDelta: 0.0922,
-//     longitudeDelta: 0.0421,
-//   });
-
 //   return (
-//     <View style={styles.container}>
-//       {/* Map View */}
+//     <View className="flex-1">
 //       <MapView
 //         style={styles.map}
-//         initialRegion={region}
-//         onRegionChangeComplete={(newRegion) => setRegion(newRegion)}
-//         provider="google" // Ensure Google Maps is used
+//         initialRegion={{
+//           latitude: 37.78825,
+//           longitude: -122.4324,
+//           latitudeDelta: 0.0922,
+//           longitudeDelta: 0.0421,
+//         }}
 //       >
-//         {/* Example Marker */}
 //         <Marker
 //           coordinate={{ latitude: 37.78825, longitude: -122.4324 }}
-//           title="Marker Title"
+//           title="My Marker"
 //           description="Marker Description"
 //         />
 //       </MapView>
-
-//       {/* Scrollable Card */}
-//       <ScrollView
-//         style={[styles.scrollContainer, { top: SCREEN_HEIGHT / 2 }]}
-//         contentContainerStyle={styles.scrollContent}
-//       >
-//         <View style={styles.card}>
-//           <Text style={styles.title}>For You</Text>
-//           <Text style={styles.description}>
-//             What's impacting the market and stocks you follow
-//           </Text>
-//           {/* Add scrollable content */}
-//           {[...Array(10).keys()].map((i) => (
-//             <Text key={i} style={styles.listItem}>
-//               Item {i + 1}
-//             </Text>
-//           ))}
-//         </View>
-//       </ScrollView>
 //     </View>
 //   );
 // }
 
 // const styles = StyleSheet.create({
-//   container: {
-//     flex: 1,
-//   },
 //   map: {
 //     ...StyleSheet.absoluteFillObject, // Makes the map fill the entire screen
 //   },
-//   scrollContainer: {
-//     position: "absolute",
-//     width: "100%",
-//     backgroundColor: "transparent",
-//   },
-//   scrollContent: {
-//     flexGrow: 1,
-//   },
-//   card: {
-//     backgroundColor: "#fff",
-//     borderTopLeftRadius: 20,
-//     borderTopRightRadius: 20,
-//     padding: 20,
-//     shadowColor: "#000",
-//     shadowOffset: { width: 0, height: 2 },
-//     shadowOpacity: 0.2,
-//     shadowRadius: 4,
-//     elevation: 5, // For Android shadow
-//   },
-//   title: {
-//     fontSize: 18,
-//     fontWeight: "bold",
-//     marginBottom: 10,
-//   },
-//   description: {
-//     fontSize: 14,
-//     color: "#666",
-//     marginBottom: 20,
-//   },
-//   listItem: {
-//     fontSize: 16,
-//     marginBottom: 10,
-//   },
 // });
+import React, { useState, useEffect } from "react";
+import { View, Alert, Text, StyleSheet } from "react-native";
+import MapView, { Marker, Region } from "react-native-maps";
+import * as Location from "expo-location";
 
-import React from "react";
-import { StyleSheet, View } from "react-native";
-import MapView, { Marker } from "react-native-maps";
+interface LocationCoordinates {
+  latitude: number;
+  longitude: number;
+}
 
 export default function UserHomeScreen() {
+  const [location, setLocation] = useState<LocationCoordinates | null>(null);
+  const [region, setRegion] = useState<Region | null>(null);
+
+  useEffect(() => {
+    (async () => {
+      try {
+        // Request location permissions
+        const { status } = await Location.requestForegroundPermissionsAsync();
+        if (status !== "granted") {
+          Alert.alert(
+            "Permission Denied",
+            "Location permission is required to use this feature."
+          );
+          return;
+        }
+
+        // Get current location
+        const userLocation = await Location.getCurrentPositionAsync({});
+        const { latitude, longitude } = userLocation.coords;
+
+        // Set region and location
+        setLocation({ latitude, longitude });
+        setRegion({
+          latitude,
+          longitude,
+          latitudeDelta: 0.01,
+          longitudeDelta: 0.01,
+        });
+      } catch (error) {
+        console.error("Error fetching location:", error);
+        Alert.alert("Error", "Unable to fetch location. Please try again.");
+      }
+    })();
+  }, []);
+
   return (
-    <View style={styles.container}>
-      <MapView
-        style={styles.map}
-        initialRegion={{
-          latitude: 37.78825,
-          longitude: -122.4324,
-          latitudeDelta: 0.0922,
-          longitudeDelta: 0.0421,
-        }}
-      >
-        <Marker
-          coordinate={{ latitude: 37.78825, longitude: -122.4324 }}
-          title="My Marker"
-          description="Marker Description"
-        />
-      </MapView>
+    <View className="flex-1">
+      {region ? (
+        <MapView
+          className="absolute inset-0" // Ensures the map fills the entire screen
+          region={region} // Center the map on the user's location
+          onRegionChangeComplete={(newRegion) => setRegion(newRegion)}
+          style={styles.map}
+        >
+          {/* Add a marker at the user's location */}
+          {location && (
+            <Marker
+              coordinate={location}
+              title="You are here"
+              description="Your current location"
+            />
+          )}
+        </MapView>
+      ) : (
+        <View className="flex-1 items-center justify-center bg-gray-100">
+          <Text className="text-gray-500">Loading your location...</Text>
+        </View>
+      )}
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
   map: {
     ...StyleSheet.absoluteFillObject, // Makes the map fill the entire screen
   },
