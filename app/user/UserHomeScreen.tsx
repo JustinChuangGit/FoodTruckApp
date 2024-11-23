@@ -7,7 +7,6 @@ import {
   PanResponder,
   Animated,
   Dimensions,
-  Platform,
 } from "react-native";
 import MapView, { Marker, Region } from "react-native-maps";
 import * as Location from "expo-location";
@@ -18,7 +17,7 @@ const { height } = Dimensions.get("window");
 const SNAP_POINTS = {
   TOP: 0,
   MIDDLE: height / 2 - 200,
-  BOTTOM: height - 300, // Adjusted to ensure it's fully visible
+  BOTTOM: height - 300, // Adjust as needed
 };
 
 interface LocationCoordinates {
@@ -29,8 +28,8 @@ interface LocationCoordinates {
 export default function UserHomeScreen() {
   const [location, setLocation] = useState<LocationCoordinates | null>(null);
   const [region, setRegion] = useState<Region | null>(null);
-  const translateY = useState(new Animated.Value(SNAP_POINTS.BOTTOM))[0]; // Default to bottom
-  const [lastTranslateY, setLastTranslateY] = useState(SNAP_POINTS.BOTTOM); // Keeps track of the last position
+  const translateY = useState(new Animated.Value(SNAP_POINTS.BOTTOM))[0]; // Start at bottom
+  const [lastTranslateY, setLastTranslateY] = useState(SNAP_POINTS.BOTTOM); // Track the last snapped position
 
   useEffect(() => {
     (async () => {
@@ -64,8 +63,12 @@ export default function UserHomeScreen() {
   // PanResponder for drag gestures
   const panResponder = PanResponder.create({
     onStartShouldSetPanResponder: () => true,
+    onPanResponderGrant: () => {
+      // Sync the starting position of the drag
+      translateY.stopAnimation(); // Stop any ongoing animation
+    },
     onPanResponderMove: (e, gestureState) => {
-      // Move the card based on gesture movement
+      // Move the card directly with the gesture
       const newTranslateY = Math.max(
         SNAP_POINTS.TOP,
         Math.min(SNAP_POINTS.BOTTOM, lastTranslateY + gestureState.dy)
@@ -75,7 +78,7 @@ export default function UserHomeScreen() {
     onPanResponderRelease: (e, gestureState) => {
       const endPosition = lastTranslateY + gestureState.dy;
 
-      // Determine the closest snap point
+      // Snap to the nearest point
       let closestPoint = SNAP_POINTS.BOTTOM;
       let minDistance = Math.abs(SNAP_POINTS.BOTTOM - endPosition);
 
@@ -91,12 +94,12 @@ export default function UserHomeScreen() {
         }
       }
 
-      // Animate to the closest point
+      // Animate the card to the closest point
       Animated.spring(translateY, {
         toValue: closestPoint,
         useNativeDriver: true,
       }).start(() => {
-        setLastTranslateY(closestPoint); // Update the last position
+        setLastTranslateY(closestPoint); // Update the last snapped position
       });
     },
   });
