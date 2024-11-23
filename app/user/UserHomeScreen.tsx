@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import {
   View,
   Alert,
@@ -7,6 +7,7 @@ import {
   PanResponder,
   Animated,
   Dimensions,
+  FlatList,
 } from "react-native";
 import MapView, { Marker, Region } from "react-native-maps";
 import * as Location from "expo-location";
@@ -17,8 +18,21 @@ const { height } = Dimensions.get("window");
 const SNAP_POINTS = {
   TOP: 0,
   MIDDLE: height / 2 - 200,
-  BOTTOM: height - 300, // Adjust as needed
+  BOTTOM: height - 300,
 };
+
+const SECTIONS = [
+  { id: "1", title: "Recommended for You", data: Array(10).fill("Card") },
+  { id: "2", title: "Trending Now", data: Array(8).fill("Card") },
+  { id: "3", title: "New Releases", data: Array(12).fill("Card") },
+  { id: "4", title: "Top Picks for You", data: Array(15).fill("Card") },
+  { id: "5", title: "Popular in Your Area", data: Array(10).fill("Card") },
+  { id: "6", title: "Recently Watched", data: Array(6).fill("Card") },
+  { id: "7", title: "Action-Packed Favorites", data: Array(8).fill("Card") },
+  { id: "8", title: "Romantic Comedies", data: Array(9).fill("Card") },
+  { id: "9", title: "Family-Friendly Picks", data: Array(7).fill("Card") },
+  { id: "10", title: "Highly Rated Movies", data: Array(10).fill("Card") },
+];
 
 interface LocationCoordinates {
   latitude: number;
@@ -28,8 +42,9 @@ interface LocationCoordinates {
 export default function UserHomeScreen() {
   const [location, setLocation] = useState<LocationCoordinates | null>(null);
   const [region, setRegion] = useState<Region | null>(null);
-  const translateY = useState(new Animated.Value(SNAP_POINTS.BOTTOM))[0]; // Start at bottom
-  const [lastTranslateY, setLastTranslateY] = useState(SNAP_POINTS.BOTTOM); // Track the last snapped position
+  const translateY = useRef(new Animated.Value(SNAP_POINTS.BOTTOM)).current;
+  const [lastTranslateY, setLastTranslateY] = useState(SNAP_POINTS.BOTTOM);
+  const [isAtTop, setIsAtTop] = useState(false);
 
   useEffect(() => {
     (async () => {
@@ -60,15 +75,13 @@ export default function UserHomeScreen() {
     })();
   }, []);
 
-  // PanResponder for drag gestures
   const panResponder = PanResponder.create({
     onStartShouldSetPanResponder: () => true,
     onPanResponderGrant: () => {
-      // Sync the starting position of the drag
       translateY.stopAnimation(); // Stop any ongoing animation
     },
     onPanResponderMove: (e, gestureState) => {
-      // Move the card directly with the gesture
+      // Follow the finger directly
       const newTranslateY = Math.max(
         SNAP_POINTS.TOP,
         Math.min(SNAP_POINTS.BOTTOM, lastTranslateY + gestureState.dy)
@@ -78,7 +91,7 @@ export default function UserHomeScreen() {
     onPanResponderRelease: (e, gestureState) => {
       const endPosition = lastTranslateY + gestureState.dy;
 
-      // Snap to the nearest point
+      // Determine the closest snap point
       let closestPoint = SNAP_POINTS.BOTTOM;
       let minDistance = Math.abs(SNAP_POINTS.BOTTOM - endPosition);
 
@@ -94,12 +107,12 @@ export default function UserHomeScreen() {
         }
       }
 
-      // Animate the card to the closest point
       Animated.spring(translateY, {
         toValue: closestPoint,
         useNativeDriver: true,
       }).start(() => {
         setLastTranslateY(closestPoint); // Update the last snapped position
+        setIsAtTop(closestPoint === SNAP_POINTS.TOP);
       });
     },
   });
@@ -137,7 +150,29 @@ export default function UserHomeScreen() {
         {...panResponder.panHandlers}
       >
         <View style={styles.dragHandle} />
-        <Text style={styles.cardContent}>Welcome to your dashboard!</Text>
+        <FlatList
+          data={SECTIONS}
+          keyExtractor={(section) => section.id}
+          renderItem={({ item }) => (
+            <View style={styles.section}>
+              <Text style={styles.sectionTitle}>{item.title}</Text>
+              <FlatList
+                data={item.data}
+                keyExtractor={(_, index) => `${item.id}-${index}`}
+                horizontal
+                showsHorizontalScrollIndicator={false}
+                renderItem={({ index }) => (
+                  <View style={styles.cardItem}>
+                    <Text>Card {index + 1}</Text>
+                  </View>
+                )}
+              />
+            </View>
+          )}
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={{ padding: 16 }}
+          scrollEnabled={isAtTop} // Enable scrolling only when at top
+        />
       </Animated.View>
     </SafeAreaView>
   );
@@ -164,7 +199,7 @@ const styles = StyleSheet.create({
     position: "absolute",
     left: 0,
     right: 0,
-    height: height - 200, // Adjust height to fit your needs
+    flexGrow: 0,
     backgroundColor: "#fff",
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
@@ -183,9 +218,22 @@ const styles = StyleSheet.create({
     alignSelf: "center",
     marginBottom: 10,
   },
-  cardContent: {
+  section: {
+    marginBottom: 16,
+  },
+  sectionTitle: {
     fontSize: 16,
-    color: "#333",
-    textAlign: "center",
+    fontWeight: "bold",
+    marginBottom: 8,
+  },
+  cardItem: {
+    backgroundColor: "#f9f9f9",
+    borderRadius: 8,
+    padding: 16,
+    marginHorizontal: 8,
+    width: 120,
+    height: 150,
+    justifyContent: "center",
+    alignItems: "center",
   },
 });
