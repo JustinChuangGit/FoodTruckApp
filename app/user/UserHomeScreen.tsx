@@ -1,65 +1,109 @@
-import React from "react";
-import { View, Text, StyleSheet } from "react-native";
-import { useSelector } from "react-redux";
-import type { RootState } from "../../redux/store"; // Adjust the path to your store
-import type { User } from "../../redux/authSlice"; // Adjust the path to your slice
+// import React from "react";
+// import { StyleSheet, View } from "react-native";
+// import MapView, { Marker } from "react-native-maps";
+
+// export default function UserHomeScreen() {
+//   return (
+//     <View className="flex-1">
+//       <MapView
+//         style={styles.map}
+//         initialRegion={{
+//           latitude: 37.78825,
+//           longitude: -122.4324,
+//           latitudeDelta: 0.0922,
+//           longitudeDelta: 0.0421,
+//         }}
+//       >
+//         <Marker
+//           coordinate={{ latitude: 37.78825, longitude: -122.4324 }}
+//           title="My Marker"
+//           description="Marker Description"
+//         />
+//       </MapView>
+//     </View>
+//   );
+// }
+
+// const styles = StyleSheet.create({
+//   map: {
+//     ...StyleSheet.absoluteFillObject, // Makes the map fill the entire screen
+//   },
+// });
+import React, { useState, useEffect } from "react";
+import { View, Alert, Text, StyleSheet } from "react-native";
+import MapView, { Marker, Region } from "react-native-maps";
+import * as Location from "expo-location";
+
+interface LocationCoordinates {
+  latitude: number;
+  longitude: number;
+}
 
 export default function UserHomeScreen() {
-  const user = useSelector(
-    (state: RootState) => state.auth.user
-  ) as User | null;
+  const [location, setLocation] = useState<LocationCoordinates | null>(null);
+  const [region, setRegion] = useState<Region | null>(null);
+
+  useEffect(() => {
+    (async () => {
+      try {
+        // Request location permissions
+        const { status } = await Location.requestForegroundPermissionsAsync();
+        if (status !== "granted") {
+          Alert.alert(
+            "Permission Denied",
+            "Location permission is required to use this feature."
+          );
+          return;
+        }
+
+        // Get current location
+        const userLocation = await Location.getCurrentPositionAsync({});
+        const { latitude, longitude } = userLocation.coords;
+
+        // Set region and location
+        setLocation({ latitude, longitude });
+        setRegion({
+          latitude,
+          longitude,
+          latitudeDelta: 0.01,
+          longitudeDelta: 0.01,
+        });
+      } catch (error) {
+        console.error("Error fetching location:", error);
+        Alert.alert("Error", "Unable to fetch location. Please try again.");
+      }
+    })();
+  }, []);
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.header}>User Home</Text>
-      {user ? (
-        <View style={styles.userInfo}>
-          <Text style={styles.label}>Name:</Text>
-          <Text style={styles.value}>{user.name}</Text>
-          <Text style={styles.label}>Email:</Text>
-          <Text style={styles.value}>{user.email}</Text>
-          <Text style={styles.label}>Vendor:</Text>
-          <Text style={styles.value}>{user.isVendor ? "Yes" : "No"}</Text>
-        </View>
+    <View className="flex-1">
+      {region ? (
+        <MapView
+          className="absolute inset-0" // Ensures the map fills the entire screen
+          region={region} // Center the map on the user's location
+          onRegionChangeComplete={(newRegion) => setRegion(newRegion)}
+          style={styles.map}
+        >
+          {/* Add a marker at the user's location */}
+          {location && (
+            <Marker
+              coordinate={location}
+              title="You are here"
+              description="Your current location"
+            />
+          )}
+        </MapView>
       ) : (
-        <Text style={styles.errorText}>No user data available</Text>
+        <View className="flex-1 items-center justify-center bg-gray-100">
+          <Text className="text-gray-500">Loading your location...</Text>
+        </View>
       )}
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: "#f8f8f8",
-    padding: 16,
-  },
-  header: {
-    fontSize: 24,
-    fontWeight: "bold",
-    color: "#333",
-    marginBottom: 20,
-  },
-  userInfo: {
-    alignItems: "flex-start",
-    width: "100%",
-  },
-  label: {
-    fontSize: 18,
-    fontWeight: "600",
-    color: "#555",
-  },
-  value: {
-    fontSize: 18,
-    fontWeight: "400",
-    color: "#000",
-    marginBottom: 10,
-  },
-  errorText: {
-    fontSize: 16,
-    fontWeight: "bold",
-    color: "red",
+  map: {
+    ...StyleSheet.absoluteFillObject, // Makes the map fill the entire screen
   },
 });
