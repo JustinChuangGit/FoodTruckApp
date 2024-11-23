@@ -16,9 +16,8 @@ import { SafeAreaView } from "react-native-safe-area-context";
 const { height } = Dimensions.get("window");
 
 const SNAP_POINTS = {
-  TOP: 0,
-  MIDDLE: height / 2 - 200,
-  BOTTOM: height - 300,
+  TOP: 100, // Adjusted top snap point (100 pixels from the top)
+  BOTTOM: height - 300, // Bottom snap point remains the same
 };
 
 const SECTIONS = [
@@ -36,7 +35,7 @@ const SECTIONS = [
 
 interface LocationCoordinates {
   latitude: number;
-  longitude: number;
+  longitude;
 }
 
 export default function UserHomeScreen() {
@@ -44,7 +43,6 @@ export default function UserHomeScreen() {
   const [region, setRegion] = useState<Region | null>(null);
   const translateY = useRef(new Animated.Value(SNAP_POINTS.BOTTOM)).current;
   const [lastTranslateY, setLastTranslateY] = useState(SNAP_POINTS.BOTTOM);
-  const [isAtTop, setIsAtTop] = useState(false);
 
   useEffect(() => {
     (async () => {
@@ -78,10 +76,10 @@ export default function UserHomeScreen() {
   const panResponder = PanResponder.create({
     onStartShouldSetPanResponder: () => true,
     onPanResponderGrant: () => {
-      translateY.stopAnimation(); // Stop any ongoing animation
+      translateY.stopAnimation();
     },
     onPanResponderMove: (e, gestureState) => {
-      // Follow the finger directly
+      // Move the card directly with the finger
       const newTranslateY = Math.max(
         SNAP_POINTS.TOP,
         Math.min(SNAP_POINTS.BOTTOM, lastTranslateY + gestureState.dy)
@@ -91,28 +89,18 @@ export default function UserHomeScreen() {
     onPanResponderRelease: (e, gestureState) => {
       const endPosition = lastTranslateY + gestureState.dy;
 
-      // Determine the closest snap point
-      let closestPoint = SNAP_POINTS.BOTTOM;
-      let minDistance = Math.abs(SNAP_POINTS.BOTTOM - endPosition);
-
-      for (const point of [
-        SNAP_POINTS.TOP,
-        SNAP_POINTS.MIDDLE,
-        SNAP_POINTS.BOTTOM,
-      ]) {
-        const distance = Math.abs(point - endPosition);
-        if (distance < minDistance) {
-          closestPoint = point;
-          minDistance = distance;
-        }
-      }
+      // Snap to the nearest point
+      const closestPoint =
+        Math.abs(SNAP_POINTS.TOP - endPosition) <
+        Math.abs(SNAP_POINTS.BOTTOM - endPosition)
+          ? SNAP_POINTS.TOP
+          : SNAP_POINTS.BOTTOM;
 
       Animated.spring(translateY, {
         toValue: closestPoint,
         useNativeDriver: true,
       }).start(() => {
         setLastTranslateY(closestPoint); // Update the last snapped position
-        setIsAtTop(closestPoint === SNAP_POINTS.TOP);
       });
     },
   });
@@ -171,7 +159,6 @@ export default function UserHomeScreen() {
           )}
           showsVerticalScrollIndicator={false}
           contentContainerStyle={{ padding: 16 }}
-          scrollEnabled={isAtTop} // Enable scrolling only when at top
         />
       </Animated.View>
     </SafeAreaView>
@@ -199,7 +186,7 @@ const styles = StyleSheet.create({
     position: "absolute",
     left: 0,
     right: 0,
-    flexGrow: 0,
+    height: height, // Full height
     backgroundColor: "#fff",
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
