@@ -8,6 +8,8 @@ import {
   Animated,
   Dimensions,
   FlatList,
+  GestureResponderEvent,
+  NativeTouchEvent,
 } from "react-native";
 import MapView, { Marker, Region } from "react-native-maps";
 import * as Location from "expo-location";
@@ -16,8 +18,8 @@ import { SafeAreaView } from "react-native-safe-area-context";
 const { height } = Dimensions.get("window");
 
 const SNAP_POINTS = {
-  TOP: 100, // Adjusted top snap point (100 pixels from the top)
-  BOTTOM: height - 300, // Bottom snap point remains the same
+  TOP: 100,
+  BOTTOM: height - 300,
 };
 
 const SECTIONS = [
@@ -31,11 +33,26 @@ const SECTIONS = [
   { id: "8", title: "Romantic Comedies", data: Array(9).fill("Card") },
   { id: "9", title: "Family-Friendly Picks", data: Array(7).fill("Card") },
   { id: "10", title: "Highly Rated Movies", data: Array(10).fill("Card") },
+  { id: "11", title: "Documentaries You’ll Love", data: Array(8).fill("Card") },
+  { id: "12", title: "Hidden Gems", data: Array(12).fill("Card") },
+  { id: "13", title: "Award-Winning Films", data: Array(10).fill("Card") },
+  { id: "14", title: "Comedy Specials", data: Array(9).fill("Card") },
+  { id: "15", title: "International Hits", data: Array(8).fill("Card") },
+  { id: "16", title: "Classic Favorites", data: Array(6).fill("Card") },
+  { id: "17", title: "Top 10 in the U.S. Today", data: Array(10).fill("Card") },
+  { id: "18", title: "Sci-Fi & Fantasy", data: Array(8).fill("Card") },
+  { id: "19", title: "Crime Thrillers", data: Array(9).fill("Card") },
+  { id: "20", title: "Kids’ Movies", data: Array(7).fill("Card") },
+  { id: "21", title: "Horror Classics", data: Array(6).fill("Card") },
+  { id: "22", title: "Feel-Good Movies", data: Array(8).fill("Card") },
+  { id: "23", title: "Action Blockbusters", data: Array(9).fill("Card") },
+  { id: "24", title: "Drama Favorites", data: Array(10).fill("Card") },
+  { id: "25", title: "Based on True Stories", data: Array(7).fill("Card") },
 ];
 
 interface LocationCoordinates {
   latitude: number;
-  longitude;
+  longitude: number;
 }
 
 export default function UserHomeScreen() {
@@ -43,6 +60,15 @@ export default function UserHomeScreen() {
   const [region, setRegion] = useState<Region | null>(null);
   const translateY = useRef(new Animated.Value(SNAP_POINTS.BOTTOM)).current;
   const [lastTranslateY, setLastTranslateY] = useState(SNAP_POINTS.BOTTOM);
+
+  // Ref to track the layout of the `bg-black` area
+  const flatListRef = useRef<View>(null);
+  const [flatListLayout, setFlatListLayout] = useState<{
+    x: number;
+    y: number;
+    width: number;
+    height: number;
+  } | null>(null);
 
   useEffect(() => {
     (async () => {
@@ -73,13 +99,28 @@ export default function UserHomeScreen() {
     })();
   }, []);
 
+  const isTouchWithinFlatList = (e: GestureResponderEvent) => {
+    if (!flatListLayout) return false;
+    const { locationX, locationY } = e.nativeEvent;
+    const { x, y, width, height } = flatListLayout;
+
+    return (
+      locationX >= x &&
+      locationX <= x + width &&
+      locationY >= y &&
+      locationY <= y + height
+    );
+  };
+
   const panResponder = PanResponder.create({
-    onStartShouldSetPanResponder: () => true,
+    onStartShouldSetPanResponder: (e) => {
+      // Only start dragging if the touch is outside the `bg-black` area
+      return !isTouchWithinFlatList(e);
+    },
     onPanResponderGrant: () => {
       translateY.stopAnimation();
     },
     onPanResponderMove: (e, gestureState) => {
-      // Move the card directly with the finger
       const newTranslateY = Math.max(
         SNAP_POINTS.TOP,
         Math.min(SNAP_POINTS.BOTTOM, lastTranslateY + gestureState.dy)
@@ -89,7 +130,6 @@ export default function UserHomeScreen() {
     onPanResponderRelease: (e, gestureState) => {
       const endPosition = lastTranslateY + gestureState.dy;
 
-      // Snap to the nearest point
       const closestPoint =
         Math.abs(SNAP_POINTS.TOP - endPosition) <
         Math.abs(SNAP_POINTS.BOTTOM - endPosition)
@@ -100,7 +140,7 @@ export default function UserHomeScreen() {
         toValue: closestPoint,
         useNativeDriver: true,
       }).start(() => {
-        setLastTranslateY(closestPoint); // Update the last snapped position
+        setLastTranslateY(closestPoint);
       });
     },
   });
@@ -127,7 +167,6 @@ export default function UserHomeScreen() {
         </View>
       )}
 
-      {/* Draggable Card */}
       <Animated.View
         style={[
           styles.card,
@@ -138,28 +177,37 @@ export default function UserHomeScreen() {
         {...panResponder.panHandlers}
       >
         <View style={styles.dragHandle} />
-        <FlatList
-          data={SECTIONS}
-          keyExtractor={(section) => section.id}
-          renderItem={({ item }) => (
-            <View style={styles.section}>
-              <Text style={styles.sectionTitle}>{item.title}</Text>
-              <FlatList
-                data={item.data}
-                keyExtractor={(_, index) => `${item.id}-${index}`}
-                horizontal
-                showsHorizontalScrollIndicator={false}
-                renderItem={({ index }) => (
-                  <View style={styles.cardItem}>
-                    <Text>Card {index + 1}</Text>
-                  </View>
-                )}
-              />
-            </View>
-          )}
-          showsVerticalScrollIndicator={false}
-          contentContainerStyle={{ padding: 16 }}
-        />
+        <View
+          className="bg-black"
+          ref={flatListRef}
+          onLayout={(event) => {
+            const layout = event.nativeEvent.layout;
+            setFlatListLayout(layout);
+          }}
+        >
+          <FlatList
+            data={SECTIONS}
+            keyExtractor={(section) => section.id}
+            renderItem={({ item }) => (
+              <View style={styles.section}>
+                <Text style={styles.sectionTitle}>{item.title}</Text>
+                <FlatList
+                  data={item.data}
+                  keyExtractor={(_, index) => `${item.id}-${index}`}
+                  horizontal
+                  showsHorizontalScrollIndicator={false}
+                  renderItem={({ index }) => (
+                    <View style={styles.cardItem}>
+                      <Text>Card {index + 1}</Text>
+                    </View>
+                  )}
+                />
+              </View>
+            )}
+            showsVerticalScrollIndicator={false}
+            contentContainerStyle={{ padding: 16 }}
+          />
+        </View>
       </Animated.View>
     </SafeAreaView>
   );
@@ -186,7 +234,7 @@ const styles = StyleSheet.create({
     position: "absolute",
     left: 0,
     right: 0,
-    height: height, // Full height
+    height: height,
     backgroundColor: "#fff",
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
