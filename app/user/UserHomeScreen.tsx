@@ -178,7 +178,6 @@ export default function UserHomeScreen() {
       >
         <View style={styles.dragHandle} />
         <View
-          className="bg-black"
           ref={flatListRef}
           onLayout={(event) => {
             const layout = event.nativeEvent.layout;
@@ -189,16 +188,26 @@ export default function UserHomeScreen() {
             data={SECTIONS}
             keyExtractor={(section) => section.id}
             renderItem={({ item }) => (
-              <View style={styles.section}>
-                <Text style={styles.sectionTitle}>{item.title}</Text>
+              <View style={styles.mainSection}>
+                <View style={styles.sectionTitleContainer}>
+                  <Text style={styles.sectionTitle}>{item.title}</Text>
+                </View>
                 <FlatList
                   data={item.data}
                   keyExtractor={(_, index) => `${item.id}-${index}`}
                   horizontal
                   showsHorizontalScrollIndicator={false}
                   renderItem={({ index }) => (
-                    <View style={styles.cardItem}>
-                      <Text>Card {index + 1}</Text>
+                    <View
+                      style={{ flexDirection: "row", alignItems: "center" }}
+                    >
+                      <View style={styles.cardItem}>
+                        <Text>Card {index + 1}</Text>
+                      </View>
+                      {/* Spacer between cards */}
+                      {index < item.data.length - 1 && (
+                        <View className="bg-black" style={styles.cardSpacer} />
+                      )}
                     </View>
                   )}
                 />
@@ -253,22 +262,27 @@ const styles = StyleSheet.create({
     alignSelf: "center",
     marginBottom: 10,
   },
-  section: {
-    marginBottom: 16,
-  },
   sectionTitle: {
     fontSize: 16,
     fontWeight: "bold",
-    marginBottom: 8,
   },
   cardItem: {
     backgroundColor: "#f9f9f9",
     borderRadius: 8,
     padding: 16,
-    marginHorizontal: 8,
     width: 120,
     height: 150,
     justifyContent: "center",
     alignItems: "center",
   },
+  cardSpacer: {
+    width: 100, // Adjust the width to define the space between cards
+    height: "100%",
+    // backgroundColor: "transparent", // Keeps it invisible
+  },
+  sectionTitleContainer: {
+    height: 40,
+    width: "100%",
+  },
+  mainSection: {},
 });
