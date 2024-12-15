@@ -12,7 +12,7 @@ import {
 import MapView, { Marker, Region } from "react-native-maps";
 import * as Location from "expo-location";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { SNAP_POINTS, SECTIONS } from "./components/constants";
+import { SNAP_POINTS, SECTIONS } from "../../constants/UserConstants";
 import MyRow from "./components/MyRow";
 
 interface LocationCoordinates {

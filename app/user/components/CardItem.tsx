@@ -8,7 +8,7 @@ interface CardItemProps {
 
 const CardItem: React.FC<CardItemProps> = ({ item, index }) => (
   <View style={{ flexDirection: "row", alignItems: "center" }}>
-    <View style={styles.cardItem}>
+    <View style={styles.cardItem} onStartShouldSetResponder={() => true}>
       <Text>{`${item} ${index + 1}`}</Text>
     </View>
     <View style={styles.cardSpacer} onStartShouldSetResponder={() => true} />
