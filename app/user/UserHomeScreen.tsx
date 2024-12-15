@@ -68,7 +68,10 @@ const CardItem: React.FC<CardItemProps> = ({ item, index }) => (
 
 const MyRow: React.FC<MyRowProps> = ({ section }) => (
   <View style={styles.mainSection}>
-    <View style={styles.sectionTitleContainer}>
+    <View
+      style={styles.sectionTitleContainer}
+      onStartShouldSetResponder={() => true} // Block gesture events
+    >
       <Text style={styles.sectionTitle}>{section.title}</Text>
     </View>
     <FlatList
