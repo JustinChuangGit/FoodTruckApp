@@ -21,7 +21,7 @@ export default function LoginScreen() {
 
       // Redirect based on user type
       if (user?.isVendor) {
-        router.replace("/vendor/VendorHomeScreen");
+        router.replace("/vendor");
       } else {
         router.replace("/user");
       }
