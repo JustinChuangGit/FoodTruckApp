@@ -69,7 +69,7 @@ const MyRow = ({ section }: { section: { title: string; data: string[] } }) => (
   </View>
 );
 
-export default function VendorHomeScreen() {
+export default function index() {
   return (
     <SafeAreaView style={styles.container}>
       <View
