@@ -134,7 +134,8 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 10,
     elevation: 5,
-    padding: 16,
+    paddingHorizontal: 16,
+    paddingTop: 16,
   },
   dragHandle: {
     width: 40,

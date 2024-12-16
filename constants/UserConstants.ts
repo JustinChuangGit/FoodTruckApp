@@ -5,7 +5,7 @@ const { height } = Dimensions.get("window");
 
 export const SNAP_POINTS = {
   TOP: 100,
-  BOTTOM: height - 300,
+  BOTTOM: height - 275,
 };
 
 export const SECTIONS = [

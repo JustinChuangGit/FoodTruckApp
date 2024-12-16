@@ -14,20 +14,20 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
-        name="UserAccountScreen"
-        options={{
-          title: "Account",
-          tabBarIcon: ({ color }) => (
-            <FontAwesome size={28} name="user" color={color} />
-          ),
-        }}
-      />
-      <Tabs.Screen
         name="UserEventsScreen"
         options={{
           title: "Events",
           tabBarIcon: ({ color }) => (
             <FontAwesome size={28} name="calendar" color={color} />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="UserAccountScreen"
+        options={{
+          title: "Account",
+          tabBarIcon: ({ color }) => (
+            <FontAwesome size={28} name="user" color={color} />
           ),
         }}
       />
