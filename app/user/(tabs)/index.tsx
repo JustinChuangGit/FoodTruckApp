@@ -16,6 +16,7 @@ import { SNAP_POINTS, SECTIONS } from "../../../constants/UserConstants";
 import MyRow from "../components/MyRow";
 import HorizontalLine from "@/components/HorizontalLine";
 import liveVendors from "../../../dummyVendorMapData.json";
+import VendorMarker from "../components/VendorMarker";
 
 interface LocationCoordinates {
   latitude: number;
@@ -92,15 +93,7 @@ export default function Index() {
         <MapView style={styles.map} region={region}>
           {location && <Marker coordinate={location} title="You are here" />}
           {liveVendors.map((vendor) => (
-            <Marker
-              key={vendor.uid}
-              coordinate={{
-                latitude: vendor.latitude,
-                longitude: vendor.longitude,
-              }}
-              title={vendor.name}
-              description={vendor.description}
-            />
+            <VendorMarker vendor={vendor} />
           ))}
         </MapView>
       ) : (
