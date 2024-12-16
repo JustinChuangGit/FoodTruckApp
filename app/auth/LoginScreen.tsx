@@ -23,7 +23,7 @@ export default function LoginScreen() {
       if (user?.isVendor) {
         router.replace("/vendor/VendorHomeScreen");
       } else {
-        router.replace("/user/UserHomeScreen");
+        router.replace("/user");
       }
     } catch (error) {
       console.error("Login Failed:", error);

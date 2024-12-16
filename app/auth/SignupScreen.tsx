@@ -24,9 +24,7 @@ export default function SignupScreen() {
     try {
       const user = await signUp(dispatch, email, password, isVendor, name); // Pass dispatch
       console.log("User signed up:", user);
-      router.replace(
-        isVendor ? "/vendor/VendorHomeScreen" : "/user/UserHomeScreen"
-      ); // Navigate based on user type
+      router.replace(isVendor ? "/vendor/VendorHomeScreen" : "/user"); // Navigate based on user type
     } catch (error) {
       Alert.alert("Sign Up Failed", (error as Error).message);
     }

@@ -12,8 +12,8 @@ import {
 import MapView, { Marker, Region } from "react-native-maps";
 import * as Location from "expo-location";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { SNAP_POINTS, SECTIONS } from "../../constants/UserConstants";
-import MyRow from "./components/MyRow";
+import { SNAP_POINTS, SECTIONS } from "../../../constants/UserConstants";
+import MyRow from "../components/MyRow";
 import HorizontalLine from "@/components/HorizontalLine";
 
 interface LocationCoordinates {
@@ -26,7 +26,7 @@ interface MapRegion extends LocationCoordinates {
   longitudeDelta: number;
 }
 
-export default function UserHomeScreen() {
+export default function Index() {
   const [location, setLocation] = useState<LocationCoordinates | null>(null);
   const [region, setRegion] = useState<MapRegion | null>(null);
   const [currentSnapPoint, setCurrentSnapPoint] = useState(SNAP_POINTS.BOTTOM);
