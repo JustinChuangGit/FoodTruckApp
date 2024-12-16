@@ -1,0 +1,183 @@
+[
+    {
+      "uid": "1",
+      "latitude": 36.8910,
+      "longitude": -119.7392,
+      "price": "$$",
+      "name": "Taco Truck",
+      "rating": 4.5,
+      "description": "Serving authentic Mexican street tacos with fresh ingredients and bold flavors."
+    },
+    {
+      "uid": "2",
+      "latitude": 36.8895,
+      "longitude": -119.7410,
+      "price": "$",
+      "name": "Burger Bus",
+      "rating": 4.0,
+      "description": "A retro-styled food truck offering juicy burgers, crispy fries, and milkshakes."
+    },
+    {
+      "uid": "3",
+      "latitude": 36.8528,
+      "longitude": -119.7850,
+      "price": "$$$",
+      "name": "Gourmet Grills",
+      "rating": 4.8,
+      "description": "Premium grilled dishes and BBQ platters crafted by expert chefs."
+    },
+    {
+      "uid": "4",
+      "latitude": 36.8540,
+      "longitude": -119.7820,
+      "price": "$$",
+      "name": "Pizza Wagon",
+      "rating": 4.2,
+      "description": "A wood-fired pizza truck serving hand-tossed pies with gourmet toppings."
+    },
+    {
+      "uid": "5",
+      "latitude": 36.8870,
+      "longitude": -119.7405,
+      "price": "$",
+      "name": "Sandwich Stop",
+      "rating": 4.1,
+      "description": "Crafting hearty sandwiches with freshly baked bread and quality ingredients."
+    },
+    {
+      "uid": "6",
+      "latitude": 36.8535,
+      "longitude": -119.7830,
+      "price": "$$",
+      "name": "BBQ Express",
+      "rating": 4.3,
+      "description": "Smoked meats, tangy sauces, and classic BBQ sides served hot and fast."
+    },
+    {
+      "uid": "7",
+      "latitude": 36.8545,
+      "longitude": -119.7815,
+      "price": "$$$",
+      "name": "Seafood Shack",
+      "rating": 4.7,
+      "description": "Fresh seafood delights, from shrimp tacos to grilled fish, sourced locally."
+    },
+    {
+      "uid": "8",
+      "latitude": 36.8890,
+      "longitude": -119.7408,
+      "price": "$",
+      "name": "Hot Dog Haven",
+      "rating": 4.0,
+      "description": "Classic hot dogs, gourmet sausages, and creative toppings for every taste."
+    },
+    {
+      "uid": "9",
+      "latitude": 36.8555,
+      "longitude": -119.7815,
+      "price": "$$",
+      "name": "Vegan Delights",
+      "rating": 4.5,
+      "description": "Innovative plant-based dishes that are as tasty as they are healthy."
+    },
+    {
+      "uid": "10",
+      "latitude": 36.8880,
+      "longitude": -119.7415,
+      "price": "$$$",
+      "name": "Dessert Truck",
+      "rating": 4.9,
+      "description": "Decadent desserts, from gourmet cupcakes to indulgent ice cream sundaes."
+    },
+    {
+      "uid": "11",
+      "latitude": 36.8800,
+      "longitude": -119.7800,
+      "price": "$$",
+      "name": "Coffee Cruiser",
+      "rating": 4.7,
+      "description": "Mobile coffee bar offering artisanal espresso and cold brew."
+    },
+    {
+      "uid": "12",
+      "latitude": 36.8650,
+      "longitude": -119.7500,
+      "price": "$",
+      "name": "Waffle Wagon",
+      "rating": 4.4,
+      "description": "Sweet and savory waffles made fresh on the spot."
+    },
+    {
+      "uid": "13",
+      "latitude": 36.8905,
+      "longitude": -119.7200,
+      "price": "$$$",
+      "name": "Steakhouse on Wheels",
+      "rating": 4.8,
+      "description": "High-quality steak dinners served food-truck style."
+    },
+    {
+      "uid": "14",
+      "latitude": 36.8620,
+      "longitude": -119.7700,
+      "price": "$$",
+      "name": "Korean BBQ Truck",
+      "rating": 4.6,
+      "description": "Korean BBQ bowls and street food favorites."
+    },
+    {
+      "uid": "15",
+      "latitude": 36.8950,
+      "longitude": -119.7450,
+      "price": "$",
+      "name": "Ice Cream Express",
+      "rating": 4.3,
+      "description": "Serving ice-cold treats, including sundaes and shaved ice."
+    },
+    {
+      "uid": "16",
+      "latitude": 36.8700,
+      "longitude": -119.7600,
+      "price": "$$$",
+      "name": "Mediterranean Eats",
+      "rating": 4.7,
+      "description": "Delicious Mediterranean wraps, hummus bowls, and more."
+    },
+    {
+      "uid": "17",
+      "latitude": 36.8845,
+      "longitude": -119.7505,
+      "price": "$$",
+      "name": "Thai Street Food",
+      "rating": 4.5,
+      "description": "Authentic Thai dishes like pad thai and green curry."
+    },
+    {
+      "uid": "18",
+      "latitude": 36.8780,
+      "longitude": -119.7400,
+      "price": "$",
+      "name": "Soul Food Truck",
+      "rating": 4.6,
+      "description": "Comfort food classics like fried chicken and mac 'n cheese."
+    },
+    {
+      "uid": "19",
+      "latitude": 36.8600,
+      "longitude": -119.7800,
+      "price": "$$$",
+      "name": "Fusion Bistro",
+      "rating": 4.8,
+      "description": "Unique fusion dishes blending global flavors."
+    },
+    {
+      "uid": "20",
+      "latitude": 36.8750,
+      "longitude": -119.7605,
+      "price": "$$",
+      "name": "Breakfast Truck",
+      "rating": 4.2,
+      "description": "All-day breakfast favorites served fresh and hot."
+    }
+  ]
+  
