@@ -26,17 +26,24 @@ export const saveUserData = async (
 };
 
 // Function to fetch user data
+// Function to fetch user or vendor data
 export const getUserData = async (uid: string): Promise<any> => {
   try {
-    const userDoc = await getDoc(doc(db, "users", uid));
+    // Try to fetch from the "users" collection
+    let userDoc = await getDoc(doc(db, "users", uid));
     if (userDoc.exists()) {
       return userDoc.data();
-    } else {
-      console.warn("No user data found");
-      return null;
     }
+    // If not found, try to fetch from the "vendors" collection
+    userDoc = await getDoc(doc(db, "vendors", uid));
+    if (userDoc.exists()) {
+      return userDoc.data();
+    }
+    // If no document is found in both collections
+    console.warn("No user or vendor data found");
+    return null;
   } catch (error) {
-    console.error("Error fetching user data:", error);
+    console.error("Error fetching user or vendor data:", error);
     throw error;
   }
 };
