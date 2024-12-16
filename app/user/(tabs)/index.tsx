@@ -103,6 +103,9 @@ export default function Index() {
         <View>
           <View style={styles.dragHandle} />
           <Text style={styles.dragSectionHeader}>For You</Text>
+          <Text style={styles.dragSectionSubheader}>
+            Checkout some spots we think you'd like
+          </Text>
           <HorizontalLine />
         </View>
         <FlatList
@@ -148,5 +151,10 @@ const styles = StyleSheet.create({
   dragSectionHeader: {
     fontSize: 30,
     fontWeight: "bold",
+  },
+  dragSectionSubheader: {
+    fontSize: 16,
+    color: "#555",
+    marginBottom: 10,
   },
 });
