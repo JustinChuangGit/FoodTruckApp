@@ -36,10 +36,11 @@ const styles = StyleSheet.create({
     height: 40,
     width: "100%",
     justifyContent: "center",
-    backgroundColor: "#f0f0f0",
-    paddingHorizontal: 8,
   },
-  sectionTitle: { fontSize: 16, fontWeight: "bold" },
+  sectionTitle: {
+    fontSize: 18,
+    fontWeight: "bold",
+  },
 });
 
 export default MyRow;

@@ -14,6 +14,7 @@ import * as Location from "expo-location";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { SNAP_POINTS, SECTIONS } from "../../constants/UserConstants";
 import MyRow from "./components/MyRow";
+import HorizontalLine from "@/components/HorizontalLine";
 
 interface LocationCoordinates {
   latitude: number;
@@ -99,7 +100,11 @@ export default function UserHomeScreen() {
         style={[styles.card, { transform: [{ translateY }] }]}
         {...panResponder.panHandlers}
       >
-        <View style={styles.dragHandle} />
+        <View>
+          <View style={styles.dragHandle} />
+          <Text style={styles.dragSectionHeader}>For You</Text>
+          <HorizontalLine />
+        </View>
         <FlatList
           data={SECTIONS}
           keyExtractor={(section) => section.id}
@@ -138,5 +143,9 @@ const styles = StyleSheet.create({
     borderRadius: 3,
     alignSelf: "center",
     marginBottom: 10,
+  },
+  dragSectionHeader: {
+    fontSize: 30,
+    fontWeight: "bold",
   },
 });
