@@ -17,6 +17,7 @@ import MyRow from "../components/MyRow";
 import HorizontalLine from "@/components/HorizontalLine";
 import liveVendors from "../../../dummyVendorMapData.json";
 import VendorMarker from "../components/VendorMarker";
+import VendorMapInfoCard from "../components/VendorMapInfoCard";
 
 interface LocationCoordinates {
   latitude: number;
@@ -28,10 +29,22 @@ interface MapRegion extends LocationCoordinates {
   longitudeDelta: number;
 }
 
+interface Vendor {
+  uid: string;
+  latitude: number;
+  longitude: number;
+  price: string;
+  name: string;
+  rating: number;
+  description: string;
+  image: string;
+}
+
 export default function Index() {
   const [location, setLocation] = useState<LocationCoordinates | null>(null);
   const [region, setRegion] = useState<MapRegion | null>(null);
   const [currentSnapPoint, setCurrentSnapPoint] = useState(SNAP_POINTS.BOTTOM);
+  const [selectedVendor, setSelectedVendor] = useState<Vendor | null>(null); // Allow null or Vendor type
   const translateY = useRef(new Animated.Value(SNAP_POINTS.BOTTOM)).current;
 
   const panResponder = useRef(
@@ -93,7 +106,11 @@ export default function Index() {
         <MapView style={styles.map} region={region}>
           {location && <Marker coordinate={location} title="You are here" />}
           {liveVendors.map((vendor) => (
-            <VendorMarker vendor={vendor} />
+            <VendorMarker
+              key={vendor.uid}
+              vendor={vendor}
+              onPress={() => setSelectedVendor(vendor)}
+            />
           ))}
         </MapView>
       ) : (
@@ -101,6 +118,8 @@ export default function Index() {
           <Text style={styles.loadingText}>Loading your location...</Text>
         </View>
       )}
+
+      {selectedVendor && <VendorMapInfoCard vendor={selectedVendor} />}
       <Animated.View
         style={[styles.card, { transform: [{ translateY }] }]}
         {...panResponder.panHandlers}
