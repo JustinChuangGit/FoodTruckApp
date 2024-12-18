@@ -1,4 +1,4 @@
-import React, { useMemo, useRef, useEffect } from "react";
+import React, { useMemo, useRef, useEffect, useState } from "react";
 import {
   View,
   Text,
@@ -32,13 +32,14 @@ const VendorMapInfoCard: React.FC<VendorMapInfoCardProps> = ({
   onClose,
   userLocation,
 }) => {
+  const [isFavorited, setIsFavorited] = useState(false); // Tracks heart state
   const scaleAnim = useRef(new Animated.Value(0)).current; // Scale starts at 0
   const opacityAnim = useRef(new Animated.Value(0)).current; // Opacity starts at 0
 
   // Determine units dynamically based on locale
   const units = useMemo(() => {
     const locale = Intl.DateTimeFormat().resolvedOptions().locale; // e.g., "en-US"
-    return locale.includes("US") ? "mile" : "km";
+    return locale.includes("US") ? "miles" : "km";
   }, []);
 
   // Calculate distance dynamically
@@ -94,6 +95,10 @@ const VendorMapInfoCard: React.FC<VendorMapInfoCardProps> = ({
     });
   };
 
+  const handleHeartPress = () => {
+    setIsFavorited((prev) => !prev); // Toggle favorite state
+  };
+
   return (
     <Animated.View
       style={[
@@ -107,6 +112,15 @@ const VendorMapInfoCard: React.FC<VendorMapInfoCardProps> = ({
       {/* Close Button */}
       <TouchableOpacity style={styles.closeButton} onPress={handleClose}>
         <FontAwesome name="close" size={24} color="black" />
+      </TouchableOpacity>
+
+      {/* Heart Button */}
+      <TouchableOpacity style={styles.heartButton} onPress={handleHeartPress}>
+        <FontAwesome
+          name={isFavorited ? "heart" : "heart-o"}
+          size={24}
+          color={isFavorited ? "red" : "black"}
+        />
       </TouchableOpacity>
 
       {/* Image */}
@@ -156,6 +170,12 @@ const styles = StyleSheet.create({
     position: "absolute",
     top: 10,
     left: 10,
+    zIndex: 10,
+  },
+  heartButton: {
+    position: "absolute",
+    top: 10,
+    right: 10,
     zIndex: 10,
   },
   image: {
