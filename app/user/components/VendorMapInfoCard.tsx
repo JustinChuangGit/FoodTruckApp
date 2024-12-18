@@ -106,7 +106,7 @@ const VendorMapInfoCard: React.FC<VendorMapInfoCardProps> = ({
 
         {/* Footer */}
         <View style={styles.footer}>
-          <Text style={styles.price}>{vendor.price} night</Text>
+          <Text style={styles.price}>{vendor.price}</Text>
           <Text style={styles.rating}>
             <FontAwesome name="star" size={14} color="gold" /> {vendor.rating}
           </Text>
