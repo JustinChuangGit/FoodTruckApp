@@ -133,7 +133,7 @@ const VendorMapInfoCard: React.FC<VendorMapInfoCardProps> = ({
 
         {/* Footer */}
         <View style={styles.footer}>
-          <Text style={styles.price}>{vendor.price} / night</Text>
+          <Text style={styles.price}>{vendor.price}</Text>
           {distance && (
             <Text style={styles.distance}>
               {distance} {units} away
