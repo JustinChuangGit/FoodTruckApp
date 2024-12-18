@@ -39,7 +39,7 @@ const VendorMapInfoCard: React.FC<VendorMapInfoCardProps> = ({
   // Determine units dynamically based on locale
   const units = useMemo(() => {
     const locale = Intl.DateTimeFormat().resolvedOptions().locale; // e.g., "en-US"
-    return locale.includes("US") ? "miles" : "km";
+    return locale.includes("US") ? "mile" : "km";
   }, []);
 
   // Calculate distance dynamically
