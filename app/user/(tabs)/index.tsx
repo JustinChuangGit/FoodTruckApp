@@ -1,32 +1,25 @@
-import React, { useState, useEffect, useRef } from "react";
-import {
-  View,
-  Alert,
-  Text,
-  StyleSheet,
-  PanResponder,
-  Animated,
-  FlatList,
-  Dimensions,
-} from "react-native";
-import MapView, { Marker, Region } from "react-native-maps";
+import React, {
+  useState,
+  useEffect,
+  useRef,
+  useMemo,
+  useCallback,
+} from "react";
+import { View, Alert, Text, StyleSheet, FlatList } from "react-native";
+import MapView, { Marker } from "react-native-maps";
 import * as Location from "expo-location";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { SNAP_POINTS, SECTIONS } from "../../../constants/UserConstants";
+import BottomSheet, { BottomSheetView } from "@gorhom/bottom-sheet";
 import MyRow from "../components/MyRow";
 import HorizontalLine from "@/components/HorizontalLine";
 import liveVendors from "../../../dummyVendorMapData.json";
 import VendorMarker from "../components/VendorMarker";
 import VendorMapInfoCard from "../components/VendorMapInfoCard";
+import { SECTIONS } from "../../../constants/UserConstants";
 
 interface LocationCoordinates {
   latitude: number;
   longitude: number;
-}
-
-interface MapRegion extends LocationCoordinates {
-  latitudeDelta: number;
-  longitudeDelta: number;
 }
 
 interface Vendor {
@@ -42,40 +35,16 @@ interface Vendor {
 
 export default function Index() {
   const [location, setLocation] = useState<LocationCoordinates | null>(null);
-  const [region, setRegion] = useState<MapRegion | null>(null);
-  const [currentSnapPoint, setCurrentSnapPoint] = useState(SNAP_POINTS.BOTTOM);
-  const [selectedVendor, setSelectedVendor] = useState<Vendor | null>(null); // Allow null or Vendor type
-  const translateY = useRef(new Animated.Value(SNAP_POINTS.BOTTOM)).current;
+  const [region, setRegion] = useState<any | null>(null);
+  const [selectedVendor, setSelectedVendor] = useState<Vendor | null>(null);
 
-  const panResponder = useRef(
-    PanResponder.create({
-      onStartShouldSetPanResponder: (evt) => evt.nativeEvent.locationY <= 50,
-      onPanResponderGrant: () => {
-        translateY.stopAnimation((currentVal) => {
-          translateY.setOffset(currentVal);
-          translateY.setValue(0);
-        });
-      },
-      onPanResponderMove: Animated.event([null, { dy: translateY }], {
-        useNativeDriver: false,
-      }),
-      onPanResponderRelease: () => {
-        translateY.flattenOffset();
-        translateY.stopAnimation((finalVal) => {
-          const closestPoint =
-            Math.abs(finalVal - SNAP_POINTS.TOP) <
-            Math.abs(finalVal - SNAP_POINTS.BOTTOM)
-              ? SNAP_POINTS.TOP
-              : SNAP_POINTS.BOTTOM;
-          setCurrentSnapPoint(closestPoint);
-          Animated.spring(translateY, {
-            toValue: closestPoint,
-            useNativeDriver: false,
-          }).start();
-        });
-      },
-    })
-  ).current;
+  const bottomSheetRef = useRef<BottomSheet>(null);
+
+  const handleSheetChanges = useCallback((index: number) => {
+    console.log("handleSheetChanges", index);
+  }, []);
+
+  const snapPoints = useMemo(() => ["30%", "50%", "90%"], []);
 
   useEffect(() => {
     (async () => {
@@ -120,65 +89,56 @@ export default function Index() {
       )}
 
       {selectedVendor && <VendorMapInfoCard vendor={selectedVendor} />}
-      <Animated.View
-        style={[styles.card, { transform: [{ translateY }] }]}
-        {...panResponder.panHandlers}
+
+      <BottomSheet
+        ref={bottomSheetRef}
+        index={1}
+        snapPoints={snapPoints}
+        onChange={handleSheetChanges}
       >
-        <View>
-          <View style={styles.dragHandle} />
+        <BottomSheetView style={styles.bottomSheetContent}>
           <Text style={styles.dragSectionHeader}>For You</Text>
           <Text style={styles.dragSectionSubheader}>
             Checkout some spots we think you'd like
           </Text>
           <HorizontalLine />
-        </View>
-        <FlatList
-          data={SECTIONS}
-          keyExtractor={(section) => section.id}
-          renderItem={({ item }) => <MyRow section={item} />}
-          contentContainerStyle={{ padding: 16 }}
-        />
-      </Animated.View>
+          <FlatList
+            data={SECTIONS}
+            keyExtractor={(item) => item.id}
+            renderItem={({ item }) => <MyRow section={item} />}
+            contentContainerStyle={{ padding: 16 }}
+          />
+        </BottomSheetView>
+      </BottomSheet>
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1 },
-  map: { ...StyleSheet.absoluteFillObject },
-  loadingContainer: { flex: 1, justifyContent: "center", alignItems: "center" },
-  loadingText: { fontSize: 16, color: "#555" },
-  card: {
-    position: "absolute",
-    left: 0,
-    right: 0,
-    height: Dimensions.get("window").height,
-    backgroundColor: "#fff",
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: -2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 10,
-    elevation: 5,
-    paddingHorizontal: 16,
-    paddingTop: 16,
+  container: {
+    flex: 1,
+    position: "relative", // Ensure proper positioning
   },
-  dragHandle: {
-    width: 40,
-    height: 6,
-    backgroundColor: "#ccc",
-    borderRadius: 3,
-    alignSelf: "center",
-    marginBottom: 10,
+  map: {
+    ...StyleSheet.absoluteFillObject,
+    zIndex: 0, // Set a lower z-index for the map
+  },
+  bottomSheetContent: {
+    flex: 1,
+    paddingHorizontal: 16,
+    paddingTop: 10,
   },
   dragSectionHeader: {
-    fontSize: 30,
+    fontSize: 24,
     fontWeight: "bold",
   },
   dragSectionSubheader: {
     fontSize: 16,
     color: "#555",
     marginBottom: 10,
+  },
+  loadingContainer: {},
+  loadingText: {
+    fontSize: 18,
   },
 });
