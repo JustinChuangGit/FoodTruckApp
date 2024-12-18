@@ -40,11 +40,7 @@ export default function Index() {
 
   const bottomSheetRef = useRef<BottomSheet>(null);
 
-  const handleSheetChanges = useCallback((index: number) => {
-    console.log("handleSheetChanges", index);
-  }, []);
-
-  const snapPoints = useMemo(() => ["30%", "50%", "90%"], []);
+  const snapPoints = useMemo(() => ["15%", "50%", "60%"], []);
 
   useEffect(() => {
     (async () => {
@@ -88,14 +84,13 @@ export default function Index() {
         </View>
       )}
 
-      {selectedVendor && <VendorMapInfoCard vendor={selectedVendor} />}
-
-      <BottomSheet
-        ref={bottomSheetRef}
-        index={1}
-        snapPoints={snapPoints}
-        onChange={handleSheetChanges}
-      >
+      {selectedVendor && (
+        <VendorMapInfoCard
+          vendor={selectedVendor}
+          onClose={() => setSelectedVendor(null)} // Hides the card
+        />
+      )}
+      <BottomSheet ref={bottomSheetRef} index={1} snapPoints={snapPoints}>
         <BottomSheetView style={styles.bottomSheetContent}>
           <Text style={styles.dragSectionHeader}>For You</Text>
           <Text style={styles.dragSectionSubheader}>
