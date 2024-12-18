@@ -87,6 +87,7 @@ export default function Index() {
       {selectedVendor && (
         <VendorMapInfoCard
           vendor={selectedVendor}
+          userLocation={location} // Pass user location here
           onClose={() => setSelectedVendor(null)} // Hides the card
         />
       )}

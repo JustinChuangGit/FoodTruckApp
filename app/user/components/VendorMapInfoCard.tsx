@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useMemo, useRef, useEffect } from "react";
 import {
   View,
   Text,
@@ -8,6 +8,7 @@ import {
   Animated,
 } from "react-native";
 import { FontAwesome } from "@expo/vector-icons";
+import haversine from "haversine";
 
 interface Vendor {
   uid: string;
@@ -16,25 +17,51 @@ interface Vendor {
   rating: number;
   image: string;
   description: string;
+  latitude: number;
+  longitude: number;
 }
 
 interface VendorMapInfoCardProps {
   vendor: Vendor;
-  onClose: () => void; // Callback for closing the card
+  onClose: () => void;
+  userLocation: { latitude: number; longitude: number } | null;
 }
 
 const VendorMapInfoCard: React.FC<VendorMapInfoCardProps> = ({
   vendor,
   onClose,
+  userLocation,
 }) => {
-  const [isFavorited, setIsFavorited] = useState(false);
+  const scaleAnim = useRef(new Animated.Value(0)).current; // Scale starts at 0
+  const opacityAnim = useRef(new Animated.Value(0)).current; // Opacity starts at 0
 
-  // Animated values for the appear and disappear animation
-  const scaleAnim = useRef(new Animated.Value(0)).current; // Starts at 0 (invisible)
-  const opacityAnim = useRef(new Animated.Value(0)).current; // Starts at 0 (invisible)
+  // Determine units dynamically based on locale
+  const units = useMemo(() => {
+    const locale = Intl.DateTimeFormat().resolvedOptions().locale; // e.g., "en-US"
+    return locale.includes("US") ? "mile" : "km";
+  }, []);
 
+  // Calculate distance dynamically
+  const distance = useMemo(() => {
+    if (userLocation) {
+      const start = {
+        latitude: userLocation.latitude,
+        longitude: userLocation.longitude,
+      };
+      const end = {
+        latitude: vendor.latitude,
+        longitude: vendor.longitude,
+      };
+
+      // Calculate distance using Haversine
+      const distanceValue = haversine(start, end, { unit: units });
+      return distanceValue.toFixed(1); // Round to 1 decimal place
+    }
+    return null;
+  }, [userLocation, vendor, units]);
+
+  // Appear animation
   useEffect(() => {
-    // Appear animation: Scale up and fade in
     Animated.parallel([
       Animated.timing(scaleAnim, {
         toValue: 1,
@@ -49,12 +76,8 @@ const VendorMapInfoCard: React.FC<VendorMapInfoCardProps> = ({
     ]).start();
   }, []);
 
-  const handleHeartPress = () => {
-    setIsFavorited((prev) => !prev);
-  };
-
   const handleClose = () => {
-    // Disappear animation: Scale down and fade out
+    // Disappear animation
     Animated.parallel([
       Animated.timing(scaleAnim, {
         toValue: 0,
@@ -67,8 +90,7 @@ const VendorMapInfoCard: React.FC<VendorMapInfoCardProps> = ({
         useNativeDriver: true,
       }),
     ]).start(() => {
-      // Call the onClose callback after the animation finishes
-      onClose();
+      onClose(); // Remove the card after animation completes
     });
   };
 
@@ -77,23 +99,14 @@ const VendorMapInfoCard: React.FC<VendorMapInfoCardProps> = ({
       style={[
         styles.card,
         {
-          transform: [{ scale: scaleAnim }], // Shrink/Grow animation
-          opacity: opacityAnim, // Fade animation
+          transform: [{ scale: scaleAnim }], // Scale animation
+          opacity: opacityAnim, // Opacity animation
         },
       ]}
     >
       {/* Close Button */}
       <TouchableOpacity style={styles.closeButton} onPress={handleClose}>
         <FontAwesome name="close" size={24} color="black" />
-      </TouchableOpacity>
-
-      {/* Heart Button */}
-      <TouchableOpacity style={styles.heartButton} onPress={handleHeartPress}>
-        <FontAwesome
-          name={isFavorited ? "heart" : "heart-o"}
-          size={24}
-          color={isFavorited ? "red" : "black"}
-        />
       </TouchableOpacity>
 
       {/* Image */}
@@ -106,7 +119,12 @@ const VendorMapInfoCard: React.FC<VendorMapInfoCardProps> = ({
 
         {/* Footer */}
         <View style={styles.footer}>
-          <Text style={styles.price}>{vendor.price}</Text>
+          <Text style={styles.price}>{vendor.price} / night</Text>
+          {distance && (
+            <Text style={styles.distance}>
+              {distance} {units} away
+            </Text>
+          )}
           <Text style={styles.rating}>
             <FontAwesome name="star" size={14} color="gold" /> {vendor.rating}
           </Text>
@@ -140,12 +158,6 @@ const styles = StyleSheet.create({
     left: 10,
     zIndex: 10,
   },
-  heartButton: {
-    position: "absolute",
-    top: 10,
-    right: 10,
-    zIndex: 10,
-  },
   image: {
     width: 120,
     height: 120,
@@ -177,6 +189,10 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: "bold",
     color: "#333",
+  },
+  distance: {
+    fontSize: 14,
+    color: "#555",
   },
   rating: {
     fontSize: 14,
