@@ -42,14 +42,14 @@ interface Vendor {
   rating: number;
   description: string;
   image: string;
-  distance?: number;
+  distance?: number; // Distance to the user
 }
 
 export default function Index() {
   const [location, setLocation] = useState<LocationCoordinates | null>(null);
   const [region, setRegion] = useState<any | null>(null);
-  const [vendors, setVendors] = useState<Vendor[]>([]); // Store sorted vendors
-  const [selectedVendorIndex, setSelectedVendorIndex] = useState(0); // Carousel index
+  const [vendors, setVendors] = useState<Vendor[]>([]); // Sorted list of vendors
+  const [selectedVendor, setSelectedVendor] = useState<Vendor | null>(null); // Control selected marker
   const bottomSheetRef = useRef<BottomSheet>(null);
 
   const snapPoints = useMemo(() => ["15%", "50%", "60%"], []);
@@ -72,7 +72,7 @@ export default function Index() {
           longitudeDelta: 0.01,
         });
 
-        // Calculate distance for each vendor and sort them
+        // Calculate distances and sort vendors
         const sortedVendors = liveVendors
           .map((vendor) => {
             const distance = haversine(
@@ -82,7 +82,7 @@ export default function Index() {
             );
             return { ...vendor, distance };
           })
-          .sort((a, b) => (a.distance ?? 0) - (b.distance ?? 0)); // Sort by distance
+          .sort((a, b) => (a.distance ?? 0) - (b.distance ?? 0));
 
         setVendors(sortedVendors);
       } catch (error) {
@@ -91,10 +91,11 @@ export default function Index() {
     })();
   }, []);
 
+  // Handle carousel item change
   const onSnapToItem = (index: number) => {
-    setSelectedVendorIndex(index);
     const vendor = vendors[index];
     if (vendor) {
+      setSelectedVendor(vendor);
       setRegion({
         latitude: vendor.latitude,
         longitude: vendor.longitude,
@@ -108,13 +109,18 @@ export default function Index() {
     <SafeAreaView style={styles.container}>
       {region ? (
         <MapView style={styles.map} region={region}>
+          {/* User's location */}
           {location && <Marker coordinate={location} title="You are here" />}
+
+          {/* Vendor markers */}
           {vendors.map((vendor, index) => (
             <VendorMarker
               key={vendor.uid}
               vendor={vendor}
-              onPress={() => onSnapToItem(index)} // Sync marker click with carousel
-              isSelected={selectedVendorIndex === index} // Highlight the selected marker
+              onPress={() => {
+                setSelectedVendor(vendor); // Show the carousel when a marker is pressed
+              }}
+              isSelected={selectedVendor?.uid === vendor.uid} // Highlight selected marker
             />
           ))}
         </MapView>
@@ -125,21 +131,26 @@ export default function Index() {
       )}
 
       {/* Vendor Carousel */}
-      <View style={styles.carouselContainer}>
-        <Carousel
-          width={width * 0.8}
-          height={200}
-          data={vendors}
-          renderItem={({ index }) => (
-            <VendorMapInfoCard
-              vendor={vendors[index]}
-              userLocation={location}
-              onClose={() => console.log("Close pressed")}
-            />
-          )}
-          onSnapToItem={onSnapToItem}
-        />
-      </View>
+      {selectedVendor && (
+        <View style={styles.carouselContainer}>
+          <Carousel
+            width={width * 0.9} // Adjust width for a better fit
+            height={300} // Adjust height for the card
+            data={vendors}
+            renderItem={({ index }) => (
+              <VendorMapInfoCard
+                vendor={vendors[index]}
+                userLocation={location}
+                onClose={() => setSelectedVendor(null)} // Hide on close
+              />
+            )}
+            onSnapToItem={onSnapToItem} // Update map when swiping
+            defaultIndex={vendors.findIndex(
+              (vendor) => vendor.uid === selectedVendor.uid
+            )}
+          />
+        </View>
+      )}
 
       {/* Bottom Sheet */}
       <BottomSheet ref={bottomSheetRef} index={1} snapPoints={snapPoints}>
@@ -171,7 +182,7 @@ const styles = StyleSheet.create({
   },
   carouselContainer: {
     position: "absolute",
-    bottom: 125, // Position above the bottom sheet
+    bottom: 10, // Position above the bottom sheet
     left: 0,
     right: 0,
     alignItems: "center",
