@@ -97,6 +97,10 @@ export default function Index() {
     }
   };
 
+  const handleCardClose = () => {
+    setSelectedVendor(null); // Clear selected vendor state
+  };
+
   return (
     <SafeAreaView style={styles.container}>
       {location && (
@@ -133,7 +137,7 @@ export default function Index() {
               <VendorMapInfoCard
                 vendor={vendors[index]}
                 userLocation={location}
-                onClose={() => setSelectedVendor(null)}
+                onClose={handleCardClose} // Close the card
               />
             )}
             onSnapToItem={(index) => {
