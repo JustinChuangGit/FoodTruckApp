@@ -1,24 +1,18 @@
-import React, {
-  useState,
-  useEffect,
-  useRef,
-  useMemo,
-  useCallback,
-} from "react";
+import React, { useState, useEffect, useRef, useMemo } from "react";
 import {
   View,
   Alert,
-  Text, // Import Text from react-native
+  Text,
   StyleSheet,
-  FlatList, // Import FlatList from react-native
-  Dimensions, // Import Dimensions for screen width/height
+  FlatList,
+  Dimensions,
 } from "react-native";
 import MapView, { Marker } from "react-native-maps";
 import * as Location from "expo-location";
 import { SafeAreaView } from "react-native-safe-area-context";
 import BottomSheet, { BottomSheetView } from "@gorhom/bottom-sheet";
-import Carousel from "react-native-reanimated-carousel"; // Import Carousel
-import haversine from "haversine"; // Import haversine for distance calculations
+import Carousel from "react-native-reanimated-carousel";
+import haversine from "haversine";
 import MyRow from "../components/MyRow";
 import HorizontalLine from "@/components/HorizontalLine";
 import liveVendors from "../../../dummyVendorMapData.json";
@@ -47,9 +41,10 @@ interface Vendor {
 
 export default function Index() {
   const [location, setLocation] = useState<LocationCoordinates | null>(null);
-  const [vendors, setVendors] = useState<Vendor[]>([]); // Sorted vendor list
+  const [vendors, setVendors] = useState<Vendor[]>([]);
   const [selectedVendor, setSelectedVendor] = useState<Vendor | null>(null);
-  const mapRef = useRef<MapView>(null); // Ref for MapView
+  const [carouselIndex, setCarouselIndex] = useState(0); // Track carousel's active index
+  const mapRef = useRef<MapView>(null);
   const bottomSheetRef = useRef<BottomSheet>(null);
 
   const snapPoints = useMemo(() => ["15%", "50%", "60%"], []);
@@ -86,9 +81,10 @@ export default function Index() {
   }, []);
 
   const handleMarkerPress = (vendor: Vendor) => {
-    setSelectedVendor(vendor); // Show carousel for the selected vendor
+    const index = vendors.findIndex((v) => v.uid === vendor.uid);
+    setSelectedVendor(vendor); // Show the selected vendor
+    setCarouselIndex(index); // Update carousel index
     if (mapRef.current) {
-      // Smoothly animate to the selected vendor's location
       mapRef.current.animateToRegion(
         {
           latitude: vendor.latitude,
@@ -96,7 +92,7 @@ export default function Index() {
           latitudeDelta: 0.01,
           longitudeDelta: 0.01,
         },
-        500 // Duration of the animation in ms
+        500
       );
     }
   };
@@ -105,7 +101,7 @@ export default function Index() {
     <SafeAreaView style={styles.container}>
       {location && (
         <MapView
-          ref={mapRef} // Attach ref to the MapView
+          ref={mapRef}
           style={styles.map}
           initialRegion={{
             latitude: location.latitude,
@@ -114,16 +110,13 @@ export default function Index() {
             longitudeDelta: 0.01,
           }}
         >
-          {/* User's location */}
           <Marker coordinate={location} title="You are here" />
-
-          {/* Vendor markers */}
           {vendors.map((vendor) => (
             <VendorMarker
               key={vendor.uid}
               vendor={vendor}
-              onPress={() => handleMarkerPress(vendor)} // Use handleMarkerPress
-              isSelected={selectedVendor?.uid === vendor.uid} // Highlight selected marker
+              onPress={() => handleMarkerPress(vendor)}
+              isSelected={selectedVendor?.uid === vendor.uid}
             />
           ))}
         </MapView>
@@ -140,15 +133,18 @@ export default function Index() {
               <VendorMapInfoCard
                 vendor={vendors[index]}
                 userLocation={location}
-                onClose={() => setSelectedVendor(null)} // Hide carousel on close
+                onClose={() => setSelectedVendor(null)}
               />
             )}
-            onSnapToItem={(index) => handleMarkerPress(vendors[index])} // Sync carousel with markers
+            onSnapToItem={(index) => {
+              setCarouselIndex(index); // Update the active index
+              handleMarkerPress(vendors[index]); // Sync map and marker
+            }}
+            defaultIndex={carouselIndex} // Ensure the correct card is shown
           />
         </View>
       )}
 
-      {/* Bottom Sheet */}
       <BottomSheet ref={bottomSheetRef} index={1} snapPoints={snapPoints}>
         <BottomSheetView style={styles.bottomSheetContent}>
           <Text style={styles.dragSectionHeader}>For You</Text>
@@ -178,7 +174,7 @@ const styles = StyleSheet.create({
   },
   carouselContainer: {
     position: "absolute",
-    bottom: 10, // Position above the bottom sheet
+    bottom: 10,
     left: 0,
     right: 0,
     alignItems: "center",

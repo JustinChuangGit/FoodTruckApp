@@ -62,7 +62,7 @@ const styles = StyleSheet.create({
     width: 20,
     height: 20,
     borderRadius: 10,
-    backgroundColor: "blue",
+    backgroundColor: "white",
   },
   selectedMarker: {
     width: 30,
