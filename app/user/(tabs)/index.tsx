@@ -42,14 +42,14 @@ interface Vendor {
   rating: number;
   description: string;
   image: string;
-  distance?: number; // Distance to the user
+  distance?: number;
 }
 
 export default function Index() {
   const [location, setLocation] = useState<LocationCoordinates | null>(null);
-  const [region, setRegion] = useState<any | null>(null);
-  const [vendors, setVendors] = useState<Vendor[]>([]); // Sorted list of vendors
-  const [selectedVendor, setSelectedVendor] = useState<Vendor | null>(null); // Control selected marker
+  const [vendors, setVendors] = useState<Vendor[]>([]); // Sorted vendor list
+  const [selectedVendor, setSelectedVendor] = useState<Vendor | null>(null);
+  const mapRef = useRef<MapView>(null); // Ref for MapView
   const bottomSheetRef = useRef<BottomSheet>(null);
 
   const snapPoints = useMemo(() => ["15%", "50%", "60%"], []);
@@ -65,12 +65,6 @@ export default function Index() {
         const { coords } = await Location.getCurrentPositionAsync({});
         const { latitude, longitude } = coords;
         setLocation({ latitude, longitude });
-        setRegion({
-          latitude,
-          longitude,
-          latitudeDelta: 0.01,
-          longitudeDelta: 0.01,
-        });
 
         // Calculate distances and sort vendors
         const sortedVendors = liveVendors
@@ -91,63 +85,65 @@ export default function Index() {
     })();
   }, []);
 
-  // Handle carousel item change
-  const onSnapToItem = (index: number) => {
-    const vendor = vendors[index];
-    if (vendor) {
-      setSelectedVendor(vendor);
-      setRegion({
-        latitude: vendor.latitude,
-        longitude: vendor.longitude,
-        latitudeDelta: 0.01,
-        longitudeDelta: 0.01,
-      });
+  const handleMarkerPress = (vendor: Vendor) => {
+    setSelectedVendor(vendor); // Show carousel for the selected vendor
+    if (mapRef.current) {
+      // Smoothly animate to the selected vendor's location
+      mapRef.current.animateToRegion(
+        {
+          latitude: vendor.latitude,
+          longitude: vendor.longitude,
+          latitudeDelta: 0.01,
+          longitudeDelta: 0.01,
+        },
+        500 // Duration of the animation in ms
+      );
     }
   };
 
   return (
     <SafeAreaView style={styles.container}>
-      {region ? (
-        <MapView style={styles.map} region={region}>
+      {location && (
+        <MapView
+          ref={mapRef} // Attach ref to the MapView
+          style={styles.map}
+          initialRegion={{
+            latitude: location.latitude,
+            longitude: location.longitude,
+            latitudeDelta: 0.01,
+            longitudeDelta: 0.01,
+          }}
+        >
           {/* User's location */}
-          {location && <Marker coordinate={location} title="You are here" />}
+          <Marker coordinate={location} title="You are here" />
 
           {/* Vendor markers */}
-          {vendors.map((vendor, index) => (
+          {vendors.map((vendor) => (
             <VendorMarker
               key={vendor.uid}
               vendor={vendor}
-              onPress={() => {
-                setSelectedVendor(vendor); // Show the carousel when a marker is pressed
-              }}
+              onPress={() => handleMarkerPress(vendor)} // Use handleMarkerPress
               isSelected={selectedVendor?.uid === vendor.uid} // Highlight selected marker
             />
           ))}
         </MapView>
-      ) : (
-        <View style={styles.loadingContainer}>
-          <Text style={styles.loadingText}>Loading your location...</Text>
-        </View>
       )}
 
       {/* Vendor Carousel */}
       {selectedVendor && (
         <View style={styles.carouselContainer}>
           <Carousel
-            width={width * 0.9} // Adjust width for a better fit
-            height={300} // Adjust height for the card
+            width={width * 0.9}
+            height={250}
             data={vendors}
             renderItem={({ index }) => (
               <VendorMapInfoCard
                 vendor={vendors[index]}
                 userLocation={location}
-                onClose={() => setSelectedVendor(null)} // Hide on close
+                onClose={() => setSelectedVendor(null)} // Hide carousel on close
               />
             )}
-            onSnapToItem={onSnapToItem} // Update map when swiping
-            defaultIndex={vendors.findIndex(
-              (vendor) => vendor.uid === selectedVendor.uid
-            )}
+            onSnapToItem={(index) => handleMarkerPress(vendors[index])} // Sync carousel with markers
           />
         </View>
       )}
