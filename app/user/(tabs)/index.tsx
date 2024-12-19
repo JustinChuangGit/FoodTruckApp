@@ -120,7 +120,6 @@ export default function Index() {
               key={vendor.uid}
               vendor={vendor}
               onPress={() => handleMarkerPress(vendor)}
-              isSelected={selectedVendor?.uid === vendor.uid}
             />
           ))}
         </MapView>
