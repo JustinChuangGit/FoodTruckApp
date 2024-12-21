@@ -35,6 +35,6 @@ const styles = StyleSheet.create({
     width: 20,
     height: 20,
     borderRadius: 10,
-    backgroundColor: "white", // Single style for all markers
+    backgroundColor: "#2D2D2D", // Single style for all markers
   },
 });
