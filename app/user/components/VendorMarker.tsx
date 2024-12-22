@@ -1,5 +1,5 @@
 import React from "react";
-import { StyleSheet, View } from "react-native";
+import { StyleSheet, View, Image } from "react-native";
 import { Marker } from "react-native-maps";
 
 interface Vendor {
@@ -7,6 +7,7 @@ interface Vendor {
   latitude: number;
   longitude: number;
   name: string;
+  image?: string; // Optional vendor-specific icon or image
 }
 
 interface VendorMarkerProps {
@@ -23,7 +24,12 @@ const VendorMarker: React.FC<VendorMarkerProps> = ({ vendor, onPress }) => {
       }}
       onPress={onPress}
     >
-      <View style={styles.marker} />
+      {/* Custom Marker Design */}
+      <View style={styles.markerContainer}>
+        <View style={styles.outerCircle}>
+          <View style={styles.innerCircle}></View>
+        </View>
+      </View>
     </Marker>
   );
 };
@@ -31,10 +37,33 @@ const VendorMarker: React.FC<VendorMarkerProps> = ({ vendor, onPress }) => {
 export default VendorMarker;
 
 const styles = StyleSheet.create({
-  marker: {
+  markerContainer: {
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  outerCircle: {
     width: 20,
     height: 20,
     borderRadius: 10,
-    backgroundColor: "#2D2D2D", // Single style for all markers
+    backgroundColor: "#FF6F61", // Outer background
+    justifyContent: "center",
+    alignItems: "center",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 3,
+    elevation: 5,
+  },
+  innerCircle: {
+    width: 10,
+    height: 10,
+    borderRadius: 15,
+    backgroundColor: "white", // Inner background
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  icon: {
+    width: 20,
+    height: 20, // Adjust size to fit within the marker
   },
 });

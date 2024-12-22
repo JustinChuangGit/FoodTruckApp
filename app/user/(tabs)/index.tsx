@@ -7,7 +7,11 @@ import {
   FlatList,
   Dimensions,
 } from "react-native";
-import MapView, { Marker } from "react-native-maps";
+import MapView, {
+  Marker,
+  PROVIDER_DEFAULT,
+  PROVIDER_GOOGLE,
+} from "react-native-maps";
 import * as Location from "expo-location";
 import { SafeAreaView } from "react-native-safe-area-context";
 import BottomSheet, { BottomSheetView } from "@gorhom/bottom-sheet";
@@ -107,6 +111,8 @@ export default function Index() {
         <MapView
           ref={mapRef}
           style={styles.map}
+          provider={PROVIDER_DEFAULT}
+          // mapType="mutedStandard"
           initialRegion={{
             latitude: location.latitude,
             longitude: location.longitude,
