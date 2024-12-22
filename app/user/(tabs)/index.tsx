@@ -112,6 +112,8 @@ export default function Index() {
           ref={mapRef}
           style={styles.map}
           provider={PROVIDER_DEFAULT}
+          showsUserLocation={true}
+          followsUserLocation={true}
           // mapType="mutedStandard"
           initialRegion={{
             latitude: location.latitude,
@@ -120,7 +122,7 @@ export default function Index() {
             longitudeDelta: 0.01,
           }}
         >
-          <Marker coordinate={location} title="You are here" />
+          {/* <Marker coordinate={location} title="You are here" /> */}
           {vendors.map((vendor) => (
             <VendorMarker
               key={vendor.uid}
