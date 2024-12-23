@@ -113,7 +113,6 @@ export default function Index() {
           style={styles.map}
           provider={PROVIDER_DEFAULT}
           showsUserLocation={true}
-          followsUserLocation={true}
           // mapType="mutedStandard"
           initialRegion={{
             latitude: location.latitude,
