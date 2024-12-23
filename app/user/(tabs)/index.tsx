@@ -47,7 +47,7 @@ export default function Index() {
   const [location, setLocation] = useState<LocationCoordinates | null>(null);
   const [vendors, setVendors] = useState<Vendor[]>([]);
   const [selectedVendor, setSelectedVendor] = useState<Vendor | null>(null);
-  const [carouselIndex, setCarouselIndex] = useState(0); // Track carousel's active index
+  const [carouselIndex, setCarouselIndex] = useState(0);
   const mapRef = useRef<MapView>(null);
   const bottomSheetRef = useRef<BottomSheet>(null);
 
@@ -65,7 +65,6 @@ export default function Index() {
         const { latitude, longitude } = coords;
         setLocation({ latitude, longitude });
 
-        // Calculate distances and sort vendors
         const sortedVendors = liveVendors
           .map((vendor) => {
             const distance = haversine(
@@ -86,8 +85,8 @@ export default function Index() {
 
   const handleMarkerPress = (vendor: Vendor) => {
     const index = vendors.findIndex((v) => v.uid === vendor.uid);
-    setSelectedVendor(vendor); // Show the selected vendor
-    setCarouselIndex(index); // Update carousel index
+    setSelectedVendor(vendor);
+    setCarouselIndex(index);
     if (mapRef.current) {
       mapRef.current.animateToRegion(
         {
@@ -102,7 +101,7 @@ export default function Index() {
   };
 
   const handleCardClose = () => {
-    setSelectedVendor(null); // Clear selected vendor state
+    setSelectedVendor(null);
   };
 
   return (
@@ -113,7 +112,6 @@ export default function Index() {
           style={styles.map}
           provider={PROVIDER_DEFAULT}
           showsUserLocation={true}
-          // mapType="mutedStandard"
           initialRegion={{
             latitude: location.latitude,
             longitude: location.longitude,
@@ -121,7 +119,6 @@ export default function Index() {
             longitudeDelta: 0.01,
           }}
         >
-          {/* <Marker coordinate={location} title="You are here" /> */}
           {vendors.map((vendor) => (
             <VendorMarker
               key={vendor.uid}
@@ -132,7 +129,6 @@ export default function Index() {
         </MapView>
       )}
 
-      {/* Vendor Carousel */}
       {selectedVendor && (
         <View style={styles.carouselContainer}>
           <Carousel
@@ -143,14 +139,14 @@ export default function Index() {
               <VendorMapInfoCard
                 vendor={vendors[index]}
                 userLocation={location}
-                onClose={handleCardClose} // Close the card
+                onClose={handleCardClose}
               />
             )}
             onSnapToItem={(index) => {
-              setCarouselIndex(index); // Update the active index
-              handleMarkerPress(vendors[index]); // Sync map and marker
+              setCarouselIndex(index);
+              handleMarkerPress(vendors[index]);
             }}
-            defaultIndex={carouselIndex} // Ensure the correct card is shown
+            defaultIndex={carouselIndex}
           />
         </View>
       )}
