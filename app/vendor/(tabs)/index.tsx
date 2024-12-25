@@ -1,90 +1,223 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useMemo } from "react";
 import {
   View,
   Alert,
   Text,
   StyleSheet,
-  PanResponder,
-  Animated,
-  Dimensions,
   FlatList,
-  GestureResponderEvent,
-  NativeTouchEvent,
+  Dimensions,
+  Modal,
+  Image,
+  TouchableOpacity,
 } from "react-native";
-import MapView, { Marker, Region } from "react-native-maps";
+import MapView, {
+  Marker,
+  PROVIDER_DEFAULT,
+  PROVIDER_GOOGLE,
+} from "react-native-maps";
 import * as Location from "expo-location";
 import { SafeAreaView } from "react-native-safe-area-context";
+import BottomSheet, { BottomSheetView } from "@gorhom/bottom-sheet";
+import Carousel from "react-native-reanimated-carousel";
+import haversine from "haversine";
+// import MyRow from "../components/MyRow";
+import HorizontalLine from "@/components/default/HorizontalLine";
+import VendorMarker from "../../../components/VendorMarker";
+import VendorMapInfoCard from "../../../components/VendorMapInfoCard";
+import { SECTIONS } from "../../../constants/UserConstants";
+import { Vendor, LocationCoordinates } from "@/constants/types";
 
-const SECTIONS = [
-  { id: "1", title: "Recommended for You", data: Array(10).fill("Card") },
-  { id: "2", title: "Trending Now", data: Array(8).fill("Card") },
-  { id: "3", title: "New Releases", data: Array(12).fill("Card") },
-  { id: "4", title: "Top Picks for You", data: Array(15).fill("Card") },
-  { id: "5", title: "Popular in Your Area", data: Array(10).fill("Card") },
-  { id: "6", title: "Recently Watched", data: Array(6).fill("Card") },
-  { id: "7", title: "Action-Packed Favorites", data: Array(8).fill("Card") },
-  { id: "8", title: "Romantic Comedies", data: Array(9).fill("Card") },
-  { id: "9", title: "Family-Friendly Picks", data: Array(7).fill("Card") },
-  { id: "10", title: "Highly Rated Movies", data: Array(10).fill("Card") },
-  { id: "11", title: "Documentaries You’ll Love", data: Array(8).fill("Card") },
-  { id: "12", title: "Hidden Gems", data: Array(12).fill("Card") },
-  { id: "13", title: "Award-Winning Films", data: Array(10).fill("Card") },
-  { id: "14", title: "Comedy Specials", data: Array(9).fill("Card") },
-  { id: "15", title: "International Hits", data: Array(8).fill("Card") },
-  { id: "16", title: "Classic Favorites", data: Array(6).fill("Card") },
-  { id: "17", title: "Top 10 in the U.S. Today", data: Array(10).fill("Card") },
-  { id: "18", title: "Sci-Fi & Fantasy", data: Array(8).fill("Card") },
-  { id: "19", title: "Crime Thrillers", data: Array(9).fill("Card") },
-  { id: "20", title: "Kids’ Movies", data: Array(7).fill("Card") },
-  { id: "21", title: "Horror Classics", data: Array(6).fill("Card") },
-  { id: "22", title: "Feel-Good Movies", data: Array(8).fill("Card") },
-  { id: "23", title: "Action Blockbusters", data: Array(9).fill("Card") },
-  { id: "24", title: "Drama Favorites", data: Array(10).fill("Card") },
-  { id: "25", title: "Based on True Stories", data: Array(7).fill("Card") },
-];
+//TODO: Replace with collections from Firestore
+import liveVendors from "../../../dummyVendorMapData.json";
 
-const CardItem = ({ item, index }: { item: string; index: number }) => (
-  <View style={{ flexDirection: "row", alignItems: "center" }}>
-    <View style={styles.cardItem} className="bg-slate-600">
-      <Text>Card {index + 1}</Text>
-    </View>
-    {/* Spacer between cards */}
-    <View style={styles.cardSpacer} />
-  </View>
-);
+const { width } = Dimensions.get("window");
 
-// Component to render rows with a title and a horizontal list of cards
-const MyRow = ({ section }: { section: { title: string; data: string[] } }) => (
-  <View style={styles.mainSection}>
-    <View style={styles.sectionTitleContainer}>
-      <Text style={styles.sectionTitle}>{section.title}</Text>
-    </View>
-    <FlatList
-      data={section.data}
-      keyExtractor={(_, index) => `${section.title}-${index}`}
-      horizontal
-      showsHorizontalScrollIndicator={false}
-      renderItem={({ item, index }) => <CardItem item={item} index={index} />}
-    />
-  </View>
-);
+export default function Index() {
+  const [location, setLocation] = useState<LocationCoordinates | null>(null);
+  const [vendors, setVendors] = useState<Vendor[]>([]);
+  const [selectedVendor, setSelectedVendor] = useState<Vendor | null>(null);
+  const [carouselIndex, setCarouselIndex] = useState(0);
+  const mapRef = useRef<MapView>(null);
+  const bottomSheetRef = useRef<BottomSheet>(null);
+  const [isModalVisible, setModalVisible] = useState(false);
 
-export default function index() {
+  const snapPoints = useMemo(() => ["15%", "50%", "60%"], []);
+
+  useEffect(() => {
+    (async () => {
+      try {
+        const { status } = await Location.requestForegroundPermissionsAsync();
+        if (status !== "granted") {
+          Alert.alert("Permission Denied", "Location permission is required.");
+          return;
+        }
+        const { coords } = await Location.getCurrentPositionAsync({});
+        const { latitude, longitude } = coords;
+        setLocation({ latitude, longitude });
+
+        const sortedVendors = liveVendors
+          .map((vendor) => {
+            const distance = haversine(
+              { latitude, longitude },
+              { latitude: vendor.latitude, longitude: vendor.longitude },
+              { unit: "km" }
+            );
+            return { ...vendor, distance };
+          })
+          .sort((a, b) => (a.distance ?? 0) - (b.distance ?? 0));
+
+        setVendors(sortedVendors);
+      } catch (error) {
+        Alert.alert("Error", "Unable to fetch location.");
+      }
+    })();
+  }, []);
+
+  const handleMarkerPress = (vendor: Vendor) => {
+    const index = vendors.findIndex((v) => v.uid === vendor.uid);
+    setSelectedVendor(vendor);
+    setCarouselIndex(index);
+    if (mapRef.current) {
+      mapRef.current.animateToRegion(
+        {
+          latitude: vendor.latitude,
+          longitude: vendor.longitude,
+          latitudeDelta: 0.01,
+          longitudeDelta: 0.01,
+        },
+        500
+      );
+    }
+  };
+
+  const handleCardClose = () => {
+    setSelectedVendor(null);
+  };
+
+  const handleCardPress = (vendor: Vendor) => {
+    setSelectedVendor(vendor);
+    setModalVisible(true);
+  };
+
+  const closeModal = () => {
+    setModalVisible(false);
+    setSelectedVendor(null);
+  };
+
   return (
     <SafeAreaView style={styles.container}>
-      <View
-        onLayout={(event) => {
-          const layout = event.nativeEvent.layout;
-        }}
+      {location && (
+        <MapView
+          ref={mapRef}
+          style={styles.map}
+          provider={PROVIDER_DEFAULT}
+          showsUserLocation={true}
+          initialRegion={{
+            latitude: location.latitude,
+            longitude: location.longitude,
+            latitudeDelta: 0.01,
+            longitudeDelta: 0.01,
+          }}
+        >
+          {vendors.map((vendor) => (
+            <VendorMarker
+              key={vendor.uid}
+              vendor={vendor}
+              onPress={() => handleMarkerPress(vendor)}
+            />
+          ))}
+        </MapView>
+      )}
+
+      {selectedVendor && (
+        <View style={styles.carouselContainer}>
+          <Carousel
+            width={width * 0.9}
+            height={250}
+            data={vendors}
+            renderItem={({ index }) => (
+              <VendorMapInfoCard
+                vendor={vendors[index]}
+                userLocation={location}
+                onClose={handleCardClose}
+              />
+            )}
+            onSnapToItem={(index) => {
+              setCarouselIndex(index);
+              handleMarkerPress(vendors[index]);
+            }}
+            defaultIndex={carouselIndex}
+          />
+        </View>
+      )}
+
+      <BottomSheet ref={bottomSheetRef} index={1} snapPoints={snapPoints}>
+        <BottomSheetView style={styles.bottomSheetContent}>
+          <Text style={styles.dragSectionHeader}>Vendor Screen</Text>
+          <Text style={styles.dragSectionSubheader}>Manage your store</Text>
+          <HorizontalLine />
+          {/* <FlatList
+            data={SECTIONDATA}
+            keyExtractor={(item) => item.id}
+            renderItem={({ item }) => (
+              <MyRow section={item} onCardPress={handleCardPress} />
+            )}
+            contentContainerStyle={{ padding: 16 }}
+          /> */}
+        </BottomSheetView>
+      </BottomSheet>
+
+      <Modal
+        visible={isModalVisible}
+        animationType="slide"
+        transparent={true}
+        onRequestClose={closeModal}
       >
-        <FlatList
-          data={SECTIONS}
-          keyExtractor={(section) => section.id}
-          renderItem={({ item }) => <MyRow section={item} />}
-          showsVerticalScrollIndicator={false}
-          contentContainerStyle={{ padding: 16 }}
-        />
-      </View>
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            {selectedVendor && (
+              <>
+                <Image
+                  source={{ uri: selectedVendor.image }}
+                  style={styles.logo}
+                />
+                <Text style={styles.name}>{selectedVendor.name}</Text>
+                <Text style={styles.description}>
+                  {selectedVendor.description}
+                </Text>
+                <Text style={styles.price}>Price: {selectedVendor.price}</Text>
+                <Text style={styles.rating}>
+                  Rating: {selectedVendor.rating}/5
+                </Text>
+                <TouchableOpacity
+                  style={styles.closeButton}
+                  onPress={closeModal}
+                >
+                  <Text style={styles.closeButtonText}>Close</Text>
+                </TouchableOpacity>
+                <HorizontalLine />
+
+                {/* Dummy Menu */}
+                <Text style={styles.menuHeader}>Menu</Text>
+                {/* <FlatList
+                  data={dummyMenu}
+                  keyExtractor={(item) => item.id}
+                  renderItem={({ item }) => (
+                    <View style={styles.menuItem}>
+                      <Text style={styles.menuItemName}>{item.name}</Text>
+                      <Text style={styles.menuItemDescription}>
+                        {item.description}
+                      </Text>
+                      <Text style={styles.menuItemPrice}>{item.price}</Text>
+                    </View>
+                  )}
+                  contentContainerStyle={styles.menuList}
+                /> */}
+              </>
+            )}
+          </View>
+        </View>
+      </Modal>
     </SafeAreaView>
   );
 }
@@ -92,66 +225,114 @@ export default function index() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    position: "relative",
   },
   map: {
     ...StyleSheet.absoluteFillObject,
+  },
+  carouselContainer: {
+    position: "absolute",
+    bottom: 10,
+    left: 0,
+    right: 0,
+    alignItems: "center",
+  },
+  bottomSheetContent: {
+    flex: 1,
+    paddingHorizontal: 16,
+    paddingTop: 10,
+  },
+  dragSectionHeader: {
+    fontSize: 24,
+    fontWeight: "bold",
+  },
+  dragSectionSubheader: {
+    fontSize: 16,
+    color: "#555",
+    marginBottom: 10,
   },
   loadingContainer: {
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: "#f0f0f0",
   },
   loadingText: {
-    fontSize: 16,
-    color: "#555",
+    fontSize: 18,
   },
-  card: {
-    position: "absolute",
-    left: 0,
-    right: 0,
-    height: 75,
-    backgroundColor: "#fff",
-    borderTopLeftRadius: 20,
+  modalOverlay: {
+    flex: 1,
+    justifyContent: "flex-end", // Align modal to the bottom
+    backgroundColor: "rgba(0, 0, 0, 0.5)", // Semi-transparent overlay
+  },
+  modalContent: {
+    ...StyleSheet.absoluteFillObject, // Extend modal to fill the bottom area
+    backgroundColor: "#fff", // Modal background
+    borderTopLeftRadius: 20, // Rounded corners at the top
     borderTopRightRadius: 20,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: -2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 10,
-    elevation: 5,
-    padding: 16,
+    padding: 16, // Add padding for content
+    paddingBottom: 32, // Extra padding to account for the safe area
   },
-  dragHandle: {
-    width: 40,
-    height: 6,
-    backgroundColor: "#ccc",
-    borderRadius: 3,
-    alignSelf: "center",
-    marginBottom: 10,
+  logo: {
+    width: 100,
+    height: 100,
+    borderRadius: 50,
+    marginBottom: 16,
   },
-  sectionTitle: {
+  name: {
+    fontSize: 24,
+    fontWeight: "bold",
+    textAlign: "center",
+    marginBottom: 8,
+  },
+  description: {
+    fontSize: 16,
+    textAlign: "center",
+    color: "#555",
+    marginBottom: 8,
+  },
+  price: {
+    fontSize: 16,
+    marginBottom: 4,
+  },
+  rating: {
+    fontSize: 16,
+    marginBottom: 16,
+  },
+  closeButton: {
+    backgroundColor: "#007bff",
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 5,
+  },
+  closeButtonText: {
+    color: "#fff",
+    fontSize: 16,
+  },
+  menuHeader: {
+    fontSize: 18,
+    fontWeight: "bold",
+    marginTop: 16,
+    marginBottom: 8,
+  },
+  menuList: {
+    paddingBottom: 16, // Adds spacing below the last item
+  },
+  menuItem: {
+    paddingVertical: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: "#ddd",
+  },
+  menuItemName: {
     fontSize: 16,
     fontWeight: "bold",
   },
-  cardItem: {
-    backgroundColor: "#f9f9f9",
-    borderRadius: 8,
-    padding: 16,
-    width: 120,
-    height: 150,
-    justifyContent: "center",
-    alignItems: "center",
+  menuItemDescription: {
+    fontSize: 14,
+    color: "#555",
   },
-  cardSpacer: {
-    width: 100, // Adjust the width to define the space between cards
-    height: "100%",
-    backgroundColor: "red",
-    // backgroundColor: "transparent", // Keeps it invisible
+  menuItemPrice: {
+    fontSize: 14,
+    color: "#007bff",
+    marginTop: 4,
   },
-  sectionTitleContainer: {
-    height: 40,
-    width: "100%",
-    backgroundColor: "#f0f0f0",
-  },
-  mainSection: {},
 });

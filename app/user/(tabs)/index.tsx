@@ -21,9 +21,9 @@ import BottomSheet, { BottomSheetView } from "@gorhom/bottom-sheet";
 import Carousel from "react-native-reanimated-carousel";
 import haversine from "haversine";
 import MyRow from "../components/MyRow";
-import HorizontalLine from "@/components/HorizontalLine";
-import VendorMarker from "../components/VendorMarker";
-import VendorMapInfoCard from "../components/VendorMapInfoCard";
+import HorizontalLine from "@/components/default/HorizontalLine";
+import VendorMarker from "../../../components/VendorMarker";
+import VendorMapInfoCard from "../../../components/VendorMapInfoCard";
 import { SECTIONS } from "../../../constants/UserConstants";
 import { Vendor, LocationCoordinates } from "@/constants/types";
 

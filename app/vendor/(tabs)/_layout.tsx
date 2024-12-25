@@ -8,17 +8,9 @@ export default function TabLayout() {
         name="index"
         options={{
           title: "Home",
+          headerShown: false,
           tabBarIcon: ({ color }) => (
             <FontAwesome size={28} name="home" color={color} />
-          ),
-        }}
-      />
-      <Tabs.Screen
-        name="VendorAccountScreen"
-        options={{
-          title: "Account",
-          tabBarIcon: ({ color }) => (
-            <FontAwesome size={28} name="user" color={color} />
           ),
         }}
       />
@@ -28,6 +20,15 @@ export default function TabLayout() {
           title: "Events",
           tabBarIcon: ({ color }) => (
             <FontAwesome size={28} name="calendar" color={color} />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="VendorAccountScreen"
+        options={{
+          title: "Account",
+          tabBarIcon: ({ color }) => (
+            <FontAwesome size={28} name="user" color={color} />
           ),
         }}
       />
