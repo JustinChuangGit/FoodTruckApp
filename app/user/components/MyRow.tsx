@@ -2,10 +2,18 @@ import React from "react";
 import { View, Text, StyleSheet, FlatList } from "react-native";
 import CardItem from "./CardItem";
 
+interface Vendor {
+  uid: string;
+  name: string;
+  price: string;
+  rating: number;
+  image: string;
+}
+
 interface Section {
   id: string;
   title: string;
-  data: string[];
+  vendors: Vendor[];
 }
 
 interface MyRowProps {
@@ -21,11 +29,11 @@ const MyRow: React.FC<MyRowProps> = ({ section }) => (
       <Text style={styles.sectionTitle}>{section.title}</Text>
     </View>
     <FlatList
-      data={section.data}
-      keyExtractor={(_, idx) => `${section.title}-${idx}`}
+      data={section.vendors}
+      keyExtractor={(vendor) => vendor.uid}
       horizontal
       showsHorizontalScrollIndicator={false}
-      renderItem={({ item, index }) => <CardItem item={item} index={index} />}
+      renderItem={({ item }) => <CardItem vendor={item} />}
     />
   </View>
 );

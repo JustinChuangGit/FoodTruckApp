@@ -23,6 +23,7 @@ import liveVendors from "../../../dummyVendorMapData.json";
 import VendorMarker from "../components/VendorMarker";
 import VendorMapInfoCard from "../components/VendorMapInfoCard";
 import { SECTIONS } from "../../../constants/UserConstants";
+import { SECTIONDATA } from "./dummySectionData";
 
 const { width } = Dimensions.get("window");
 
@@ -159,7 +160,7 @@ export default function Index() {
           </Text>
           <HorizontalLine />
           <FlatList
-            data={SECTIONS}
+            data={SECTIONDATA}
             keyExtractor={(item) => item.id}
             renderItem={({ item }) => <MyRow section={item} />}
             contentContainerStyle={{ padding: 16 }}

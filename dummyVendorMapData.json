@@ -1,103 +1,202 @@
 [
-    {
-      "uid": "1",
-      "latitude": 36.8910,
-      "longitude": -119.7392,
-      "price": "$$",
-      "name": "Taco Truck",
+  {
+      "uid": "v1",
+      "price": "$",
+      "name": "Taco Fiesta",
       "rating": 4.5,
       "description": "Serving authentic Mexican street tacos with fresh ingredients and bold flavors.",
-      "image": "https://tse1.mm.bing.net/th?id=OIP.JR5G_ieeQF6KVDaAhH7j7QHaFj&pid=Api"
-    },
-    {
-      "uid": "2",
-      "latitude": 36.8895,
-      "longitude": -119.7410,
-      "price": "$",
-      "name": "Burger Bus",
+      "image": "https://cdn.pixabay.com/photo/2017/05/07/08/56/tacos-2299365_150.jpg",
+      "latitude": 36.7391,
+      "longitude": -119.8256
+  },
+  {
+      "uid": "v2",
+      "price": "$$",
+      "name": "Burger Haven",
       "rating": 4.0,
       "description": "A retro-styled food truck offering juicy burgers, crispy fries, and milkshakes.",
-      "image": "https://tse4.mm.bing.net/th?id=OIP.ncfVavgfQfPKHBdStCSWigHaDm&pid=Api"
-    },
-    {
-      "uid": "3",
-      "latitude": 36.8528,
-      "longitude": -119.7850,
+      "image": "https://cdn.pixabay.com/photo/2016/03/05/19/02/hamburger-1238246_150.jpg",
+      "latitude": 36.7502,
+      "longitude": -119.7805
+  },
+  {
+      "uid": "v3",
       "price": "$$$",
       "name": "Gourmet Grills",
-      "rating": 4.8,
+      "rating": 3.8,
       "description": "Premium grilled dishes and BBQ platters crafted by expert chefs.",
-      "image": "https://tse1.mm.bing.net/th?id=OIP.dZrG2b_D928eYjb311CeBwHaEK&pid=Api"
-    },
-    {
-      "uid": "4",
-      "latitude": 36.8540,
-      "longitude": -119.7820,
-      "price": "$$",
-      "name": "Pizza Wagon",
-      "rating": 4.2,
-      "description": "A wood-fired pizza truck serving hand-tossed pies with gourmet toppings.",
-      "image": "https://tse1.mm.bing.net/th?id=OIP.5UuC8gIKcIFiC62MiNaL6QHaFL&pid=Api"
-    },
-    {
-      "uid": "5",
-      "latitude": 36.8870,
-      "longitude": -119.7405,
+      "image": "https://cdn.pixabay.com/photo/2015/08/20/20/07/barbecue-896196_150.jpg",
+      "latitude": 36.7354,
+      "longitude": -119.8408
+  },
+  {
+      "uid": "v4",
       "price": "$",
-      "name": "Dessert Truck",
-      "rating": 4.9,
-      "description": "Decadent desserts, from gourmet cupcakes to indulgent ice cream sundaes.",
-      "image": "https://tse3.mm.bing.net/th?id=OIP.fpry_cGgGDhfVWtDbZ7_WwHaFj&pid=Api"
-    },
-    {
-      "uid": "6",
-      "latitude": 36.8902,
-      "longitude": -119.7412,
+      "name": "Pizza Wagon",
+      "rating": 4.7,
+      "description": "A wood-fired pizza truck serving hand-tossed pies with gourmet toppings.",
+      "image": "https://cdn.pixabay.com/photo/2017/12/09/08/18/pizza-3007395_150.jpg",
+      "latitude": 36.7256,
+      "longitude": -119.8102
+  },
+  {
+      "uid": "v5",
+      "price": "$$",
+      "name": "Sandwich Stop",
+      "rating": 4.2,
+      "description": "Delicious sandwiches made with fresh ingredients and a variety of fillings.",
+      "image": "https://cdn.pixabay.com/photo/2014/04/22/02/56/sandwich-329103_150.jpg",
+      "latitude": 36.7407,
+      "longitude": -119.8701
+  },
+  {
+      "uid": "v6",
       "price": "$$",
       "name": "BBQ Express",
-      "rating": 4.3,
+      "rating": 3.9,
       "description": "Smoked meats, tangy sauces, and classic BBQ sides served hot and fast.",
-      "image": "https://tse3.mm.bing.net/th?id=OIP.JVGJz0NoT55ZcIRp-jc8TgHaFj&pid=Api"
-    },
-    {
-      "uid": "7",
-      "latitude": 36.8890,
-      "longitude": -119.7450,
+      "image": "https://cdn.pixabay.com/photo/2017/01/22/19/11/ribs-2005929_150.jpg",
+      "latitude": 36.7603,
+      "longitude": -119.7854
+  },
+  {
+      "uid": "v7",
       "price": "$$$",
       "name": "Seafood Shack",
-      "rating": 4.7,
+      "rating": 4.8,
       "description": "Fresh seafood delights, from shrimp tacos to grilled fish, sourced locally.",
-      "image": "https://tse3.mm.bing.net/th?id=OIP.W12TZBo3V2p3LvzBV0Pz8QHaE8&pid=Api"
-    },
-    {
-      "uid": "8",
-      "latitude": 36.8885,
-      "longitude": -119.7385,
+      "image": "https://cdn.pixabay.com/photo/2016/03/05/20/02/shrimp-1239425_150.jpg",
+      "latitude": 36.7123,
+      "longitude": -119.7508
+  },
+  {
+      "uid": "v8",
       "price": "$",
       "name": "Hot Dog Haven",
-      "rating": 4.0,
+      "rating": 4.1,
       "description": "Classic hot dogs, gourmet sausages, and creative toppings for every taste.",
-      "image": "https://tse1.mm.bing.net/th?id=OIP.5YNKzPaV9toEZaA5THCWdAHaE7&pid=Api"
-    },
-    {
-      "uid": "9",
-      "latitude": 36.8850,
-      "longitude": -119.7500,
+      "image": "https://cdn.pixabay.com/photo/2018/06/23/02/22/hot-dogs-3499927_150.jpg",
+      "latitude": 36.7754,
+      "longitude": -119.8156
+  },
+  {
+      "uid": "v9",
       "price": "$$",
-      "name": "Coffee Cruiser",
-      "rating": 4.7,
-      "description": "Mobile coffee bar offering artisanal espresso and cold brew.",
-      "image": "https://tse2.mm.bing.net/th?id=OIP.8ssbo6uNiDrCb1KclXxBAQHaE8&pid=Api"
-    },
-    {
-      "uid": "10",
-      "latitude": 36.8845,
-      "longitude": -119.7402,
+      "name": "Vegan Delights",
+      "rating": 4.3,
+      "description": "Delicious vegan dishes made with fresh, organic ingredients.",
+      "image": "https://cdn.pixabay.com/photo/2016/11/29/05/17/salad-1869610_150.jpg",
+      "latitude": 36.7802,
+      "longitude": -119.8453
+  },
+  {
+      "uid": "v10",
       "price": "$$$",
-      "name": "Breakfast Truck",
+      "name": "Dessert Truck",
+      "rating": 4.0,
+      "description": "Decadent desserts, from gourmet cupcakes to indulgent ice cream sundaes.",
+      "image": "https://cdn.pixabay.com/photo/2017/07/31/21/41/ice-cream-2564328_150.jpg",
+      "latitude": 36.7309,
+      "longitude": -119.7604
+  },
+  {
+      "uid": "v11",
+      "price": "$$",
+      "name": "Burrito Bros",
       "rating": 4.6,
-      "description": "All-day breakfast favorites served fresh and hot.",
-      "image": "https://tse3.mm.bing.net/th?id=OIP.9FGuO0CXyM5Ftq9E6kAr5wHaE7&pid=Api"
-    }
-  ]
-  
+      "description": "Hearty burritos filled with fresh ingredients and bold flavors.",
+      "image": "https://cdn.pixabay.com/photo/2014/10/19/20/59/burrito-494748_150.jpg",
+      "latitude": 36.7856,
+      "longitude": -119.8052
+  },
+  {
+      "uid": "v12",
+      "price": "$",
+      "name": "Quesadilla Queen",
+      "rating": 4.4,
+      "description": "Delicious quesadillas with a variety of fillings and toppings.",
+      "image": "https://cdn.pixabay.com/photo/2021/06/15/08/25/quesadilla-6335841_150.jpg",
+      "latitude": 36.7476,
+      "longitude": -119.8204
+  },
+  {
+      "uid": "v13",
+      "price": "$$",
+      "name": "Nacho Nirvana",
+      "rating": 4.7,
+      "description": "Loaded nachos with a variety of toppings and sauces.",
+      "image": "https://cdn.pixabay.com/photo/2016/11/21/15/40/cheese-1842027_150.jpg",
+      "latitude": 36.7601,
+      "longitude": -119.7452
+  },
+  {
+      "uid": "v14",
+      "price": "$",
+      "name": "Taco Truck",
+      "rating": 4.3,
+      "description": "Serving authentic Mexican street tacos with fresh ingredients and bold flavors.",
+      "image": "https://cdn.pixabay.com/photo/2015/03/26/10/03/taco-690254_150.jpg",
+      "latitude": 36.7005,
+      "longitude": -119.8407
+  },
+  {
+      "uid": "v15",
+      "price": "$$",
+      "name": "Fried Chicken Co.",
+      "rating": 4.5,
+      "description": "Crispy fried chicken with a variety of sides and sauces.",
+      "image": "https://cdn.pixabay.com/photo/2017/09/02/20/23/chicken-2708484_150.jpg",
+      "latitude": 36.7402,
+      "longitude": -119.8805
+  },
+  {
+      "uid": "v16",
+      "price": "$$$",
+      "name": "Sushi Station",
+      "rating": 4.8,
+      "description": "Fresh sushi rolls and sashimi made with high-quality ingredients.",
+      "image": "https://cdn.pixabay.com/photo/2014/04/22/02/56/sushi-329103_150.jpg",
+      "latitude": 36.7059,
+      "longitude": -119.7509
+  },
+  {
+      "uid": "v17",
+      "price": "$$",
+      "name": "Ramen Road",
+      "rating": 4.6,
+      "description": "Delicious ramen bowls with rich broth and fresh toppings.",
+      "image": "https://cdn.pixabay.com/photo/2020/10/15/11/47/ramen-5658575_150.jpg",
+      "latitude": 36.7607,
+      "longitude": -119.7705
+  },
+  {
+      "uid": "v18",
+      "price": "$$",
+      "name": "Tempura Truck",
+      "rating": 4.4,
+      "description": "Crispy tempura dishes with a variety of dipping sauces.",
+      "image": "https://cdn.pixabay.com/photo/2021/02/08/10/30/tempura-5994995_150.jpg",
+      "latitude": 36.7752,
+      "longitude": -119.8102
+  },
+  {
+      "uid": "v19",
+      "price": "$",
+      "name": "Teriyaki Treats",
+      "rating": 4.3,
+      "description": "Delicious teriyaki dishes with a variety of sides.",
+      "image": "https://cdn.pixabay.com/photo/2017/09/19/19/00/chicken-2760381_150.jpg",
+      "latitude": 36.7256,
+      "longitude": -119.7804
+  },
+  {
+      "uid": "v20",
+      "price": "$$$",
+      "name": "Sashimi Stop",
+      "rating": 4.7,
+      "description": "Fresh sashimi and sushi rolls made with high-quality ingredients.",
+      "image": "https://cdn.pixabay.com/photo/2016/11/18/16/16/sashimi-1839266_150.jpg",
+      "latitude": 36.7505,
+      "longitude": -119.8103
+  }
+]

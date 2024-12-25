@@ -1,17 +1,24 @@
 import React from "react";
-import { View, Text, StyleSheet } from "react-native";
+import { View, Text, StyleSheet, Image } from "react-native";
 
-interface CardItemProps {
-  item: string;
-  index: number;
+interface Vendor {
+  uid: string;
+  name: string;
+  price: string;
+  rating: number;
+  image: string;
 }
 
-const CardItem: React.FC<CardItemProps> = ({ item, index }) => (
-  <View style={{ flexDirection: "row", alignItems: "center" }}>
-    <View style={styles.cardItem} onStartShouldSetResponder={() => true}>
-      <Text>{`${item} ${index + 1}`}</Text>
-    </View>
-    <View style={styles.cardSpacer} onStartShouldSetResponder={() => true} />
+interface CardItemProps {
+  vendor: Vendor;
+}
+
+const CardItem: React.FC<CardItemProps> = ({ vendor }) => (
+  <View style={styles.cardItem}>
+    <Image source={{ uri: vendor.image }} style={styles.vendorImage} />
+    <Text style={styles.vendorName}>{vendor.name}</Text>
+    <Text style={styles.vendorPrice}>{vendor.price}</Text>
+    <Text style={styles.vendorRating}>Rating: {vendor.rating}/5</Text>
   </View>
 );
 
@@ -20,12 +27,31 @@ const styles = StyleSheet.create({
     backgroundColor: "#f9f9f9",
     borderRadius: 8,
     padding: 16,
-    width: 120,
-    height: 150,
+    width: 150,
+    height: 200,
     justifyContent: "center",
     alignItems: "center",
+    marginRight: 10,
   },
-  cardSpacer: { width: 10 },
+  vendorImage: {
+    width: 120,
+    height: 80,
+    borderRadius: 8,
+    marginBottom: 10,
+  },
+  vendorName: {
+    fontSize: 16,
+    fontWeight: "bold",
+    textAlign: "center",
+  },
+  vendorPrice: {
+    fontSize: 14,
+    color: "#555",
+  },
+  vendorRating: {
+    fontSize: 14,
+    color: "#888",
+  },
 });
 
 export default CardItem;
