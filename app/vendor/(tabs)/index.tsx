@@ -20,11 +20,9 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import BottomSheet, { BottomSheetView } from "@gorhom/bottom-sheet";
 import Carousel from "react-native-reanimated-carousel";
 import haversine from "haversine";
-// import MyRow from "../components/MyRow";
 import HorizontalLine from "@/components/default/HorizontalLine";
 import VendorMarker from "../../../components/VendorMarker";
 import VendorMapInfoCard from "../../../components/VendorMapInfoCard";
-import { SECTIONS } from "../../../constants/UserConstants";
 import { Vendor, LocationCoordinates } from "@/constants/types";
 
 //TODO: Replace with collections from Firestore
@@ -41,7 +39,7 @@ export default function Index() {
   const bottomSheetRef = useRef<BottomSheet>(null);
   const [isModalVisible, setModalVisible] = useState(false);
 
-  const snapPoints = useMemo(() => ["15%", "50%", "60%"], []);
+  const snapPoints = useMemo(() => ["15%", "50%", "90%"], []);
 
   useEffect(() => {
     (async () => {
@@ -153,7 +151,7 @@ export default function Index() {
 
       <BottomSheet ref={bottomSheetRef} index={1} snapPoints={snapPoints}>
         <BottomSheetView style={styles.bottomSheetContent}>
-          <Text style={styles.dragSectionHeader}>Vendor Screen</Text>
+          <Text style={styles.dragSectionHeader}>Vendor Name</Text>
           <Text style={styles.dragSectionSubheader}>Manage your store</Text>
           <HorizontalLine />
           {/* <FlatList
