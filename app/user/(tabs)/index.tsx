@@ -17,7 +17,10 @@ import MapView, {
 } from "react-native-maps";
 import * as Location from "expo-location";
 import { SafeAreaView } from "react-native-safe-area-context";
-import BottomSheet, { BottomSheetView } from "@gorhom/bottom-sheet";
+import BottomSheet, {
+  BottomSheetView,
+  BottomSheetFlatList,
+} from "@gorhom/bottom-sheet";
 import Carousel from "react-native-reanimated-carousel";
 import haversine from "haversine";
 import MyRow from "../components/MyRow";
@@ -247,14 +250,20 @@ export default function Index() {
         </View>
       )}
 
-      <BottomSheet ref={bottomSheetRef} index={1} snapPoints={snapPoints}>
+      <BottomSheet
+        ref={bottomSheetRef}
+        index={1}
+        snapPoints={snapPoints}
+        enableOverDrag={false}
+        topInset={100}
+      >
         <BottomSheetView style={styles.bottomSheetContent}>
           <Text style={styles.dragSectionHeader}>For You</Text>
           <Text style={styles.dragSectionSubheader}>
             Checkout some spots we think you'd like
           </Text>
           <HorizontalLine />
-          <FlatList
+          <BottomSheetFlatList
             data={SECTIONDATA}
             keyExtractor={(item) => item.id}
             renderItem={({ item }) => (
