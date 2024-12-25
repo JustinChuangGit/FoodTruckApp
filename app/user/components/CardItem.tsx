@@ -1,25 +1,19 @@
 import React from "react";
-import { View, Text, StyleSheet, Image } from "react-native";
-
-interface Vendor {
-  uid: string;
-  name: string;
-  price: string;
-  rating: number;
-  image: string;
-}
+import { View, Text, StyleSheet, Image, TouchableOpacity } from "react-native";
+import { Vendor } from "@/constants/types";
 
 interface CardItemProps {
   vendor: Vendor;
+  onPress: () => void; // Add this prop
 }
 
-const CardItem: React.FC<CardItemProps> = ({ vendor }) => (
-  <View style={styles.cardItem}>
+const CardItem: React.FC<CardItemProps> = ({ vendor, onPress }) => (
+  <TouchableOpacity style={styles.cardItem} onPress={onPress}>
     <Image source={{ uri: vendor.image }} style={styles.vendorImage} />
     <Text style={styles.vendorName}>{vendor.name}</Text>
     <Text style={styles.vendorPrice}>{vendor.price}</Text>
     <Text style={styles.vendorRating}>Rating: {vendor.rating}/5</Text>
-  </View>
+  </TouchableOpacity>
 );
 
 const styles = StyleSheet.create({

@@ -6,6 +6,9 @@ import {
   StyleSheet,
   FlatList,
   Dimensions,
+  Modal,
+  Image,
+  TouchableOpacity,
 } from "react-native";
 import MapView, {
   Marker,
@@ -19,30 +22,16 @@ import Carousel from "react-native-reanimated-carousel";
 import haversine from "haversine";
 import MyRow from "../components/MyRow";
 import HorizontalLine from "@/components/HorizontalLine";
-import liveVendors from "../../../dummyVendorMapData.json";
 import VendorMarker from "../components/VendorMarker";
 import VendorMapInfoCard from "../components/VendorMapInfoCard";
 import { SECTIONS } from "../../../constants/UserConstants";
+import { Vendor, LocationCoordinates } from "@/constants/types";
+
+//TODO: Replace with collections from Firestore
 import { SECTIONDATA } from "./dummySectionData";
+import liveVendors from "../../../dummyVendorMapData.json";
 
 const { width } = Dimensions.get("window");
-
-interface LocationCoordinates {
-  latitude: number;
-  longitude: number;
-}
-
-interface Vendor {
-  uid: string;
-  latitude: number;
-  longitude: number;
-  price: string;
-  name: string;
-  rating: number;
-  description: string;
-  image: string;
-  distance?: number;
-}
 
 export default function Index() {
   const [location, setLocation] = useState<LocationCoordinates | null>(null);
@@ -51,6 +40,7 @@ export default function Index() {
   const [carouselIndex, setCarouselIndex] = useState(0);
   const mapRef = useRef<MapView>(null);
   const bottomSheetRef = useRef<BottomSheet>(null);
+  const [isModalVisible, setModalVisible] = useState(false);
 
   const snapPoints = useMemo(() => ["15%", "50%", "60%"], []);
 
@@ -102,6 +92,16 @@ export default function Index() {
   };
 
   const handleCardClose = () => {
+    setSelectedVendor(null);
+  };
+
+  const handleCardPress = (vendor: Vendor) => {
+    setSelectedVendor(vendor);
+    setModalVisible(true);
+  };
+
+  const closeModal = () => {
+    setModalVisible(false);
     setSelectedVendor(null);
   };
 
@@ -162,11 +162,47 @@ export default function Index() {
           <FlatList
             data={SECTIONDATA}
             keyExtractor={(item) => item.id}
-            renderItem={({ item }) => <MyRow section={item} />}
+            renderItem={({ item }) => (
+              <MyRow section={item} onCardPress={handleCardPress} />
+            )}
             contentContainerStyle={{ padding: 16 }}
           />
         </BottomSheetView>
       </BottomSheet>
+
+      <Modal
+        visible={isModalVisible}
+        animationType="slide"
+        transparent={true}
+        onRequestClose={closeModal}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            {selectedVendor && (
+              <>
+                <Image
+                  source={{ uri: selectedVendor.image }}
+                  style={styles.logo}
+                />
+                <Text style={styles.name}>{selectedVendor.name}</Text>
+                <Text style={styles.description}>
+                  {selectedVendor.description}
+                </Text>
+                <Text style={styles.price}>Price: {selectedVendor.price}</Text>
+                <Text style={styles.rating}>
+                  Rating: {selectedVendor.rating}/5
+                </Text>
+                <TouchableOpacity
+                  style={styles.closeButton}
+                  onPress={closeModal}
+                >
+                  <Text style={styles.closeButtonText}>Close</Text>
+                </TouchableOpacity>
+              </>
+            )}
+          </View>
+        </View>
+      </Modal>
     </SafeAreaView>
   );
 }
@@ -207,5 +243,55 @@ const styles = StyleSheet.create({
   },
   loadingText: {
     fontSize: 18,
+  },
+  modalOverlay: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+  },
+  modalContent: {
+    width: "80%",
+    padding: 16,
+    backgroundColor: "#fff",
+    borderRadius: 10,
+    alignItems: "center",
+  },
+
+  logo: {
+    width: 100,
+    height: 100,
+    borderRadius: 50,
+    marginBottom: 16,
+  },
+  name: {
+    fontSize: 24,
+    fontWeight: "bold",
+    textAlign: "center",
+    marginBottom: 8,
+  },
+  description: {
+    fontSize: 16,
+    textAlign: "center",
+    color: "#555",
+    marginBottom: 8,
+  },
+  price: {
+    fontSize: 16,
+    marginBottom: 4,
+  },
+  rating: {
+    fontSize: 16,
+    marginBottom: 16,
+  },
+  closeButton: {
+    backgroundColor: "#007bff",
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 5,
+  },
+  closeButtonText: {
+    color: "#fff",
+    fontSize: 16,
   },
 });

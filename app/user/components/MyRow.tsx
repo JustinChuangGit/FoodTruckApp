@@ -1,14 +1,7 @@
 import React from "react";
 import { View, Text, StyleSheet, FlatList } from "react-native";
 import CardItem from "./CardItem";
-
-interface Vendor {
-  uid: string;
-  name: string;
-  price: string;
-  rating: number;
-  image: string;
-}
+import { Vendor } from "@/constants/types";
 
 interface Section {
   id: string;
@@ -18,9 +11,10 @@ interface Section {
 
 interface MyRowProps {
   section: Section;
+  onCardPress: (vendor: Vendor) => void; // Add this prop
 }
 
-const MyRow: React.FC<MyRowProps> = ({ section }) => (
+const MyRow: React.FC<MyRowProps> = ({ section, onCardPress }) => (
   <View style={styles.mainSection}>
     <View
       style={styles.sectionTitleContainer}
@@ -33,7 +27,9 @@ const MyRow: React.FC<MyRowProps> = ({ section }) => (
       keyExtractor={(vendor) => vendor.uid}
       horizontal
       showsHorizontalScrollIndicator={false}
-      renderItem={({ item }) => <CardItem vendor={item} />}
+      renderItem={({ item }) => (
+        <CardItem vendor={item} onPress={() => onCardPress(item)} />
+      )}
     />
   </View>
 );
