@@ -33,6 +33,101 @@ import liveVendors from "../../../dummyVendorMapData.json";
 
 const { width } = Dimensions.get("window");
 
+const dummyMenu = [
+  {
+    id: "1",
+    name: "Taco Special",
+    description: "Three delicious tacos with your choice of protein.",
+    price: "$8.99",
+  },
+  {
+    id: "2",
+    name: "Loaded Nachos",
+    description: "Crispy tortilla chips topped with cheese and salsa.",
+    price: "$6.99",
+  },
+  {
+    id: "3",
+    name: "Burrito Bowl",
+    description: "A hearty bowl with rice, beans, and toppings.",
+    price: "$9.99",
+  },
+  {
+    id: "4",
+    name: "Quesadilla",
+    description: "Cheesy quesadilla served with sour cream and guacamole.",
+    price: "$7.99",
+  },
+  {
+    id: "5",
+    name: "Churros",
+    description: "Sweet fried dough sprinkled with cinnamon sugar.",
+    price: "$4.99",
+  },
+  {
+    id: "6",
+    name: "Street Corn",
+    description:
+      "Grilled corn on the cob coated with butter, cheese, and spices.",
+    price: "$3.99",
+  },
+  {
+    id: "7",
+    name: "Fish Tacos",
+    description: "Fresh fish tacos topped with cabbage and tangy sauce.",
+    price: "$10.99",
+  },
+  {
+    id: "8",
+    name: "Carne Asada Fries",
+    description:
+      "Crispy fries topped with grilled steak, cheese, and guacamole.",
+    price: "$11.99",
+  },
+  {
+    id: "9",
+    name: "Vegetarian Burrito",
+    description: "A burrito packed with beans, rice, veggies, and salsa.",
+    price: "$8.49",
+  },
+  {
+    id: "10",
+    name: "Tostadas",
+    description: "Crispy tortillas topped with beans, lettuce, and cheese.",
+    price: "$5.99",
+  },
+  {
+    id: "11",
+    name: "Chicken Enchiladas",
+    description: "Corn tortillas stuffed with chicken and topped with sauce.",
+    price: "$12.99",
+  },
+  {
+    id: "12",
+    name: "Steak Fajitas",
+    description: "Sizzling steak strips served with peppers and onions.",
+    price: "$14.99",
+  },
+  {
+    id: "13",
+    name: "Tamales",
+    description: "Traditional steamed corn masa filled with meat or veggies.",
+    price: "$7.99",
+  },
+  {
+    id: "14",
+    name: "Guacamole & Chips",
+    description: "Fresh guacamole served with crispy tortilla chips.",
+    price: "$5.49",
+  },
+  {
+    id: "15",
+    name: "Mexican Rice",
+    description: "Fluffy rice cooked with tomatoes and spices.",
+    price: "$2.99",
+  },
+];
+
 export default function Index() {
   const [location, setLocation] = useState<LocationCoordinates | null>(null);
   const [vendors, setVendors] = useState<Vendor[]>([]);
@@ -198,6 +293,24 @@ export default function Index() {
                 >
                   <Text style={styles.closeButtonText}>Close</Text>
                 </TouchableOpacity>
+                <HorizontalLine />
+
+                {/* Dummy Menu */}
+                <Text style={styles.menuHeader}>Menu</Text>
+                <FlatList
+                  data={dummyMenu}
+                  keyExtractor={(item) => item.id}
+                  renderItem={({ item }) => (
+                    <View style={styles.menuItem}>
+                      <Text style={styles.menuItemName}>{item.name}</Text>
+                      <Text style={styles.menuItemDescription}>
+                        {item.description}
+                      </Text>
+                      <Text style={styles.menuItemPrice}>{item.price}</Text>
+                    </View>
+                  )}
+                  contentContainerStyle={styles.menuList}
+                />
               </>
             )}
           </View>
@@ -246,18 +359,17 @@ const styles = StyleSheet.create({
   },
   modalOverlay: {
     flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: "rgba(0, 0, 0, 0.5)",
+    justifyContent: "flex-end", // Align modal to the bottom
+    backgroundColor: "rgba(0, 0, 0, 0.5)", // Semi-transparent overlay
   },
   modalContent: {
-    width: "80%",
-    padding: 16,
-    backgroundColor: "#fff",
-    borderRadius: 10,
-    alignItems: "center",
+    ...StyleSheet.absoluteFillObject, // Extend modal to fill the bottom area
+    backgroundColor: "#fff", // Modal background
+    borderTopLeftRadius: 20, // Rounded corners at the top
+    borderTopRightRadius: 20,
+    padding: 16, // Add padding for content
+    paddingBottom: 32, // Extra padding to account for the safe area
   },
-
   logo: {
     width: 100,
     height: 100,
@@ -293,5 +405,32 @@ const styles = StyleSheet.create({
   closeButtonText: {
     color: "#fff",
     fontSize: 16,
+  },
+  menuHeader: {
+    fontSize: 18,
+    fontWeight: "bold",
+    marginTop: 16,
+    marginBottom: 8,
+  },
+  menuList: {
+    paddingBottom: 16, // Adds spacing below the last item
+  },
+  menuItem: {
+    paddingVertical: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: "#ddd",
+  },
+  menuItemName: {
+    fontSize: 16,
+    fontWeight: "bold",
+  },
+  menuItemDescription: {
+    fontSize: 14,
+    color: "#555",
+  },
+  menuItemPrice: {
+    fontSize: 14,
+    color: "#007bff",
+    marginTop: 4,
   },
 });
