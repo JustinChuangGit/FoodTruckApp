@@ -114,15 +114,14 @@ export default function Index() {
   const toggleVendorActive = async (uid: string | undefined) => {
     if (!uid) {
       console.error("User UID is not available");
-      return; // Exit the function early if uid is undefined
+      return;
     }
 
     try {
-      // Animate button color
       Animated.timing(buttonColorAnim, {
-        toValue: isVendorActive ? 0 : 1, // Toggle between 0 (light red) and 1 (light green)
-        duration: 500, // Duration of the animation in milliseconds
-        useNativeDriver: false, // Needed for animating colors
+        toValue: isVendorActive ? 0 : 1,
+        duration: 500,
+        useNativeDriver: false,
       }).start();
 
       if (!isVendorActive) {
@@ -138,7 +137,6 @@ export default function Index() {
         console.log("User removed from activeVendors collection");
       }
 
-      // Toggle the vendor active state
       setVendorActive((prev) => !prev);
     } catch (error) {
       console.error("Error toggling vendor active status:", error);
