@@ -13,7 +13,7 @@ export default function VendorAccountScreen() {
       {/* Edit Menu Button */}
       <TouchableOpacity
         style={styles.editMenuButton}
-        onPress={() => router.push("../otherScreens/vendorEditMenuScreen")} // Correct relative path
+        onPress={() => router.push("../otherScreens/EditMenuItemsScreen")} // Navigate to EditMenuItemsScreen
       >
         <Text style={styles.editMenuButtonText}>Edit Menu</Text>
       </TouchableOpacity>

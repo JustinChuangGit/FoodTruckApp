@@ -9,6 +9,10 @@ export default function VendorLayout() {
     <Provider store={store}>
       <Stack>
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+        <Stack.Screen
+          name="otherScreens/vendorEditMenuScreen"
+          options={{ headerShown: false }}
+        />
       </Stack>
     </Provider>
   );
