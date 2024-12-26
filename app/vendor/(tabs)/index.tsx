@@ -27,7 +27,7 @@ import VendorMapInfoCard from "../../../components/VendorMapInfoCard";
 import { Vendor, LocationCoordinates } from "@/constants/types";
 import { useSelector } from "react-redux";
 import { selectUser } from "../../../redux/authSlice"; // Update the path as needed
-import { doc, setDoc, deleteDoc } from "firebase/firestore";
+import { doc, setDoc, deleteDoc, getDoc } from "firebase/firestore";
 import { db } from "../../../services/firestore"; // Adjust the path to your Firestore utility file
 
 //TODO: Replace with collections from Firestore
@@ -79,6 +79,40 @@ export default function Index() {
       }
     })();
   }, []);
+
+  useEffect(() => {
+    const checkVendorStatus = async () => {
+      if (!user?.uid) {
+        console.error("User UID is not available");
+        return;
+      }
+
+      try {
+        const docRef = doc(db, "activeVendors", user.uid);
+        const docSnap = await getDoc(docRef);
+
+        if (docSnap.exists()) {
+          setVendorActive(true);
+          Animated.timing(buttonColorAnim, {
+            toValue: 1, // Set to "active" color
+            duration: 500,
+            useNativeDriver: false,
+          }).start();
+        } else {
+          setVendorActive(false);
+          Animated.timing(buttonColorAnim, {
+            toValue: 0, // Set to "inactive" color
+            duration: 500,
+            useNativeDriver: false,
+          }).start();
+        }
+      } catch (error) {
+        console.error("Error checking vendor active status:", error);
+      }
+    };
+
+    checkVendorStatus();
+  }, [user?.uid]);
 
   const handleMarkerPress = (vendor: Vendor) => {
     const index = vendors.findIndex((v) => v.uid === vendor.uid);
