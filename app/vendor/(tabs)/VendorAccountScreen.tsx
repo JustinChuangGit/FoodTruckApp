@@ -3,17 +3,17 @@ import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
 import { useRouter } from "expo-router";
 
 export default function VendorAccountScreen() {
-  const router = useRouter(); // Use router for navigation
+  const router = useRouter();
 
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Vendor Account Screen</Text>
       <Text>This is a dummy screen for vendor account details.</Text>
 
-      {/* Edit Menu Button */}
+      {/* Navigate to Edit Menu */}
       <TouchableOpacity
         style={styles.editMenuButton}
-        onPress={() => router.push("../otherScreens/vendorEditMenuScreen")} // Correct relative path
+        onPress={() => router.push("/vendor/otherScreens/vendorEditMenuScreen")} // Correct path
       >
         <Text style={styles.editMenuButtonText}>Edit Menu</Text>
       </TouchableOpacity>

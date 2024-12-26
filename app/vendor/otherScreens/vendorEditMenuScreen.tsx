@@ -9,6 +9,7 @@ import {
   TouchableOpacity,
   Alert,
 } from "react-native";
+import { useRouter } from "expo-router"; // Import useRouter
 
 // Define the type for a menu item
 type MenuItem = {
@@ -20,6 +21,8 @@ type MenuItem = {
 };
 
 export default function EditMenuItemsScreen() {
+  const router = useRouter(); // Use router for navigation
+
   // State for menu items
   const [menuItems, setMenuItems] = useState<MenuItem[]>([]);
   const [isModalVisible, setModalVisible] = useState(false);
@@ -105,6 +108,11 @@ export default function EditMenuItemsScreen() {
 
   return (
     <View style={styles.container}>
+      {/* Back Button */}
+      <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
+        <Text style={styles.backButtonText}>Hello</Text>
+      </TouchableOpacity>
+
       {/* List of Menu Items Grouped by Category */}
       <FlatList
         data={Object.keys(groupedItems)} // Categories as keys
@@ -186,6 +194,19 @@ const styles = StyleSheet.create({
     flex: 1,
     padding: 16,
     backgroundColor: "#fff",
+  },
+  backButton: {
+    backgroundColor: "gray",
+    padding: 10,
+    borderRadius: 8,
+    alignItems: "center",
+    marginBottom: 10,
+    marginTop: 40,
+  },
+  backButtonText: {
+    color: "#fff",
+    fontSize: 16,
+    fontWeight: "bold",
   },
   addButton: {
     backgroundColor: "blue",
