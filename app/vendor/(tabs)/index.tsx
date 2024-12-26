@@ -24,6 +24,8 @@ import HorizontalLine from "@/components/default/HorizontalLine";
 import VendorMarker from "../../../components/VendorMarker";
 import VendorMapInfoCard from "../../../components/VendorMapInfoCard";
 import { Vendor, LocationCoordinates } from "@/constants/types";
+import { useSelector } from "react-redux";
+import { selectUser } from "../../../redux/authSlice"; // Update the path as needed
 
 //TODO: Replace with collections from Firestore
 import liveVendors from "../../../dummyVendorMapData.json";
@@ -40,6 +42,8 @@ export default function Index() {
   const [isModalVisible, setModalVisible] = useState(false);
 
   const snapPoints = useMemo(() => ["15%", "50%", "90%"], []);
+  const user = useSelector(selectUser);
+  const userName = user?.name || "Vendor Name";
 
   useEffect(() => {
     (async () => {
@@ -151,7 +155,7 @@ export default function Index() {
 
       <BottomSheet ref={bottomSheetRef} index={1} snapPoints={snapPoints}>
         <BottomSheetView style={styles.bottomSheetContent}>
-          <Text style={styles.dragSectionHeader}>Vendor Name</Text>
+          <Text style={styles.dragSectionHeader}>{userName}</Text>
           <Text style={styles.dragSectionSubheader}>Manage your store</Text>
           <HorizontalLine />
           {/* <FlatList
