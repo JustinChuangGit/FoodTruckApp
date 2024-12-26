@@ -27,6 +27,8 @@ import VendorMapInfoCard from "../../../components/VendorMapInfoCard";
 import { Vendor, LocationCoordinates } from "@/constants/types";
 import { useSelector } from "react-redux";
 import { selectUser } from "../../../redux/authSlice"; // Update the path as needed
+import { doc, setDoc, deleteDoc } from "firebase/firestore";
+import { db } from "../../../services/firestore"; // Adjust the path to your Firestore utility file
 
 //TODO: Replace with collections from Firestore
 import liveVendors from "../../../dummyVendorMapData.json";
@@ -109,14 +111,38 @@ export default function Index() {
     setSelectedVendor(null);
   };
 
-  const toggleVendorActive = () => {
-    Animated.timing(buttonColorAnim, {
-      toValue: isVendorActive ? 0 : 1, // Toggle between 0 (blue) and 1 (light green)
-      duration: 500, // Duration of the animation in milliseconds
-      useNativeDriver: false, // Needed for animating colors
-    }).start();
+  const toggleVendorActive = async (uid: string | undefined) => {
+    if (!uid) {
+      console.error("User UID is not available");
+      return; // Exit the function early if uid is undefined
+    }
 
-    setVendorActive((prev) => !prev);
+    try {
+      // Animate button color
+      Animated.timing(buttonColorAnim, {
+        toValue: isVendorActive ? 0 : 1, // Toggle between 0 (light red) and 1 (light green)
+        duration: 500, // Duration of the animation in milliseconds
+        useNativeDriver: false, // Needed for animating colors
+      }).start();
+
+      if (!isVendorActive) {
+        // Add the UID to the "activeVendors" collection
+        await setDoc(doc(db, "activeVendors", uid), {
+          uid,
+          timestamp: new Date().toISOString(),
+        });
+        console.log("User added to activeVendors collection");
+      } else {
+        // Remove the UID from the "activeVendors" collection
+        await deleteDoc(doc(db, "activeVendors", uid));
+        console.log("User removed from activeVendors collection");
+      }
+
+      // Toggle the vendor active state
+      setVendorActive((prev) => !prev);
+    } catch (error) {
+      console.error("Error toggling vendor active status:", error);
+    }
   };
 
   const buttonBackgroundColor = buttonColorAnim.interpolate({
@@ -176,7 +202,9 @@ export default function Index() {
           <Text style={styles.dragSectionHeader}>{userName}</Text>
           <Text style={styles.dragSectionSubheader}>Manage your store</Text>
           <HorizontalLine />
-          <TouchableOpacity onPress={toggleVendorActive}>
+          <TouchableOpacity
+            onPress={() => user && toggleVendorActive(user.uid)}
+          >
             <Animated.View
               style={[
                 styles.toggleButton,
