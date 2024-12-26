@@ -9,6 +9,7 @@ import {
   Modal,
   Image,
   TouchableOpacity,
+  Animated,
 } from "react-native";
 import MapView, {
   Marker,
@@ -40,6 +41,8 @@ export default function Index() {
   const mapRef = useRef<MapView>(null);
   const bottomSheetRef = useRef<BottomSheet>(null);
   const [isModalVisible, setModalVisible] = useState(false);
+  const [isVendorActive, setVendorActive] = useState(false);
+  const [buttonColorAnim] = useState(new Animated.Value(0));
 
   const snapPoints = useMemo(() => ["15%", "50%", "90%"], []);
   const user = useSelector(selectUser);
@@ -106,6 +109,21 @@ export default function Index() {
     setSelectedVendor(null);
   };
 
+  const toggleVendorActive = () => {
+    Animated.timing(buttonColorAnim, {
+      toValue: isVendorActive ? 0 : 1, // Toggle between 0 (blue) and 1 (light green)
+      duration: 500, // Duration of the animation in milliseconds
+      useNativeDriver: false, // Needed for animating colors
+    }).start();
+
+    setVendorActive((prev) => !prev);
+  };
+
+  const buttonBackgroundColor = buttonColorAnim.interpolate({
+    inputRange: [0, 1],
+    outputRange: ["#007bff", "#90EE90"], // Blue to light green
+  });
+
   return (
     <SafeAreaView style={styles.container}>
       {location && (
@@ -158,14 +176,18 @@ export default function Index() {
           <Text style={styles.dragSectionHeader}>{userName}</Text>
           <Text style={styles.dragSectionSubheader}>Manage your store</Text>
           <HorizontalLine />
-          {/* <FlatList
-            data={SECTIONDATA}
-            keyExtractor={(item) => item.id}
-            renderItem={({ item }) => (
-              <MyRow section={item} onCardPress={handleCardPress} />
-            )}
-            contentContainerStyle={{ padding: 16 }}
-          /> */}
+          <Animated.View
+            style={[
+              styles.toggleButton,
+              { backgroundColor: buttonBackgroundColor },
+            ]}
+          >
+            <TouchableOpacity onPress={toggleVendorActive}>
+              <Text style={styles.toggleButtonText}>
+                {isVendorActive ? "Switch to Blue" : "Switch to Light Green"}
+              </Text>
+            </TouchableOpacity>
+          </Animated.View>
         </BottomSheetView>
       </BottomSheet>
 
@@ -336,5 +358,18 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: "#007bff",
     marginTop: 4,
+  },
+  toggleButton: {
+    backgroundColor: "#007bff",
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 5,
+    alignItems: "center",
+    marginTop: 10,
+  },
+  toggleButtonText: {
+    color: "#fff",
+    fontSize: 16,
+    fontWeight: "bold",
   },
 });
