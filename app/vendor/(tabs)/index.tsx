@@ -121,7 +121,7 @@ export default function Index() {
 
   const buttonBackgroundColor = buttonColorAnim.interpolate({
     inputRange: [0, 1],
-    outputRange: ["#007bff", "#90EE90"], // Blue to light green
+    outputRange: ["#90EE90", "#FF7F7F"], // Blue to light green
   });
 
   return (
@@ -176,18 +176,18 @@ export default function Index() {
           <Text style={styles.dragSectionHeader}>{userName}</Text>
           <Text style={styles.dragSectionSubheader}>Manage your store</Text>
           <HorizontalLine />
-          <Animated.View
-            style={[
-              styles.toggleButton,
-              { backgroundColor: buttonBackgroundColor },
-            ]}
-          >
-            <TouchableOpacity onPress={toggleVendorActive}>
+          <TouchableOpacity onPress={toggleVendorActive}>
+            <Animated.View
+              style={[
+                styles.toggleButton,
+                { backgroundColor: buttonBackgroundColor },
+              ]}
+            >
               <Text style={styles.toggleButtonText}>
-                {isVendorActive ? "Switch to Blue" : "Switch to Light Green"}
+                {isVendorActive ? "Close Up Shop" : "Go Live"}
               </Text>
-            </TouchableOpacity>
-          </Animated.View>
+            </Animated.View>
+          </TouchableOpacity>
         </BottomSheetView>
       </BottomSheet>
 
@@ -360,12 +360,13 @@ const styles = StyleSheet.create({
     marginTop: 4,
   },
   toggleButton: {
-    backgroundColor: "#007bff",
     paddingVertical: 10,
     paddingHorizontal: 20,
     borderRadius: 5,
     alignItems: "center",
     marginTop: 10,
+    height: 65,
+    justifyContent: "center",
   },
   toggleButtonText: {
     color: "#fff",
