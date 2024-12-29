@@ -122,33 +122,24 @@ export const fetchMenuItems = async (vendorUid: string): Promise<MenuItem[]> => 
   }
 
   try {
-    const categories = ["Drinks", "Food"]; // List of known category names
+    const menuCollectionRef = collection(db, "vendors", vendorUid, "menu");
+    const menuCollectionSnapshot = await getDocs(menuCollectionRef);
     const menuItems: MenuItem[] = [];
 
-    for (const category of categories) {
-      console.log(`Fetching items from category: ${category}`);
+    // Loop through all category documents
+    menuCollectionSnapshot.forEach((categoryDoc) => {
+      const category = categoryDoc.id; // Category name (document ID)
+      const categoryData = categoryDoc.data(); // Category fields (menu items)
 
-      // Reference the category document
-      const categoryDocRef = doc(db, "vendors", vendorUid, "menu", category);
-
-      // Fetch the category document
-      const categorySnapshot = await getDoc(categoryDocRef);
-
-      if (!categorySnapshot.exists()) {
-        console.warn(`Category '${category}' does not exist.`);
-        continue;
-      }
-
-      // Extract items (fields) from the document
-      const categoryData = categorySnapshot.data();
+      // Extract all items in the category
       for (const [itemId, itemData] of Object.entries(categoryData)) {
         menuItems.push({
-          ...(itemData as Omit<MenuItem, "id">), // Spread only the data, excluding `id`
-          id: itemId, // Add the `id` explicitly
+          id: itemId,
+          ...(itemData as Omit<MenuItem, "id" | "category">), // Spread item data excluding id and category
           category, // Add the category name
         });
       }
-    }
+    });
 
     console.log("Fetched menu items:", menuItems);
     return menuItems;
