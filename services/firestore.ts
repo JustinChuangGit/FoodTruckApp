@@ -1,6 +1,7 @@
-import { getFirestore, doc, setDoc, getDoc, updateDoc, collection } from "firebase/firestore";
+import { getFirestore, doc, setDoc, getDoc, updateDoc, collection, getDocs } from "firebase/firestore";
 import { app } from "../firebaseConfig"; // Import the initialized Firebase app
 import { Alert } from "react-native"; // For React Native prompts (adjust for web if needed)
+import { MenuItem } from "@/constants/types"; // Import the MenuItem type
 
 // Initialize Firestore
 export const db = getFirestore(app);
@@ -63,6 +64,8 @@ export const updateUserData = async (
   }
 };
 
+
+
 export const saveMenuItem = async (
   vendorUid: string | undefined,
   category: string,
@@ -74,14 +77,14 @@ export const saveMenuItem = async (
       throw new Error("Invalid vendor UID. Please log out and log back in.");
     }
 
-    // Firestore path: vendors/{vendorUid}/menu/{category}/{item.id}
-    const itemRef = doc(
-      collection(db, "vendors", vendorUid, "menu", category, "items"),
-      item.id
-    );
-    
-    await setDoc(itemRef, item);
-    console.log("Menu item saved successfully");
+    // Reference to the category document
+    const categoryRef = doc(db, "vendors", vendorUid, "menu", category);
+
+    // Set the entire category document with the new item map
+    await setDoc(categoryRef, {
+      [item.id]: item, // Replace the document with this map
+    }, {merge: true}); // Merge the new data with existing data
+    console.log(`Menu item saved in category '${category}':`, item);
   } catch (error) {
     if (error instanceof Error) {
       console.error("Error saving menu item:", error);
@@ -109,5 +112,48 @@ export const saveMenuItem = async (
     }
 
     throw error; // Re-throw the error if needed
+  }
+};
+
+export const fetchMenuItems = async (vendorUid: string): Promise<MenuItem[]> => {
+  if (!vendorUid) {
+    console.error("Vendor UID is undefined.");
+    return [];
+  }
+
+  try {
+    const categories = ["Drinks", "Food"]; // List of known category names
+    const menuItems: MenuItem[] = [];
+
+    for (const category of categories) {
+      console.log(`Fetching items from category: ${category}`);
+
+      // Reference the category document
+      const categoryDocRef = doc(db, "vendors", vendorUid, "menu", category);
+
+      // Fetch the category document
+      const categorySnapshot = await getDoc(categoryDocRef);
+
+      if (!categorySnapshot.exists()) {
+        console.warn(`Category '${category}' does not exist.`);
+        continue;
+      }
+
+      // Extract items (fields) from the document
+      const categoryData = categorySnapshot.data();
+      for (const [itemId, itemData] of Object.entries(categoryData)) {
+        menuItems.push({
+          ...(itemData as Omit<MenuItem, "id">), // Spread only the data, excluding `id`
+          id: itemId, // Add the `id` explicitly
+          category, // Add the category name
+        });
+      }
+    }
+
+    console.log("Fetched menu items:", menuItems);
+    return menuItems;
+  } catch (error) {
+    console.error("Error fetching menu items:", error);
+    throw error;
   }
 };

@@ -16,14 +16,9 @@ import HorizontalLine from "@/components/default/HorizontalLine";
 import { saveMenuItem } from "@/services/firestore"; // Import the saveMenuItem function
 import { selectUser } from "../../../redux/authSlice"; // Update the path as needed
 import { useSelector } from "react-redux";
-
-type MenuItem = {
-  id: string;
-  name: string;
-  price: number;
-  description: string;
-  category: string;
-};
+import { MenuItem } from "@/constants/types"; // Import the MenuItem type
+import { fetchMenuItems } from "@/services/firestore"; // Adjust the path as needed
+import { useEffect } from "react";
 
 export default function EditMenuItemsScreen() {
   const router = useRouter();
@@ -37,6 +32,7 @@ export default function EditMenuItemsScreen() {
   const [newItemPrice, setNewItemPrice] = useState("");
   const [newItemDescription, setNewItemDescription] = useState("");
   const [newItemCategory, setNewItemCategory] = useState("");
+  const [loading, setLoading] = useState(true);
 
   const openModal = () => {
     setModalVisible(true);
@@ -98,6 +94,31 @@ export default function EditMenuItemsScreen() {
     {}
   );
 
+  useEffect(() => {
+    const fetchItems = async () => {
+      setLoading(true); // Set loading at the beginning
+      if (!vendorUid) {
+        console.error("Vendor UID is missing.");
+        setLoading(false);
+        return;
+      }
+
+      try {
+        const items = await fetchMenuItems(vendorUid);
+        setMenuItems(items);
+      } catch (error) {
+        Alert.alert(
+          "Error",
+          "Could not fetch menu items. Please try again later."
+        );
+      } finally {
+        setLoading(false); // Stop loading
+      }
+    };
+
+    fetchItems();
+  }, [vendorUid]);
+
   const renderCategory = ({ item: category }: { item: string }) => (
     <View style={styles.categoryContainer}>
       <Text style={styles.categoryHeader}>{category}</Text>
@@ -130,14 +151,18 @@ export default function EditMenuItemsScreen() {
 
       <HorizontalLine />
 
-      <FlatList
-        data={Object.keys(groupedItems)}
-        keyExtractor={(item) => item}
-        renderItem={renderCategory}
-        ListEmptyComponent={
-          <Text style={styles.emptyText}>No items added yet.</Text>
-        }
-      />
+      {loading ? (
+        <Text style={styles.emptyText}>Loading menu items...</Text>
+      ) : (
+        <FlatList
+          data={Object.keys(groupedItems)}
+          keyExtractor={(item) => item}
+          renderItem={renderCategory}
+          ListEmptyComponent={
+            <Text style={styles.emptyText}>No items added yet.</Text>
+          }
+        />
+      )}
 
       <TouchableOpacity style={styles.addButton} onPress={openModal}>
         <Text style={styles.addButtonText}>Add Item</Text>
