@@ -32,13 +32,6 @@ export default function TabLayout() {
           ),
         }}
       />
-      {/* <Tabs.Screen
-        name="VendorEditMenuScreen"
-        options={{
-          title: "Menu",
-          tabBarItemStyle: { display: "none" },
-        }}
-      /> */}
     </Tabs>
   );
 }

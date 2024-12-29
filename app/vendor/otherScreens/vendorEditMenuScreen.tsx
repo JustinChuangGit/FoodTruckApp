@@ -10,6 +10,9 @@ import {
   Alert,
 } from "react-native";
 import { useRouter } from "expo-router"; // Import useRouter
+import { FontAwesome } from "@expo/vector-icons"; // Import FontAwesome
+import { SafeAreaView } from "react-native-safe-area-context";
+import HorizontalLine from "@/components/default/HorizontalLine";
 
 // Define the type for a menu item
 type MenuItem = {
@@ -108,10 +111,18 @@ export default function EditMenuItemsScreen() {
 
   return (
     <View style={styles.container}>
-      {/* Back Button */}
-      <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
-        <Text style={styles.backButtonText}>Hello</Text>
-      </TouchableOpacity>
+      <SafeAreaView edges={["top"]} />
+      <View style={styles.header}>
+        <TouchableOpacity
+          style={styles.backButton}
+          onPress={() => router.back()}
+        >
+          <FontAwesome name="chevron-left" size={24} color="black" />
+        </TouchableOpacity>
+        <Text style={styles.headerText}>Edit Menu Items</Text>
+      </View>
+
+      <HorizontalLine />
 
       {/* List of Menu Items Grouped by Category */}
       <FlatList
@@ -196,12 +207,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#fff",
   },
   backButton: {
-    backgroundColor: "gray",
-    padding: 10,
-    borderRadius: 8,
-    alignItems: "center",
-    marginBottom: 10,
-    marginTop: 40,
+    marginRight: 10, // Space between back button and title
   },
   backButtonText: {
     color: "#fff",
@@ -294,5 +300,24 @@ const styles = StyleSheet.create({
     color: "#fff",
     fontSize: 16,
     fontWeight: "bold",
+  },
+  header: {
+    flexDirection: "row",
+    alignItems: "center",
+    height: 60, // Fixed height
+    backgroundColor: "#fff",
+    paddingHorizontal: 10,
+  },
+  headerTextContainer: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  headerText: {
+    fontSize: 20,
+    fontWeight: "bold",
+    color: "#000",
+    flex: 1, // Push the text to the center within the row layout
+    textAlign: "center", // Center the text horizontally
   },
 });
