@@ -13,8 +13,10 @@ import { useRouter } from "expo-router"; // Import useRouter
 import { FontAwesome } from "@expo/vector-icons"; // Import FontAwesome
 import { SafeAreaView } from "react-native-safe-area-context";
 import HorizontalLine from "@/components/default/HorizontalLine";
+import { saveMenuItem } from "@/services/firestore"; // Import the saveMenuItem function
+import { selectUser } from "../../../redux/authSlice"; // Update the path as needed
+import { useSelector } from "react-redux";
 
-// Define the type for a menu item
 type MenuItem = {
   id: string;
   name: string;
@@ -24,30 +26,27 @@ type MenuItem = {
 };
 
 export default function EditMenuItemsScreen() {
-  const router = useRouter(); // Use router for navigation
+  const router = useRouter();
+  const user = useSelector(selectUser);
+  const vendorUid = user?.uid;
 
-  // State for menu items
   const [menuItems, setMenuItems] = useState<MenuItem[]>([]);
   const [isModalVisible, setModalVisible] = useState(false);
 
-  // Form State
   const [newItemName, setNewItemName] = useState("");
   const [newItemPrice, setNewItemPrice] = useState("");
   const [newItemDescription, setNewItemDescription] = useState("");
   const [newItemCategory, setNewItemCategory] = useState("");
 
-  // Open Modal
   const openModal = () => {
     setModalVisible(true);
     resetForm();
   };
 
-  // Close Modal
   const closeModal = () => {
     setModalVisible(false);
   };
 
-  // Reset Form Fields
   const resetForm = () => {
     setNewItemName("");
     setNewItemPrice("");
@@ -55,8 +54,7 @@ export default function EditMenuItemsScreen() {
     setNewItemCategory("");
   };
 
-  // Add New Menu Item
-  const addMenuItem = () => {
+  const addMenuItem = async () => {
     if (
       !newItemName.trim() ||
       !newItemPrice.trim() ||
@@ -68,18 +66,27 @@ export default function EditMenuItemsScreen() {
     }
 
     const newItem: MenuItem = {
-      id: Date.now().toString(), // Unique ID based on timestamp
+      id: Date.now().toString(),
       name: newItemName,
-      price: parseFloat(newItemPrice), // Convert price to number
+      price: parseFloat(newItemPrice),
       description: newItemDescription,
       category: newItemCategory,
     };
 
-    setMenuItems((prevItems) => [...prevItems, newItem]); // Add new item
-    closeModal(); // Close the modal
+    try {
+      // Save to Firestore
+      await saveMenuItem(vendorUid, newItem.category, newItem);
+
+      // Update local state
+      setMenuItems((prevItems) => [...prevItems, newItem]);
+      closeModal();
+      console.log("Menu item added successfully");
+    } catch (error) {
+      console.error("Error adding menu item:", error);
+      Alert.alert("Error", "Could not save the menu item.");
+    }
   };
 
-  // Group Menu Items by Category
   const groupedItems = menuItems.reduce<Record<string, MenuItem[]>>(
     (acc, item) => {
       if (!acc[item.category]) {
@@ -91,7 +98,6 @@ export default function EditMenuItemsScreen() {
     {}
   );
 
-  // Render Category with Items
   const renderCategory = ({ item: category }: { item: string }) => (
     <View style={styles.categoryContainer}>
       <Text style={styles.categoryHeader}>{category}</Text>
@@ -119,41 +125,35 @@ export default function EditMenuItemsScreen() {
         >
           <FontAwesome name="chevron-left" size={24} color="black" />
         </TouchableOpacity>
-        <Text style={styles.headerText}>Edit Menu Items</Text>
+        <Text style={styles.headerText}>Edit Items</Text>
       </View>
 
       <HorizontalLine />
 
-      {/* List of Menu Items Grouped by Category */}
       <FlatList
-        data={Object.keys(groupedItems)} // Categories as keys
+        data={Object.keys(groupedItems)}
         keyExtractor={(item) => item}
         renderItem={renderCategory}
         ListEmptyComponent={
-          <Text style={styles.emptyText}>No menu items added yet.</Text>
+          <Text style={styles.emptyText}>No items added yet.</Text>
         }
       />
 
-      {/* Add Button */}
       <TouchableOpacity style={styles.addButton} onPress={openModal}>
-        <Text style={styles.addButtonText}>Add Menu Item</Text>
+        <Text style={styles.addButtonText}>Add Item</Text>
       </TouchableOpacity>
 
-      {/* Add Menu Item Modal */}
       <Modal visible={isModalVisible} animationType="slide" transparent={true}>
         <View style={styles.modalOverlay}>
           <View style={styles.modalContainer}>
             <Text style={styles.modalHeader}>Add New Menu Item</Text>
 
-            {/* Name Input */}
             <TextInput
               style={styles.input}
               placeholder="Item Name"
               value={newItemName}
               onChangeText={setNewItemName}
             />
-
-            {/* Price Input */}
             <TextInput
               style={styles.input}
               placeholder="Price"
@@ -161,16 +161,12 @@ export default function EditMenuItemsScreen() {
               onChangeText={setNewItemPrice}
               keyboardType="numeric"
             />
-
-            {/* Description Input */}
             <TextInput
               style={styles.input}
               placeholder="Description"
               value={newItemDescription}
               onChangeText={setNewItemDescription}
             />
-
-            {/* Category Input */}
             <TextInput
               style={styles.input}
               placeholder="Category"
@@ -178,7 +174,6 @@ export default function EditMenuItemsScreen() {
               onChangeText={setNewItemCategory}
             />
 
-            {/* Modal Buttons */}
             <View style={styles.modalButtonContainer}>
               <TouchableOpacity
                 style={styles.modalButton}
@@ -220,6 +215,7 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     alignItems: "center",
     marginTop: 16,
+    marginBottom: 16,
   },
   addButtonText: {
     color: "#fff",
