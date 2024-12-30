@@ -1,4 +1,4 @@
-import { getFirestore, doc, setDoc, getDoc, updateDoc, collection, getDocs } from "firebase/firestore";
+import { getFirestore, doc, setDoc, getDoc, updateDoc, collection, getDocs, deleteField } from "firebase/firestore";
 import { app } from "../firebaseConfig"; // Import the initialized Firebase app
 import { Alert } from "react-native"; // For React Native prompts (adjust for web if needed)
 import { MenuItem } from "@/constants/types"; // Import the MenuItem type
@@ -115,7 +115,7 @@ export const saveMenuItem = async (
   }
 };
 
-export const fetchMenuItems = async (vendorUid: string): Promise<MenuItem[]> => {
+export const fetchMenuItems = async (vendorUid: string | undefined): Promise<MenuItem[]> => {
   if (!vendorUid) {
     console.error("Vendor UID is undefined.");
     return [];
@@ -126,25 +126,58 @@ export const fetchMenuItems = async (vendorUid: string): Promise<MenuItem[]> => 
     const menuCollectionSnapshot = await getDocs(menuCollectionRef);
     const menuItems: MenuItem[] = [];
 
-    // Loop through all category documents
     menuCollectionSnapshot.forEach((categoryDoc) => {
-      const category = categoryDoc.id; // Category name (document ID)
-      const categoryData = categoryDoc.data(); // Category fields (menu items)
+      const category = categoryDoc.id;
+      const categoryData = categoryDoc.data();
 
-      // Extract all items in the category
       for (const [itemId, itemData] of Object.entries(categoryData)) {
         menuItems.push({
           id: itemId,
-          ...(itemData as Omit<MenuItem, "id" | "category">), // Spread item data excluding id and category
-          category, // Add the category name
+          ...(itemData as Omit<MenuItem, "id" | "category">),
+          category,
         });
       }
     });
 
-    console.log("Fetched menu items:", menuItems);
     return menuItems;
   } catch (error) {
     console.error("Error fetching menu items:", error);
     throw error;
+  }
+};
+
+
+export const deleteMenuItem = async (
+  vendorUid: string | undefined,
+  category: string,
+  itemId: string
+): Promise<void> => {
+  try {
+    // Validate vendorUid
+    if (!vendorUid) {
+      throw new Error("Invalid vendor UID. Please log out and log back in.");
+    }
+
+    // Reference to the category document
+    const categoryRef = doc(db, "vendors", vendorUid, "menu", category);
+
+    // Delete the item field
+    await updateDoc(categoryRef, {
+      [itemId]: deleteField(), // Remove the field by its ID
+    });
+
+    Alert.alert("Success", "Item deleted successfully!");
+    console.log(`Deleted item '${itemId}' from category '${category}'`);
+  } catch (error) {
+    if (error instanceof Error && error.message === "Invalid vendor UID. Please log out and log back in.") {
+      Alert.alert(
+        "Authentication Error",
+        "Your session seems to be invalid. Please log out and log back in.",
+        [{ text: "OK" }]
+      );
+    } else {
+      console.error("Error deleting menu item:", error);
+      Alert.alert("Error", "Could not delete the menu item. Please try again.");
+    }
   }
 };

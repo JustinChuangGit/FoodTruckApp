@@ -17,7 +17,7 @@ import { saveMenuItem } from "@/services/firestore"; // Import the saveMenuItem 
 import { selectUser } from "../../../redux/authSlice"; // Update the path as needed
 import { useSelector } from "react-redux";
 import { MenuItem } from "@/constants/types"; // Import the MenuItem type
-import { fetchMenuItems } from "@/services/firestore"; // Adjust the path as needed
+import { fetchMenuItems, deleteMenuItem } from "@/services/firestore"; // Adjust the path as needed
 import { useEffect } from "react";
 
 export default function EditMenuItemsScreen() {
@@ -127,9 +127,23 @@ export default function EditMenuItemsScreen() {
         keyExtractor={(item) => item.id}
         renderItem={({ item }) => (
           <View style={styles.itemContainer}>
-            <Text style={styles.itemName}>{item.name}</Text>
-            <Text style={styles.itemDescription}>{item.description}</Text>
-            <Text style={styles.itemPrice}>${item.price.toFixed(2)}</Text>
+            <View style={styles.itemTextContainer}>
+              <Text style={styles.itemName}>{item.name}</Text>
+              <Text style={styles.itemDescription}>{item.description}</Text>
+              <Text style={styles.itemPrice}>${item.price.toFixed(2)}</Text>
+            </View>
+            <View style={styles.itemDeleteButton}>
+              <TouchableOpacity
+                onPress={async () => {
+                  // Delete the item and update the menu
+                  await deleteMenuItem(vendorUid, category, item.id);
+                  const items = await fetchMenuItems(vendorUid);
+                  setMenuItems(items);
+                }}
+              >
+                <FontAwesome name="trash" size={30} />
+              </TouchableOpacity>
+            </View>
           </View>
         )}
       />
@@ -266,6 +280,7 @@ const styles = StyleSheet.create({
     padding: 8,
     borderBottomWidth: 1,
     borderBottomColor: "#ddd",
+    flexDirection: "row",
   },
   itemName: {
     fontSize: 16,
@@ -340,5 +355,12 @@ const styles = StyleSheet.create({
     color: "#000",
     flex: 1, // Push the text to the center within the row layout
     textAlign: "center", // Center the text horizontally
+  },
+  itemTextContainer: {
+    flex: 1,
+  },
+  itemDeleteButton: {
+    justifyContent: "center",
+    alignItems: "center",
   },
 });
