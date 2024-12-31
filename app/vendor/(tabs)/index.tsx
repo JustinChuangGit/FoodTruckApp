@@ -151,6 +151,11 @@ export default function Index() {
       return;
     }
 
+    if (!location) {
+      Alert.alert("Error", "Location is not available. Please try again.");
+      return;
+    }
+
     try {
       Animated.timing(buttonColorAnim, {
         toValue: isVendorActive ? 0 : 1,
@@ -159,12 +164,15 @@ export default function Index() {
       }).start();
 
       if (!isVendorActive) {
-        // Add the UID to the "activeVendors" collection
         await setDoc(doc(db, "activeVendors", uid), {
           uid,
           timestamp: new Date().toISOString(),
+          location: {
+            latitude: location.latitude,
+            longitude: location.longitude,
+          },
         });
-        console.log("User added to activeVendors collection");
+        console.log("User added to activeVendors collection with location");
       } else {
         // Remove the UID from the "activeVendors" collection
         await deleteDoc(doc(db, "activeVendors", uid));
@@ -174,6 +182,7 @@ export default function Index() {
       setVendorActive((prev) => !prev);
     } catch (error) {
       console.error("Error toggling vendor active status:", error);
+      Alert.alert("Error", "Failed to toggle vendor status. Please try again.");
     }
   };
 
