@@ -181,3 +181,18 @@ export const deleteMenuItem = async (
     }
   }
 };
+
+export const getVendorInfo = async (uid: string) => {
+  try {
+    const vendorDoc = await getDoc(doc(db, "vendors", uid));
+    if (vendorDoc.exists()) {
+      return { uid, ...vendorDoc.data() }; // Return vendor details with UID
+    } else {
+      console.error(`No vendor found with UID: ${uid}`);
+      return null;
+    }
+  } catch (error) {
+    console.error(`Error fetching vendor info for UID: ${uid}`, error);
+    return null;
+  }
+};

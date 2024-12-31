@@ -30,7 +30,7 @@ import VendorMapInfoCard from "../../../components/VendorMapInfoCard";
 import { SECTIONS } from "../../../constants/UserConstants";
 import { Vendor, LocationCoordinates } from "@/constants/types";
 import { collection, onSnapshot } from "firebase/firestore";
-import { db } from "@/services/firestore";
+import { db, getVendorInfo } from "@/services/firestore";
 
 //TODO: Replace with collections from Firestore
 import { SECTIONDATA } from "./dummySectionData";
@@ -160,12 +160,8 @@ export default function Index() {
     const unsubscribe = onSnapshot(
       collection(db, "activeVendors"),
       (snapshot) => {
-        console.log("Snapshot received:", snapshot); // Log the snapshot
-
         const updatedVendors = snapshot.docs.map((doc) => {
           const data = doc.data();
-          console.log("Document data:", data); // Log each document's data
-
           return {
             uid: doc.id,
             latitude: data.location?.latitude,
@@ -177,8 +173,6 @@ export default function Index() {
             image: data.image || "https://via.placeholder.com/150", // Default image
           };
         });
-
-        console.log("Updated vendors:", updatedVendors); // Log the final mapped vendors
         setVendors(updatedVendors);
       },
       (error) => {
