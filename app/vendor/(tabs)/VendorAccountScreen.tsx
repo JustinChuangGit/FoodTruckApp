@@ -17,6 +17,14 @@ export default function VendorAccountScreen() {
       >
         <Text style={styles.editMenuButtonText}>Edit Menu</Text>
       </TouchableOpacity>
+      <TouchableOpacity
+        style={styles.editMenuButton}
+        onPress={() =>
+          router.push("/vendor/otherScreens/vendorEditAccountScreen")
+        } // Correct path
+      >
+        <Text style={styles.editMenuButtonText}>Edit Account</Text>
+      </TouchableOpacity>
     </View>
   );
 }

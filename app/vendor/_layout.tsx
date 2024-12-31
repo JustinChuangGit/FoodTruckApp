@@ -13,6 +13,10 @@ export default function VendorLayout() {
           name="otherScreens/vendorEditMenuScreen"
           options={{ headerShown: false }}
         />
+        <Stack.Screen
+          name="otherScreens/vendorEditAccountScreen"
+          options={{ headerShown: false }}
+        />
       </Stack>
     </Provider>
   );
