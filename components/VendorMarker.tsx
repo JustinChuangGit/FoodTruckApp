@@ -1,14 +1,7 @@
 import React from "react";
 import { StyleSheet, View, Image } from "react-native";
 import { Marker } from "react-native-maps";
-
-interface Vendor {
-  uid: string;
-  latitude: number;
-  longitude: number;
-  name: string;
-  image?: string; // Optional vendor-specific icon or image
-}
+import { Vendor } from "../constants/types";
 
 interface VendorMarkerProps {
   vendor: Vendor;

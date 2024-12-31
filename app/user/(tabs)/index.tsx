@@ -29,6 +29,8 @@ import VendorMarker from "../../../components/VendorMarker";
 import VendorMapInfoCard from "../../../components/VendorMapInfoCard";
 import { SECTIONS } from "../../../constants/UserConstants";
 import { Vendor, LocationCoordinates } from "@/constants/types";
+import { collection, onSnapshot } from "firebase/firestore";
+import { db } from "@/services/firestore";
 
 //TODO: Replace with collections from Firestore
 import { SECTIONDATA } from "./dummySectionData";
@@ -144,32 +146,47 @@ export default function Index() {
 
   useEffect(() => {
     (async () => {
-      try {
-        const { status } = await Location.requestForegroundPermissionsAsync();
-        if (status !== "granted") {
-          Alert.alert("Permission Denied", "Location permission is required.");
-          return;
-        }
-        const { coords } = await Location.getCurrentPositionAsync({});
-        const { latitude, longitude } = coords;
-        setLocation({ latitude, longitude });
-
-        const sortedVendors = liveVendors
-          .map((vendor) => {
-            const distance = haversine(
-              { latitude, longitude },
-              { latitude: vendor.latitude, longitude: vendor.longitude },
-              { unit: "km" }
-            );
-            return { ...vendor, distance };
-          })
-          .sort((a, b) => (a.distance ?? 0) - (b.distance ?? 0));
-
-        setVendors(sortedVendors);
-      } catch (error) {
-        Alert.alert("Error", "Unable to fetch location.");
+      const { status } = await Location.requestForegroundPermissionsAsync();
+      if (status !== "granted") {
+        Alert.alert("Permission Denied", "Location permission is required.");
+        return;
       }
+      const { coords } = await Location.getCurrentPositionAsync({});
+      setLocation(coords);
     })();
+  }, []);
+
+  useEffect(() => {
+    const unsubscribe = onSnapshot(
+      collection(db, "activeVendors"),
+      (snapshot) => {
+        console.log("Snapshot received:", snapshot); // Log the snapshot
+
+        const updatedVendors = snapshot.docs.map((doc) => {
+          const data = doc.data();
+          console.log("Document data:", data); // Log each document's data
+
+          return {
+            uid: doc.id,
+            latitude: data.location?.latitude,
+            longitude: data.location?.longitude,
+            price: data.price || "$$", // Default price if not provided
+            name: data.name || "Unknown Vendor",
+            rating: data.rating || 0, // Default rating if not provided
+            description: data.description || "No description available",
+            image: data.image || "https://via.placeholder.com/150", // Default image
+          };
+        });
+
+        console.log("Updated vendors:", updatedVendors); // Log the final mapped vendors
+        setVendors(updatedVendors);
+      },
+      (error) => {
+        console.error("Error fetching active vendors:", error); // Log errors
+      }
+    );
+
+    return () => unsubscribe();
   }, []);
 
   const handleMarkerPress = (vendor: Vendor) => {
@@ -179,7 +196,7 @@ export default function Index() {
     if (mapRef.current) {
       mapRef.current.animateToRegion(
         {
-          latitude: vendor.latitude,
+          latitude: vendor.latitude, // Assuming Vendor type has latitude/longitude
           longitude: vendor.longitude,
           latitudeDelta: 0.01,
           longitudeDelta: 0.01,
