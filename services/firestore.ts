@@ -224,3 +224,15 @@ export const updateVendorAccountData = async (
   }
 };
 
+export const getVendorAccountData = async (uid: string) => {
+  try {
+    const vendorDocRef = doc(db, "vendors", uid);
+    const vendorDoc = await getDoc(vendorDocRef);
+    return vendorDoc.exists() ? vendorDoc.data() : null;
+  } catch (error) {
+    console.error("Error fetching vendor account data:", error);
+    throw error;
+  }
+};
+
+

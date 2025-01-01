@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   View,
   Text,
@@ -6,7 +6,6 @@ import {
   TextInput,
   TouchableOpacity,
   ScrollView,
-  Switch,
   Image,
 } from "react-native";
 import { useRouter } from "expo-router";
@@ -17,18 +16,48 @@ import SelectDropdown from "react-native-select-dropdown";
 import Icon from "react-native-vector-icons/MaterialCommunityIcons";
 import { useSelector } from "react-redux";
 import { selectUser } from "../../../redux/authSlice"; // Update the path as needed
-import { updateVendorAccountData } from "../../../services/firestore"; // Update the path as needed
+import {
+  updateVendorAccountData,
+  getVendorAccountData,
+} from "../../../services/firestore"; // Update the path as needed
 import { VendorAccountInfo } from "../../../constants/types"; // Update the path as needed
 
 export default function VendorEditAccountScreen() {
   const router = useRouter();
+  const user = useSelector(selectUser);
+
+  // State for vendor account info
   const [price, setPrice] = useState("");
   const [vendorType, setVendorType] = useState("");
-  const [customVendorType, setCustomVendorType] = useState("");
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [image, setImage] = useState<string | null>(null);
-  const user = useSelector(selectUser);
+
+  // Fetch vendor account data on component mount
+  useEffect(() => {
+    const fetchVendorData = async () => {
+      if (!user?.uid) {
+        console.error("User UID not available.");
+        return;
+      }
+
+      try {
+        const data = await getVendorAccountData(user.uid);
+        if (data) {
+          // Set state with the fetched data
+          setPrice(data.price || "");
+          setVendorType(data.vendorType || "");
+          setName(data.name || "");
+          setDescription(data.description || "");
+          setImage(data.image || null);
+        }
+      } catch (error) {
+        console.error("Error fetching vendor data:", error);
+      }
+    };
+
+    fetchVendorData();
+  }, [user]);
 
   const pickImage = async () => {
     const result = await ImagePicker.launchImageLibraryAsync({
@@ -128,6 +157,7 @@ export default function VendorEditAccountScreen() {
         <Text style={styles.label}>Price</Text>
         <SelectDropdown
           data={priceOptions}
+          defaultValue={priceOptions.find((option) => option.title === price)}
           onSelect={(selectedItem) => setPrice(selectedItem.title)}
           renderButton={(selectedItem, isOpened) => (
             <View style={styles.dropdownButtonStyle}>
@@ -157,6 +187,9 @@ export default function VendorEditAccountScreen() {
         <Text style={styles.label}>Vendor Type</Text>
         <SelectDropdown
           data={vendorTypeOptions}
+          defaultValue={vendorTypeOptions.find(
+            (option) => option.title === vendorType
+          )}
           onSelect={(selectedItem) => setVendorType(selectedItem.title)}
           renderButton={(selectedItem, isOpened) => (
             <View style={styles.dropdownButtonStyle}>
@@ -182,15 +215,6 @@ export default function VendorEditAccountScreen() {
           showsVerticalScrollIndicator={false}
           dropdownStyle={styles.dropdownMenuStyle}
         />
-
-        {vendorType === "Other" && (
-          <TextInput
-            style={styles.input}
-            value={customVendorType}
-            onChangeText={setCustomVendorType}
-            placeholder="Specify vendor type"
-          />
-        )}
 
         <Text style={styles.label}>Description</Text>
         <TextInput
