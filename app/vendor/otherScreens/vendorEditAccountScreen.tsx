@@ -119,12 +119,6 @@ export default function VendorEditAccountScreen() {
           onSelect={(selectedItem) => setPrice(selectedItem.title)}
           renderButton={(selectedItem, isOpened) => (
             <View style={styles.dropdownButtonStyle}>
-              {selectedItem && (
-                <Icon
-                  name={selectedItem.icon}
-                  style={styles.dropdownButtonIconStyle}
-                />
-              )}
               <Text style={styles.dropdownButtonTxtStyle}>
                 {(selectedItem && selectedItem.title) || "Select Price"}
               </Text>
@@ -141,7 +135,6 @@ export default function VendorEditAccountScreen() {
                 ...(isSelected && { backgroundColor: "#D2D9DF" }),
               }}
             >
-              <Icon name={item.icon} style={styles.dropdownItemIconStyle} />
               <Text style={styles.dropdownItemTxtStyle}>{item.title}</Text>
             </View>
           )}
@@ -269,7 +262,8 @@ const styles = StyleSheet.create({
   },
   dropdownMenuStyle: {
     backgroundColor: "#E9ECEF",
-    borderRadius: 8,
+    borderRadius: 10,
+    height: 200,
   },
   dropdownItemStyle: {
     width: "100%",
