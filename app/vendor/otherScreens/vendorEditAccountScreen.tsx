@@ -44,12 +44,11 @@ export default function VendorEditAccountScreen() {
       try {
         const data = await getVendorAccountData(user.uid);
         if (data) {
-          // Set state with the fetched data
           setPrice(data.price || "");
           setVendorType(data.vendorType || "");
           setName(data.name || "");
           setDescription(data.description || "");
-          setImage(data.image || null);
+          setImage(data.image || null); // Set the image URL
         }
       } catch (error) {
         console.error("Error fetching vendor data:", error);
@@ -75,18 +74,16 @@ export default function VendorEditAccountScreen() {
       const localUri = result.assets[0].uri;
 
       try {
-        console.log("Picked image URI:", localUri);
-
-        // Define a fixed path for the logo
         const imagePath = `vendors/${user?.uid}/logo.jpg`;
 
-        // Upload the image to Firebase Storage
         const downloadURL = await uploadImage(localUri, imagePath);
 
-        console.log("Image uploaded successfully:", downloadURL);
-
-        // Set the download URL as the image state
         setImage(downloadURL);
+
+        const vendorData: Partial<VendorAccountInfo> = { image: downloadURL };
+        await updateVendorAccountData(user.uid, vendorData);
+
+        console.log("Image URL updated in Firestore!");
       } catch (error) {
         console.error("Error uploading image:", error);
       }
@@ -104,11 +101,11 @@ export default function VendorEditAccountScreen() {
       vendorType,
       name,
       description,
-      image,
+      image, // This will already have the correct download URL
     };
 
     try {
-      await updateVendorAccountData(user.uid, vendorData); // Calls your Firestore update function
+      await updateVendorAccountData(user.uid, vendorData);
       console.log("Vendor data updated successfully!");
       router.back(); // Navigate back after saving
     } catch (error) {
