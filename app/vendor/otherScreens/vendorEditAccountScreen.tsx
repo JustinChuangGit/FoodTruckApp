@@ -6,22 +6,21 @@ import {
   TextInput,
   TouchableOpacity,
   ScrollView,
-  Switch,
   Image,
 } from "react-native";
 import { useRouter } from "expo-router";
 import * as ImagePicker from "expo-image-picker";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { FontAwesome } from "@expo/vector-icons";
+import SelectDropdown from "react-native-select-dropdown";
+import Icon from "react-native-vector-icons/MaterialCommunityIcons";
 
 export default function VendorEditAccountScreen() {
   const router = useRouter();
   const [price, setPrice] = useState("");
   const [name, setName] = useState("");
-  const [rating, setRating] = useState(0);
   const [description, setDescription] = useState("");
   const [image, setImage] = useState<string | null>(null);
-  const [showBadge, setShowBadge] = useState(false);
 
   const pickImage = async () => {
     const result = await ImagePicker.launchImageLibraryAsync({
@@ -37,10 +36,10 @@ export default function VendorEditAccountScreen() {
 
   const handleSave = () => {
     // Handle save logic
-    console.log({ price, name, rating, description, image, showBadge });
     router.back();
   };
 
+  const priceOptions = [{ title: "$" }, { title: "$$" }, { title: "$$$" }];
   return (
     <View style={styles.container}>
       <SafeAreaView edges={["top"]} />
@@ -77,21 +76,32 @@ export default function VendorEditAccountScreen() {
         />
 
         <Text style={styles.label}>Price</Text>
-        <TextInput
-          style={styles.input}
-          value={price}
-          onChangeText={setPrice}
-          placeholder="Enter price"
-          keyboardType="numeric"
-        />
-
-        <Text style={styles.label}>Rating</Text>
-        <TextInput
-          style={styles.input}
-          value={rating.toString()}
-          onChangeText={(text) => setRating(Number(text))}
-          placeholder="Enter rating"
-          keyboardType="numeric"
+        <SelectDropdown
+          data={priceOptions}
+          onSelect={(selectedItem) => setPrice(selectedItem.title)}
+          renderButton={(selectedItem, isOpened) => (
+            <View style={styles.dropdownButtonStyle}>
+              <Text style={styles.dropdownButtonTxtStyle}>
+                {selectedItem ? selectedItem.title : "Select Price"}
+              </Text>
+              <Icon
+                name={isOpened ? "chevron-up" : "chevron-down"}
+                style={styles.dropdownButtonArrowStyle}
+              />
+            </View>
+          )}
+          renderItem={(item, index, isSelected) => (
+            <View
+              style={{
+                ...styles.dropdownItemStyle,
+                ...(isSelected && { backgroundColor: "#D2D9DF" }),
+              }}
+            >
+              <Text style={styles.dropdownItemTxtStyle}>{item.title}</Text>
+            </View>
+          )}
+          showsVerticalScrollIndicator={false}
+          dropdownStyle={styles.dropdownMenuStyle}
         />
 
         <Text style={styles.label}>Description</Text>
@@ -102,11 +112,6 @@ export default function VendorEditAccountScreen() {
           placeholder="Enter description"
           multiline
         />
-
-        <View style={styles.switchContainer}>
-          <Text style={styles.label}>Show Badge</Text>
-          <Switch value={showBadge} onValueChange={setShowBadge} />
-        </View>
 
         <TouchableOpacity style={styles.saveButton} onPress={handleSave}>
           <Text style={styles.saveButtonText}>Save</Text>
@@ -199,5 +204,51 @@ const styles = StyleSheet.create({
   editImageText: {
     color: "blue",
     marginTop: 8,
+  },
+  dropdownButtonStyle: {
+    width: "100%",
+    height: 50,
+    backgroundColor: "#E9ECEF",
+    borderRadius: 12,
+    flexDirection: "row",
+    justifyContent: "center",
+    alignItems: "center",
+    paddingHorizontal: 12,
+    marginBottom: 16,
+  },
+  dropdownButtonTxtStyle: {
+    flex: 1,
+    fontSize: 18,
+    fontWeight: "500",
+    color: "#151E26",
+  },
+  dropdownButtonArrowStyle: {
+    fontSize: 28,
+  },
+  dropdownButtonIconStyle: {
+    fontSize: 28,
+    marginRight: 8,
+  },
+  dropdownMenuStyle: {
+    backgroundColor: "#E9ECEF",
+    borderRadius: 8,
+  },
+  dropdownItemStyle: {
+    width: "100%",
+    flexDirection: "row",
+    paddingHorizontal: 12,
+    justifyContent: "center",
+    alignItems: "center",
+    paddingVertical: 8,
+  },
+  dropdownItemTxtStyle: {
+    flex: 1,
+    fontSize: 18,
+    fontWeight: "500",
+    color: "#151E26",
+  },
+  dropdownItemIconStyle: {
+    fontSize: 28,
+    marginRight: 8,
   },
 });
