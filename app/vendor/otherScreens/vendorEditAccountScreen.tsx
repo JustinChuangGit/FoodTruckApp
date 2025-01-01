@@ -21,7 +21,7 @@ import {
   getVendorAccountData,
 } from "../../../services/firestore"; // Update the path as needed
 import { VendorAccountInfo } from "../../../constants/types"; // Update the path as needed
-
+import { uploadImage } from "../../../services/storage"; // Update the path as needed
 export default function VendorEditAccountScreen() {
   const router = useRouter();
   const user = useSelector(selectUser);
@@ -66,8 +66,30 @@ export default function VendorEditAccountScreen() {
       quality: 1,
     });
 
+    if (!user?.uid) {
+      console.error("User UID not available.");
+      return;
+    }
+
     if (!result.canceled && result.assets && result.assets.length > 0) {
-      setImage(result.assets[0].uri);
+      const localUri = result.assets[0].uri;
+
+      try {
+        console.log("Picked image URI:", localUri);
+
+        // Define a fixed path for the logo
+        const imagePath = `vendors/${user?.uid}/logo.jpg`;
+
+        // Upload the image to Firebase Storage
+        const downloadURL = await uploadImage(localUri, imagePath);
+
+        console.log("Image uploaded successfully:", downloadURL);
+
+        // Set the download URL as the image state
+        setImage(downloadURL);
+      } catch (error) {
+        console.error("Error uploading image:", error);
+      }
     }
   };
 
