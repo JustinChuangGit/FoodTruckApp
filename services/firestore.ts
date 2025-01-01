@@ -196,3 +196,31 @@ export const getVendorInfo = async (uid: string) => {
     return null;
   }
 };
+
+export const updateVendorAccountData = async (
+  uid: string,
+  updates: Partial<{
+    price: string;
+    vendorType: string;
+    name: string;
+    description: string;
+    image: string | null;
+  }>
+): Promise<void> => {
+  try {
+    if (!uid) {
+      throw new Error("Vendor UID is required.");
+    }
+
+    const vendorDocRef = doc(db, "vendors", uid);
+
+    // Use setDoc with { merge: true } to create or update the document
+    await setDoc(vendorDocRef, updates, { merge: true });
+
+    console.log("Vendor data updated successfully.");
+  } catch (error) {
+    console.error("Error updating vendor data:", error);
+    throw error;
+  }
+};
+

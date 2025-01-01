@@ -15,17 +15,20 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { FontAwesome } from "@expo/vector-icons";
 import SelectDropdown from "react-native-select-dropdown";
 import Icon from "react-native-vector-icons/MaterialCommunityIcons";
+import { useSelector } from "react-redux";
+import { selectUser } from "../../../redux/authSlice"; // Update the path as needed
+import { updateVendorAccountData } from "../../../services/firestore"; // Update the path as needed
+import { VendorAccountInfo } from "../../../constants/types"; // Update the path as needed
 
 export default function VendorEditAccountScreen() {
   const router = useRouter();
-  const [price, setPrice] = useState(null);
-  const [vendorType, setVendorType] = useState(null);
+  const [price, setPrice] = useState("");
+  const [vendorType, setVendorType] = useState("");
   const [customVendorType, setCustomVendorType] = useState("");
   const [name, setName] = useState("");
-  const [rating, setRating] = useState(0);
   const [description, setDescription] = useState("");
   const [image, setImage] = useState<string | null>(null);
-  const [showBadge, setShowBadge] = useState(false);
+  const user = useSelector(selectUser);
 
   const pickImage = async () => {
     const result = await ImagePicker.launchImageLibraryAsync({
@@ -39,18 +42,27 @@ export default function VendorEditAccountScreen() {
     }
   };
 
-  const handleSave = () => {
-    console.log({
+  const handleSave = async () => {
+    if (!user?.uid) {
+      console.error("User UID not available. Ensure the user is logged in.");
+      return;
+    }
+
+    const vendorData: VendorAccountInfo = {
       price,
       vendorType,
-      customVendorType,
       name,
-      rating,
       description,
       image,
-      showBadge,
-    });
-    router.back();
+    };
+
+    try {
+      await updateVendorAccountData(user.uid, vendorData); // Calls your Firestore update function
+      console.log("Vendor data updated successfully!");
+      router.back(); // Navigate back after saving
+    } catch (error) {
+      console.error("Error updating vendor data:", error);
+    }
   };
 
   const priceOptions = [
