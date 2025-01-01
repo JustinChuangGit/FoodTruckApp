@@ -10,6 +10,7 @@ import {
   Image,
 } from "react-native";
 import { useRouter } from "expo-router";
+import * as ImagePicker from "expo-image-picker";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { FontAwesome } from "@expo/vector-icons";
 
@@ -19,8 +20,20 @@ export default function VendorEditAccountScreen() {
   const [name, setName] = useState("");
   const [rating, setRating] = useState(0);
   const [description, setDescription] = useState("");
-  const [image, setImage] = useState("");
+  const [image, setImage] = useState<string | null>(null);
   const [showBadge, setShowBadge] = useState(false);
+
+  const pickImage = async () => {
+    const result = await ImagePicker.launchImageLibraryAsync({
+      allowsEditing: true,
+      aspect: [1, 1],
+      quality: 1,
+    });
+
+    if (!result.canceled && result.assets && result.assets.length > 0) {
+      setImage(result.assets[0].uri);
+    }
+  };
 
   const handleSave = () => {
     // Handle save logic
@@ -50,9 +63,7 @@ export default function VendorEditAccountScreen() {
               <Text style={styles.placeholderText}>No Image</Text>
             </View>
           )}
-          <TouchableOpacity
-            onPress={() => setImage("https://via.placeholder.com/150")}
-          >
+          <TouchableOpacity onPress={pickImage}>
             <Text style={styles.editImageText}>Edit picture or avatar</Text>
           </TouchableOpacity>
         </View>
@@ -90,14 +101,6 @@ export default function VendorEditAccountScreen() {
           onChangeText={setDescription}
           placeholder="Enter description"
           multiline
-        />
-
-        <Text style={styles.label}>Image URL</Text>
-        <TextInput
-          style={styles.input}
-          value={image}
-          onChangeText={setImage}
-          placeholder="Enter image URL"
         />
 
         <View style={styles.switchContainer}>
