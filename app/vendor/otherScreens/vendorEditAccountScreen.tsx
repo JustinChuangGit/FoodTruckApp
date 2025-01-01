@@ -97,11 +97,11 @@ export default function VendorEditAccountScreen() {
             <Image source={{ uri: image }} style={styles.profileImage} />
           ) : (
             <View style={styles.placeholderImage}>
-              <Text style={styles.placeholderText}>No Image</Text>
+              <Text style={styles.placeholderText}>Please Add Your Logo</Text>
             </View>
           )}
           <TouchableOpacity onPress={pickImage}>
-            <Text style={styles.editImageText}>Edit picture or avatar</Text>
+            <Text style={styles.editImageText}>Edit Logo</Text>
           </TouchableOpacity>
         </View>
 
@@ -187,15 +187,6 @@ export default function VendorEditAccountScreen() {
           />
         )}
 
-        <Text style={styles.label}>Rating</Text>
-        <TextInput
-          style={styles.input}
-          value={rating.toString()}
-          onChangeText={(text) => setRating(Number(text))}
-          placeholder="Enter rating"
-          keyboardType="numeric"
-        />
-
         <Text style={styles.label}>Description</Text>
         <TextInput
           style={[styles.input, styles.textArea]}
@@ -204,11 +195,6 @@ export default function VendorEditAccountScreen() {
           placeholder="Enter description"
           multiline
         />
-
-        <View style={styles.switchContainer}>
-          <Text style={styles.label}>Show Badge</Text>
-          <Switch value={showBadge} onValueChange={setShowBadge} />
-        </View>
 
         <TouchableOpacity style={styles.saveButton} onPress={handleSave}>
           <Text style={styles.saveButtonText}>Save</Text>
@@ -329,14 +315,14 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   profileImage: {
-    width: 100,
-    height: 100,
-    borderRadius: 50,
+    width: 225,
+    height: 225,
+    borderRadius: 120,
   },
   placeholderImage: {
-    width: 100,
-    height: 100,
-    borderRadius: 50,
+    width: 225,
+    height: 225,
+    borderRadius: 120,
     backgroundColor: "#ddd",
     alignItems: "center",
     justifyContent: "center",
