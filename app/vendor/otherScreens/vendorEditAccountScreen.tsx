@@ -28,12 +28,13 @@ export default function VendorEditAccountScreen() {
   const user = useSelector(selectUser);
 
   // State for vendor account info
-  const [price, setPrice] = useState("");
-  const [vendorType, setVendorType] = useState("");
-  const [name, setName] = useState("");
-  const [description, setDescription] = useState("");
-  const [image, setImage] = useState<string | null>(null);
-  const [loading, setLoading] = useState(false); // Added loading state
+  const [imageLoading, setImageLoading] = useState(true); // Track if the image is loading
+  const [loading, setLoading] = useState(false); // For image upload
+  const [image, setImage] = useState(user?.image || null); // Use Redux image initially
+  const [price, setPrice] = useState(user?.price || "");
+  const [vendorType, setVendorType] = useState(user?.vendorType || "");
+  const [name, setName] = useState(user?.name || "");
+  const [description, setDescription] = useState(user?.description || "");
 
   // Fetch vendor account data on component mount
   useEffect(() => {
@@ -159,7 +160,9 @@ export default function VendorEditAccountScreen() {
       <ScrollView contentContainerStyle={styles.formContainer}>
         <View style={styles.imageContainer}>
           {loading ? (
-            <ActivityIndicator size="large" color="blue" />
+            <View style={styles.placeholderImage}>
+              <ActivityIndicator size="large" color="blue" />
+            </View>
           ) : image ? (
             <Image source={{ uri: image }} style={styles.profileImage} />
           ) : (

@@ -7,6 +7,10 @@ export interface User {
   email: string;
   name: string;
   isVendor: boolean;
+  image?: string; // Add this field
+  price?: string; // Add this field
+  vendorType?: string; // Add this field
+  description?: string; // Add this field
 }
 
 // Define the initial state
