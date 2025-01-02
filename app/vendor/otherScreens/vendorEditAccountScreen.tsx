@@ -23,9 +23,13 @@ import {
 } from "../../../services/firestore"; // Update the path as needed
 import { VendorAccountInfo } from "../../../constants/types"; // Update the path as needed
 import { uploadImage } from "../../../services/storage"; // Update the path as needed
+import { useDispatch } from "react-redux";
+import { setUser } from "../../../redux/authSlice"; // Update the path as needed
+
 export default function VendorEditAccountScreen() {
   const router = useRouter();
   const user = useSelector(selectUser);
+  const dispatch = useDispatch();
 
   // State for vendor account info
   const [imageLoading, setImageLoading] = useState(true); // Track if the image is loading
@@ -35,31 +39,6 @@ export default function VendorEditAccountScreen() {
   const [vendorType, setVendorType] = useState(user?.vendorType || "");
   const [name, setName] = useState(user?.name || "");
   const [description, setDescription] = useState(user?.description || "");
-
-  // Fetch vendor account data on component mount
-  useEffect(() => {
-    const fetchVendorData = async () => {
-      if (!user?.uid) {
-        console.error("User UID not available.");
-        return;
-      }
-
-      try {
-        const data = await getVendorAccountData(user.uid);
-        if (data) {
-          setPrice(data.price || "");
-          setVendorType(data.vendorType || "");
-          setName(data.name || "");
-          setDescription(data.description || "");
-          setImage(data.image || null); // Set the image URL
-        }
-      } catch (error) {
-        console.error("Error fetching vendor data:", error);
-      }
-    };
-
-    fetchVendorData();
-  }, [user]);
 
   const pickImage = async () => {
     const result = await ImagePicker.launchImageLibraryAsync({
@@ -83,6 +62,7 @@ export default function VendorEditAccountScreen() {
         const downloadURL = await uploadImage(localUri, imagePath);
 
         setImage(downloadURL);
+        dispatch(setUser({ ...user, image: downloadURL })); // Update Redux state
 
         const vendorData: Partial<VendorAccountInfo> = { image: downloadURL };
         await updateVendorAccountData(user.uid, vendorData);
