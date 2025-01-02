@@ -7,6 +7,7 @@ import {
   TouchableOpacity,
   ScrollView,
   Image,
+  ActivityIndicator,
 } from "react-native";
 import { useRouter } from "expo-router";
 import * as ImagePicker from "expo-image-picker";
@@ -32,6 +33,7 @@ export default function VendorEditAccountScreen() {
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [image, setImage] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false); // Added loading state
 
   // Fetch vendor account data on component mount
   useEffect(() => {
@@ -72,6 +74,7 @@ export default function VendorEditAccountScreen() {
 
     if (!result.canceled && result.assets && result.assets.length > 0) {
       const localUri = result.assets[0].uri;
+      setLoading(true); // Set loading to true before starting the upload
 
       try {
         const imagePath = `vendors/${user?.uid}/logo.jpg`;
@@ -86,6 +89,8 @@ export default function VendorEditAccountScreen() {
         console.log("Image URL updated in Firestore!");
       } catch (error) {
         console.error("Error uploading image:", error);
+      } finally {
+        setLoading(false); // Set loading to false after upload is complete
       }
     }
   };
@@ -153,13 +158,16 @@ export default function VendorEditAccountScreen() {
 
       <ScrollView contentContainerStyle={styles.formContainer}>
         <View style={styles.imageContainer}>
-          {image ? (
+          {loading ? (
+            <ActivityIndicator size="large" color="blue" />
+          ) : image ? (
             <Image source={{ uri: image }} style={styles.profileImage} />
           ) : (
             <View style={styles.placeholderImage}>
               <Text style={styles.placeholderText}>Please Add Your Logo</Text>
             </View>
           )}
+
           <TouchableOpacity onPress={pickImage}>
             <Text style={styles.editImageText}>Edit Logo</Text>
           </TouchableOpacity>
