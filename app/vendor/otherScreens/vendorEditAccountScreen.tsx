@@ -92,7 +92,15 @@ export default function VendorEditAccountScreen() {
 
     try {
       await updateVendorAccountData(user.uid, vendorData);
-      console.log("Vendor data updated successfully!");
+      // Ensure 'image' is either a string or undefined
+      const updatedUser = {
+        ...user,
+        ...vendorData,
+        image: image || undefined, // Convert null to undefined if necessary
+      };
+
+      dispatch(setUser(updatedUser)); // Update Redux state with the updated vendor data
+
       router.back(); // Navigate back after saving
     } catch (error) {
       console.error("Error updating vendor data:", error);

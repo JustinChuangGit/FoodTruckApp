@@ -32,6 +32,8 @@ const authSlice = createSlice({
     setUser: (state, action: PayloadAction<User>) => {
       state.user = action.payload;
       state.isAuthenticated = true;
+      console.log("Updated State:", state); // Log the updated state
+
     },
     clearUser: (state) => {
       state.user = null;
