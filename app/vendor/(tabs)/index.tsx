@@ -164,6 +164,12 @@ export default function Index() {
       }).start();
 
       if (!isVendorActive) {
+        if (!user || !user.isVendor) {
+          console.error("User is not a vendor or not logged in.");
+          return;
+        }
+
+        // Add the vendor to the activeVendors collection with menu and details
         await setDoc(doc(db, "activeVendors", uid), {
           uid,
           timestamp: new Date().toISOString(),
@@ -171,15 +177,23 @@ export default function Index() {
             latitude: location.latitude,
             longitude: location.longitude,
           },
+          menu: user.menu || [], // Include the vendor's menu
+          name: user.name, // Include vendor's name
+          vendorType: user.vendorType, // Include vendor's type
+          price: user.price, // Include vendor's price range
+          description: user.description, // Include vendor's description
         });
-        console.log("User added to activeVendors collection with location");
+
+        console.log(
+          "User added to activeVendors collection with location and menu"
+        );
       } else {
-        // Remove the UID from the "activeVendors" collection
+        // Remove the vendor from the activeVendors collection
         await deleteDoc(doc(db, "activeVendors", uid));
         console.log("User removed from activeVendors collection");
       }
 
-      setVendorActive((prev) => !prev);
+      setVendorActive((prev) => !prev); // Toggle the local state
     } catch (error) {
       console.error("Error toggling vendor active status:", error);
       Alert.alert("Error", "Failed to toggle vendor status. Please try again.");
