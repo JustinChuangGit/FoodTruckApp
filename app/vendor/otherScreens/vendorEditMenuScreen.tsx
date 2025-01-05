@@ -19,6 +19,14 @@ import { useSelector } from "react-redux";
 import { MenuItem } from "@/constants/types"; // Import the MenuItem type
 import { fetchMenuItems, deleteMenuItem } from "@/services/firestore"; // Adjust the path as needed
 import { useEffect } from "react";
+import {
+  collection,
+  addDoc,
+  getDocs,
+  deleteDoc,
+  doc,
+} from "firebase/firestore";
+import { db } from "@/services/firestore"; // Adjust to your Firebase configuration
 
 export default function EditMenuItemsScreen() {
   const router = useRouter();
@@ -66,14 +74,18 @@ export default function EditMenuItemsScreen() {
       name: newItemName,
       price: parseFloat(newItemPrice),
       description: newItemDescription,
-      category: newItemCategory,
+      category: newItemCategory, // Keep category as a field, but don't group by it
     };
 
     try {
-      // Save to Firestore
-      await saveMenuItem(vendorUid, newItem.category, newItem);
+      if (!vendorUid) {
+        console.error("Vendor UID is missing.");
+        return; // Exit early if vendorUid is undefined
+      }
+      // Save the item directly to the vendor's menu collection
+      await saveMenuItem(vendorUid, newItem);
 
-      // Update local state
+      // Update local state with the new item
       setMenuItems((prevItems) => [...prevItems, newItem]);
       closeModal();
       console.log("Menu item added successfully");
@@ -83,16 +95,23 @@ export default function EditMenuItemsScreen() {
     }
   };
 
-  const groupedItems = menuItems.reduce<Record<string, MenuItem[]>>(
-    (acc, item) => {
-      if (!acc[item.category]) {
-        acc[item.category] = [];
-      }
-      acc[item.category].push(item);
-      return acc;
-    },
-    {}
-  );
+  const saveMenuItem = async (vendorUid: string, menuItem: MenuItem) => {
+    const menuCollectionRef = collection(db, `vendors/${vendorUid}/menu`);
+    await addDoc(menuCollectionRef, menuItem);
+  };
+
+  const fetchMenuItems = async (vendorUid: string) => {
+    const menuCollectionRef = collection(db, `vendors/${vendorUid}/menu`);
+    const snapshot = await getDocs(menuCollectionRef);
+    return snapshot.docs.map((doc) => ({
+      id: doc.id,
+      ...doc.data(),
+    })) as MenuItem[];
+  };
+  const deleteMenuItem = async (vendorUid: string, itemId: string) => {
+    const itemRef = doc(db, `vendors/${vendorUid}/menu/${itemId}`);
+    await deleteDoc(itemRef);
+  };
 
   useEffect(() => {
     const fetchItems = async () => {
@@ -135,10 +154,18 @@ export default function EditMenuItemsScreen() {
             <View style={styles.itemDeleteButton}>
               <TouchableOpacity
                 onPress={async () => {
-                  // Delete the item and update the menu
-                  await deleteMenuItem(vendorUid, category, item.id);
-                  const items = await fetchMenuItems(vendorUid);
-                  setMenuItems(items);
+                  try {
+                    if (!vendorUid) {
+                      console.error("Vendor UID is missing.");
+                      return; // Exit early if vendorUid is undefined
+                    }
+                    await deleteMenuItem(vendorUid, item.id); // No need for category reference
+                    const updatedItems = await fetchMenuItems(vendorUid);
+                    setMenuItems(updatedItems);
+                  } catch (error) {
+                    console.error("Error deleting menu item:", error);
+                    Alert.alert("Error", "Could not delete the menu item.");
+                  }
                 }}
               >
                 <FontAwesome name="trash" size={30} />
@@ -148,6 +175,17 @@ export default function EditMenuItemsScreen() {
         )}
       />
     </View>
+  );
+
+  const groupedItems = menuItems.reduce<Record<string, MenuItem[]>>(
+    (acc, item) => {
+      if (!acc[item.category]) {
+        acc[item.category] = [];
+      }
+      acc[item.category].push(item);
+      return acc;
+    },
+    {}
   );
 
   return (
