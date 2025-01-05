@@ -133,6 +133,45 @@ const dummyMenu = [
   },
 ];
 
+function getNearbyVendors(
+  vendors: Vendor[],
+  location: LocationCoordinates | null
+): { id: string; title: string; vendors: Vendor[] } {
+  if (!location) {
+    return {
+      id: "nearby",
+      title: "Nearby Vendors",
+      vendors: [],
+    };
+  }
+
+  const sortedVendors = vendors
+    .map((vendor) => ({
+      ...vendor,
+      distance: haversine(location, {
+        latitude: vendor.latitude,
+        longitude: vendor.longitude,
+      }),
+    }))
+    .sort((a, b) => (a.distance ?? 0) - (b.distance ?? 0));
+
+  return {
+    id: "nearby",
+    title: "Nearby Vendors",
+    vendors: sortedVendors,
+  };
+}
+
+function formatSections(
+  sections: { id: string; title: string; vendors: Vendor[] }[]
+): typeof SECTIONDATA {
+  return sections.map((section, index) => ({
+    id: (index + 1).toString(),
+    title: section.title,
+    vendors: section.vendors,
+  }));
+}
+
 export default function Index() {
   const [location, setLocation] = useState<LocationCoordinates | null>(null);
   const [vendors, setVendors] = useState<Vendor[]>([]);
@@ -141,7 +180,11 @@ export default function Index() {
   const mapRef = useRef<MapView>(null);
   const bottomSheetRef = useRef<BottomSheet>(null);
   const [isModalVisible, setModalVisible] = useState(false);
-
+  const SECTIONDATA = formatSections([
+    getNearbyVendors(vendors, location),
+    getNearbyVendors(vendors, location),
+    getNearbyVendors(vendors, location),
+  ]);
   const snapPoints = useMemo(() => ["15%", "50%", "60%"], []);
 
   useEffect(() => {
@@ -171,6 +214,7 @@ export default function Index() {
             rating: data.rating || 0, // Default rating if not provided
             description: data.description || "No description available",
             image: data.image || "https://via.placeholder.com/150", // Default image
+            menu: data.menu || [], // Include menu field, default to an empty array
           };
         });
         setVendors(updatedVendors);
@@ -271,11 +315,31 @@ export default function Index() {
         <BottomSheetView style={styles.bottomSheetContent}>
           <Text style={styles.dragSectionHeader}>For You</Text>
           <Text style={styles.dragSectionSubheader}>
-            Checkout some spots we think you'd like
+            Check out some spots we think you'd like
           </Text>
           <HorizontalLine />
           <BottomSheetFlatList
-            data={SECTIONDATA}
+            data={
+              location
+                ? [
+                    {
+                      id: "nearby",
+                      title: "Nearby Vendors",
+                      vendors: vendors.sort(
+                        (a, b) =>
+                          haversine(location, {
+                            latitude: a.latitude,
+                            longitude: a.longitude,
+                          }) -
+                          haversine(location, {
+                            latitude: b.latitude,
+                            longitude: b.longitude,
+                          })
+                      ),
+                    },
+                  ]
+                : []
+            }
             keyExtractor={(item) => item.id}
             renderItem={({ item }) => (
               <MyRow section={item} onCardPress={handleCardPress} />
