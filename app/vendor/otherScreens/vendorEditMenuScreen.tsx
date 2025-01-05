@@ -28,8 +28,12 @@ import {
 } from "firebase/firestore";
 import { db } from "@/services/firestore"; // Adjust to your Firebase configuration
 
+import { useDispatch } from "react-redux";
+import { updateMenu } from "../../../redux/authSlice"; // Adjust the path as needed
+
 export default function EditMenuItemsScreen() {
   const router = useRouter();
+  const dispatch = useDispatch();
   const user = useSelector(selectUser);
   const vendorUid = user?.uid;
 
@@ -87,6 +91,10 @@ export default function EditMenuItemsScreen() {
 
       // Update local state with the new item
       setMenuItems((prevItems) => [...prevItems, newItem]);
+
+      // Dispatch the updateMenu action to update Redux state
+      dispatch(updateMenu([...menuItems, newItem]));
+
       closeModal();
       console.log("Menu item added successfully");
     } catch (error) {

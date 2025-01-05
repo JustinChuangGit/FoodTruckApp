@@ -11,7 +11,8 @@ import { saveUserData, getUserData } from "./firestore"; // Adjust the path as n
 import { setUser } from "../redux/authSlice"; // Adjust the path as needed
 import { AppDispatch } from "../redux/store"; // Adjust the path as needed
 import ReactNativeAsyncStorage from "@react-native-async-storage/async-storage";
-
+import { collection, getDocs, getDoc, doc } from "firebase/firestore"; // Import necessary Firestore methods
+import { db } from "@/services/firestore"; // Import the Firestore instance
 
 const auth = initializeAuth(app, {
   persistence: getReactNativePersistence(ReactNativeAsyncStorage),
@@ -56,18 +57,54 @@ export const signIn = async (dispatch: AppDispatch, email: string, password: str
     const userCredential = await signInWithEmailAndPassword(auth, email, password);
     const user = userCredential.user;
 
-    // Fetch additional user data from Firestore
-    const userData = await getUserData(user.uid);
+    let fullUserData: any = null;
 
-    // Update Redux state
-    dispatch(setUser({ uid: user.uid, email: user.email, ...userData }));
+    // Try to fetch from `users` collection
+    const userDoc = await getDoc(doc(db, "users", user.uid));
+    if (userDoc.exists()) {
+      const userData = userDoc.data();
+      fullUserData = {
+        uid: user.uid,
+        email: user.email || "",
+        ...userData,
+      };
+    } else {
+      // If not in `users`, try `vendors` collection
+      const vendorDoc = await getDoc(doc(db, "vendors", user.uid));
+      if (vendorDoc.exists()) {
+        const vendorData = vendorDoc.data();
 
-    return { uid: user.uid, email: user.email, ...userData }; // Include `isVendor` in return
+        // Fetch menu for vendors
+        const menuCollectionRef = collection(db, `vendors/${user.uid}/menu`);
+        const menuSnapshot = await getDocs(menuCollectionRef);
+        const menu = menuSnapshot.docs.map((doc) => ({
+          id: doc.id,
+          ...doc.data(),
+        }));
+
+        fullUserData = {
+          uid: user.uid,
+          email: user.email || "",
+          ...vendorData, // Include vendor-specific fields
+          menu,          // Add menu field
+        };
+      } else {
+        // If not found in both collections
+        console.error(`User or vendor document not found for UID: ${user.uid}`);
+        throw new Error("User account does not exist. Please sign up.");
+      }
+    }
+
+    // Dispatch Redux action to update state
+    dispatch(setUser(fullUserData));
+
+    return fullUserData; // Return the full user object for further use
   } catch (error) {
     console.error("Error during sign-in:", error);
     throw error;
   }
 };
+
 // Function to sign out the user
 export const signOutUser = async (): Promise<void> => {
   try {

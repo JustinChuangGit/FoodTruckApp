@@ -1,5 +1,6 @@
 // store/authSlice.ts
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
+import { MenuItem } from "@/constants/types";
 
 // Define the User interface
 export interface User {
@@ -7,10 +8,11 @@ export interface User {
   email: string;
   name: string;
   isVendor: boolean;
-  image?: string; // Add this field
-  price?: string; // Add this field
-  vendorType?: string; // Add this field
-  description?: string; // Add this field
+  image?: string;
+  price?: string;
+  vendorType?: string;
+  description?: string;
+  menu?: MenuItem[]; // Add menu field
 }
 
 // Define the initial state
@@ -32,18 +34,26 @@ const authSlice = createSlice({
     setUser: (state, action: PayloadAction<User>) => {
       state.user = action.payload;
       state.isAuthenticated = true;
-      console.log("Updated State:", state); // Log the updated state
-
+      console.log("Redux State after setUser:", JSON.stringify(state, null, 2));
     },
     clearUser: (state) => {
       state.user = null;
       state.isAuthenticated = false;
+      console.log("Redux State after clearUser:", JSON.stringify(state, null, 2));
+    },
+    updateMenu: (state, action: PayloadAction<MenuItem[]>) => {
+      if (state.user) {
+        state.user.menu = action.payload; // Update the menu for the current user
+        console.log("Redux State after updateMenu:", JSON.stringify(state, null, 2));
+      }
     },
   },
 });
 
-// Export actions
-export const { setUser, clearUser } = authSlice.actions;
+
+// Export the new action
+export const { setUser, clearUser, updateMenu } = authSlice.actions;
+
 
 // Export selectors for accessing user state
 export const selectUser = (state: { auth: AuthState }) => state.auth.user;
