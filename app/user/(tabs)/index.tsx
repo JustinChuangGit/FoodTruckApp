@@ -154,6 +154,7 @@ export default function Index() {
             description: data.description || "No description available",
             image: data.image || "https://via.placeholder.com/150", // Default image
             menu: data.menu || [], // Include menu field, default to an empty array
+            vendorType: data.vendorType || "Other", // Default vendor type
           };
         });
         setVendors(updatedVendors);

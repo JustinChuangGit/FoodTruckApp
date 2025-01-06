@@ -9,6 +9,7 @@ export interface Vendor {
   image: string;
   distance?: number;
   menu: MenuItem[];
+  vendorType: string;
 }
 
 export interface VendorAccountInfo {

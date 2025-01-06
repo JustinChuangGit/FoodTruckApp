@@ -76,8 +76,8 @@ const VendorMapInfoCard: React.FC<VendorMapInfoCardProps> = ({
       style={[
         styles.card,
         {
-          transform: [{ scale: scaleAnim }],
-          opacity: opacityAnim,
+          transform: [{ scale: scaleAnim }], // Pass as-is
+          opacity: opacityAnim, // Pass as-is
         },
       ]}
     >
