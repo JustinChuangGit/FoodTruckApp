@@ -6,6 +6,7 @@ import {
   Image,
   TouchableOpacity,
   Animated,
+  ActivityIndicator,
 } from "react-native";
 import { FontAwesome } from "@expo/vector-icons";
 import haversine from "haversine";
@@ -33,6 +34,7 @@ const VendorMapInfoCard: React.FC<VendorMapInfoCardProps> = ({
   userLocation,
 }) => {
   const [isFavorited, setIsFavorited] = useState(false); // Tracks heart state
+  const [loading, setLoading] = useState(true); // Track image loading state
   const scaleAnim = useRef(new Animated.Value(0)).current; // Scale starts at 0
   const opacityAnim = useRef(new Animated.Value(0)).current; // Opacity starts at 0
 
@@ -123,8 +125,22 @@ const VendorMapInfoCard: React.FC<VendorMapInfoCardProps> = ({
         />
       </TouchableOpacity>
 
-      {/* Image */}
-      <Image source={{ uri: vendor.image }} style={styles.image} />
+      {/* Image with Loading Indicator */}
+      <View style={styles.imageContainer}>
+        {loading && (
+          <ActivityIndicator
+            size="small"
+            color="#007bff"
+            style={styles.loadingIndicator}
+          />
+        )}
+        <Image
+          source={{ uri: vendor.image }}
+          style={styles.image}
+          onLoadStart={() => setLoading(true)} // Show loader
+          onLoad={() => setLoading(false)} // Hide loader once loaded
+        />
+      </View>
 
       {/* Vendor Details */}
       <View style={styles.infoContainer}>
@@ -178,11 +194,22 @@ const styles = StyleSheet.create({
     right: 10,
     zIndex: 10,
   },
-  image: {
+  imageContainer: {
     width: 120,
     height: 120,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "#e0e0e0", // Placeholder background while loading
+  },
+  image: {
+    width: "100%",
+    height: "100%",
     borderTopLeftRadius: 16,
     borderBottomLeftRadius: 16,
+  },
+  loadingIndicator: {
+    position: "absolute",
+    zIndex: 1,
   },
   infoContainer: {
     flex: 1,
