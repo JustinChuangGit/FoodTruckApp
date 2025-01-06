@@ -184,6 +184,9 @@ export default function Index() {
     getNearbyVendors(vendors, location),
     getNearbyVendors(vendors, location),
     getNearbyVendors(vendors, location),
+    getNearbyVendors(vendors, location),
+    getNearbyVendors(vendors, location),
+    getNearbyVendors(vendors, location),
   ]);
   const snapPoints = useMemo(() => ["15%", "50%", "60%"], []);
 
@@ -315,31 +318,12 @@ export default function Index() {
         <BottomSheetView style={styles.bottomSheetContent}>
           <Text style={styles.dragSectionHeader}>For You</Text>
           <Text style={styles.dragSectionSubheader}>
-            Check out some spots we think you'd like
+            Checkout some spots we think you'd like
           </Text>
           <HorizontalLine />
           <BottomSheetFlatList
-            data={
-              location
-                ? [
-                    {
-                      id: "nearby",
-                      title: "Nearby Vendors",
-                      vendors: vendors.sort(
-                        (a, b) =>
-                          haversine(location, {
-                            latitude: a.latitude,
-                            longitude: a.longitude,
-                          }) -
-                          haversine(location, {
-                            latitude: b.latitude,
-                            longitude: b.longitude,
-                          })
-                      ),
-                    },
-                  ]
-                : []
-            }
+            data={SECTIONDATA}
+            showsVerticalScrollIndicator={false}
             keyExtractor={(item) => item.id}
             renderItem={({ item }) => (
               <MyRow section={item} onCardPress={handleCardPress} />
