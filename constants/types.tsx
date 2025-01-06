@@ -30,3 +30,9 @@ export interface MenuItem {
   description: string;
   category: string;
 }
+
+export interface Section {
+  id: string;
+  title: string;
+  vendors: Vendor[];
+}

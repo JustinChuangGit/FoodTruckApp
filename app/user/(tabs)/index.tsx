@@ -31,9 +31,9 @@ import { SECTIONS } from "../../../constants/UserConstants";
 import { Vendor, LocationCoordinates } from "@/constants/types";
 import { collection, onSnapshot } from "firebase/firestore";
 import { db, getVendorInfo } from "@/services/firestore";
+import { Section } from "@/constants/types";
 
 //TODO: Replace with collections from Firestore
-import { SECTIONDATA } from "./dummySectionData";
 import liveVendors from "../../../dummyVendorMapData.json";
 
 const { width } = Dimensions.get("window");
@@ -164,7 +164,7 @@ function getNearbyVendors(
 
 function formatSections(
   sections: { id: string; title: string; vendors: Vendor[] }[]
-): typeof SECTIONDATA {
+): Section[] {
   return sections.map((section, index) => ({
     id: (index + 1).toString(),
     title: section.title,

@@ -182,6 +182,7 @@ export default function Index() {
           vendorType: user.vendorType, // Include vendor's type
           price: user.price, // Include vendor's price range
           description: user.description, // Include vendor's description
+          image: user.image || null, // Include vendor's
         });
 
         console.log(

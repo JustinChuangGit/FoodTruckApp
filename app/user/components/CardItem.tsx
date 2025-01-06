@@ -7,14 +7,19 @@ interface CardItemProps {
   onPress: () => void; // Add this prop
 }
 
-const CardItem: React.FC<CardItemProps> = ({ vendor, onPress }) => (
-  <TouchableOpacity style={styles.cardItem} onPress={onPress}>
-    <Image source={{ uri: vendor.image }} style={styles.vendorImage} />
-    <Text style={styles.vendorName}>{vendor.name}</Text>
-    <Text style={styles.vendorPrice}>{vendor.price}</Text>
-    <Text style={styles.vendorRating}>Rating: {vendor.rating}/5</Text>
-  </TouchableOpacity>
-);
+const CardItem: React.FC<CardItemProps> = ({ vendor, onPress }) => {
+  // Log the image URL to verify it's correct
+  console.log("Vendor Image URL:", vendor.image);
+
+  return (
+    <TouchableOpacity style={styles.cardItem} onPress={onPress}>
+      <Image source={{ uri: vendor.image }} style={styles.vendorImage} />
+      <Text style={styles.vendorName}>{vendor.name}</Text>
+      <Text style={styles.vendorPrice}>{vendor.price}</Text>
+      <Text style={styles.vendorRating}>Rating: {vendor.rating}/5</Text>
+    </TouchableOpacity>
+  );
+};
 
 const styles = StyleSheet.create({
   cardItem: {
