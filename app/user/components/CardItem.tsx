@@ -77,8 +77,8 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     width: 250,
     height: "auto",
-    marginRight: 10,
-    padding: 16,
+    marginLeft: 10,
+    paddingHorizontal: 16,
   },
   imageContainer: {
     width: 218,

@@ -35,16 +35,17 @@ const MyRow: React.FC<MyRowProps> = ({ section, onCardPress }) => (
 );
 
 const styles = StyleSheet.create({
-  mainSection: { marginBottom: 16 },
+  mainSection: { marginVertical: 16 },
   sectionTitleContainer: {
-    height: 40,
+    height: "auto",
     width: "100%",
     justifyContent: "center",
-    paddingLeft: 16,
+    paddingLeft: 25,
   },
   sectionTitle: {
-    fontSize: 18,
+    fontSize: 22,
     fontWeight: "bold",
+    paddingBottom: 8,
   },
 });
 

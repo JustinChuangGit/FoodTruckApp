@@ -380,7 +380,7 @@ const styles = StyleSheet.create({
     paddingTop: 10,
   },
   dragSectionHeader: {
-    fontSize: 24,
+    fontSize: 28,
     fontWeight: "bold",
   },
   dragSectionSubheader: {
