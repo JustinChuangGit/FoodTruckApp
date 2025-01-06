@@ -316,11 +316,13 @@ export default function Index() {
         topInset={100}
       >
         <BottomSheetView style={styles.bottomSheetContent}>
-          <Text style={styles.dragSectionHeader}>For You</Text>
-          <Text style={styles.dragSectionSubheader}>
-            Checkout some spots we think you'd like
-          </Text>
-          <HorizontalLine />
+          <View style={styles.dragSectionHeaderContainer}>
+            <Text style={styles.dragSectionHeader}>For You</Text>
+            <Text style={styles.dragSectionSubheader}>
+              Checkout some spots we think you'd like
+            </Text>
+            <HorizontalLine />
+          </View>
           <BottomSheetFlatList
             data={SECTIONDATA}
             showsVerticalScrollIndicator={false}
@@ -328,7 +330,10 @@ export default function Index() {
             renderItem={({ item }) => (
               <MyRow section={item} onCardPress={handleCardPress} />
             )}
-            contentContainerStyle={{ padding: 16 }}
+            contentContainerStyle={{
+              paddingHorizontal: 0, // Remove extra padding here
+              paddingBottom: 16, // Optional for spacing at the bottom
+            }}
           />
         </BottomSheetView>
       </BottomSheet>
@@ -405,7 +410,6 @@ const styles = StyleSheet.create({
   },
   bottomSheetContent: {
     flex: 1,
-    paddingHorizontal: 16,
     paddingTop: 10,
   },
   dragSectionHeader: {
@@ -500,5 +504,8 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: "#007bff",
     marginTop: 4,
+  },
+  dragSectionHeaderContainer: {
+    paddingHorizontal: 16,
   },
 });

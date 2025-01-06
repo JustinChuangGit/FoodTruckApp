@@ -20,7 +20,6 @@ const styles = StyleSheet.create({
   cardItem: {
     backgroundColor: "#f9f9f9",
     borderRadius: 8,
-    padding: 16,
     width: 150,
     height: 200,
     justifyContent: "center",
