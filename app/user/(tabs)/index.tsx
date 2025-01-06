@@ -38,100 +38,36 @@ import liveVendors from "../../../dummyVendorMapData.json";
 
 const { width } = Dimensions.get("window");
 
-const dummyMenu = [
-  {
-    id: "1",
-    name: "Taco Special",
-    description: "Three delicious tacos with your choice of protein.",
-    price: "$8.99",
-  },
-  {
-    id: "2",
-    name: "Loaded Nachos",
-    description: "Crispy tortilla chips topped with cheese and salsa.",
-    price: "$6.99",
-  },
-  {
-    id: "3",
-    name: "Burrito Bowl",
-    description: "A hearty bowl with rice, beans, and toppings.",
-    price: "$9.99",
-  },
-  {
-    id: "4",
-    name: "Quesadilla",
-    description: "Cheesy quesadilla served with sour cream and guacamole.",
-    price: "$7.99",
-  },
-  {
-    id: "5",
-    name: "Churros",
-    description: "Sweet fried dough sprinkled with cinnamon sugar.",
-    price: "$4.99",
-  },
-  {
-    id: "6",
-    name: "Street Corn",
-    description:
-      "Grilled corn on the cob coated with butter, cheese, and spices.",
-    price: "$3.99",
-  },
-  {
-    id: "7",
-    name: "Fish Tacos",
-    description: "Fresh fish tacos topped with cabbage and tangy sauce.",
-    price: "$10.99",
-  },
-  {
-    id: "8",
-    name: "Carne Asada Fries",
-    description:
-      "Crispy fries topped with grilled steak, cheese, and guacamole.",
-    price: "$11.99",
-  },
-  {
-    id: "9",
-    name: "Vegetarian Burrito",
-    description: "A burrito packed with beans, rice, veggies, and salsa.",
-    price: "$8.49",
-  },
-  {
-    id: "10",
-    name: "Tostadas",
-    description: "Crispy tortillas topped with beans, lettuce, and cheese.",
-    price: "$5.99",
-  },
-  {
-    id: "11",
-    name: "Chicken Enchiladas",
-    description: "Corn tortillas stuffed with chicken and topped with sauce.",
-    price: "$12.99",
-  },
-  {
-    id: "12",
-    name: "Steak Fajitas",
-    description: "Sizzling steak strips served with peppers and onions.",
-    price: "$14.99",
-  },
-  {
-    id: "13",
-    name: "Tamales",
-    description: "Traditional steamed corn masa filled with meat or veggies.",
-    price: "$7.99",
-  },
-  {
-    id: "14",
-    name: "Guacamole & Chips",
-    description: "Fresh guacamole served with crispy tortilla chips.",
-    price: "$5.49",
-  },
-  {
-    id: "15",
-    name: "Mexican Rice",
-    description: "Fluffy rice cooked with tomatoes and spices.",
-    price: "$2.99",
-  },
-];
+function formatMenuWithHeaders(
+  menu: {
+    id: string;
+    name: string;
+    description: string;
+    price: number;
+    category: string;
+  }[]
+) {
+  const grouped = menu.reduce((acc: Record<string, any[]>, item) => {
+    if (!acc[item.category]) {
+      acc[item.category] = [];
+    }
+    acc[item.category].push(item);
+    return acc;
+  }, {});
+
+  const formatted = [];
+  for (const [category, items] of Object.entries(grouped)) {
+    formatted.push({ type: "header", title: category }); // Add header
+    formatted.push(
+      ...items.map((item) => ({
+        ...item,
+        type: "item",
+        price: item.price.toFixed(2), // Convert price to string
+      }))
+    ); // Add items
+  }
+  return formatted;
+}
 
 function getNearbyVendors(
   vendors: Vendor[],
@@ -348,42 +284,71 @@ export default function Index() {
           <View style={styles.modalContent}>
             {selectedVendor && (
               <>
+                {/* Vendor Image */}
                 <Image
                   source={{ uri: selectedVendor.image }}
                   style={styles.logo}
                 />
+
+                {/* Vendor Name */}
                 <Text style={styles.name}>{selectedVendor.name}</Text>
+
+                {/* Vendor Description */}
                 <Text style={styles.description}>
                   {selectedVendor.description}
                 </Text>
+
+                {/* Vendor Price Range */}
                 <Text style={styles.price}>Price: {selectedVendor.price}</Text>
+
+                {/* Vendor Rating */}
                 <Text style={styles.rating}>
                   Rating: {selectedVendor.rating}/5
                 </Text>
+
+                {/* Close Button */}
                 <TouchableOpacity
                   style={styles.closeButton}
                   onPress={closeModal}
                 >
                   <Text style={styles.closeButtonText}>Close</Text>
                 </TouchableOpacity>
+
+                {/* Horizontal Line */}
                 <HorizontalLine />
 
-                {/* Dummy Menu */}
+                {/* Vendor Menu */}
                 <Text style={styles.menuHeader}>Menu</Text>
-                <FlatList
-                  data={dummyMenu}
-                  keyExtractor={(item) => item.id}
-                  renderItem={({ item }) => (
-                    <View style={styles.menuItem}>
-                      <Text style={styles.menuItemName}>{item.name}</Text>
-                      <Text style={styles.menuItemDescription}>
-                        {item.description}
-                      </Text>
-                      <Text style={styles.menuItemPrice}>{item.price}</Text>
-                    </View>
-                  )}
-                  contentContainerStyle={styles.menuList}
-                />
+                {selectedVendor.menu && selectedVendor.menu.length > 0 ? (
+                  <FlatList
+                    data={formatMenuWithHeaders(selectedVendor.menu)} // Add headers to menu data
+                    keyExtractor={(item, index) => item.id || `header-${index}`} // Handle both menu items and headers
+                    renderItem={({ item }) =>
+                      item.type === "header" ? (
+                        <Text style={styles.categoryHeader}>{item.title}</Text> // Render category header
+                      ) : (
+                        <View style={styles.menuItem}>
+                          <View style={styles.menuItemTextContainer}>
+                            <Text style={styles.menuItemName}>{item.name}</Text>
+                            <Text style={styles.menuItemDescription}>
+                              {item.description}
+                            </Text>
+                          </View>
+                          <View style={styles.menuItemPriceContainer}>
+                            <Text style={styles.menuItemPrice}>
+                              ${item.price}
+                            </Text>
+                          </View>
+                        </View>
+                      )
+                    }
+                    contentContainerStyle={styles.menuList}
+                  />
+                ) : (
+                  <Text style={styles.emptyMenuText}>
+                    No menu items available
+                  </Text>
+                )}
               </>
             )}
           </View>
@@ -479,7 +444,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
   menuHeader: {
-    fontSize: 18,
+    fontSize: 30,
     fontWeight: "bold",
     marginTop: 16,
     marginBottom: 8,
@@ -491,6 +456,7 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     borderBottomWidth: 1,
     borderBottomColor: "#ddd",
+    flexDirection: "row",
   },
   menuItemName: {
     fontSize: 16,
@@ -507,5 +473,22 @@ const styles = StyleSheet.create({
   },
   dragSectionHeaderContainer: {
     paddingHorizontal: 16,
+  },
+  emptyMenuText: {
+    fontSize: 16,
+    color: "#555",
+    textAlign: "center",
+    marginTop: 16,
+  },
+  categoryHeader: {
+    fontSize: 25,
+    fontWeight: "bold",
+    marginTop: 20,
+  },
+  menuItemTextContainer: {
+    flex: 1,
+  },
+  menuItemPriceContainer: {
+    justifyContent: "center",
   },
 });

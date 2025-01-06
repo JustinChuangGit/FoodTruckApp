@@ -8,9 +8,6 @@ interface CardItemProps {
 }
 
 const CardItem: React.FC<CardItemProps> = ({ vendor, onPress }) => {
-  // Log the image URL to verify it's correct
-  console.log("Vendor Image URL:", vendor.image);
-
   return (
     <TouchableOpacity style={styles.cardItem} onPress={onPress}>
       <Image source={{ uri: vendor.image }} style={styles.vendorImage} />
