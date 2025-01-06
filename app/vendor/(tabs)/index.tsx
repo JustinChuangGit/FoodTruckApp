@@ -62,14 +62,18 @@ export default function Index() {
         const { latitude, longitude } = coords;
         setLocation({ latitude, longitude });
 
-        const sortedVendors = liveVendors
+        const sortedVendors = vendors
           .map((vendor) => {
-            const distance = haversine(
-              { latitude, longitude },
-              { latitude: vendor.latitude, longitude: vendor.longitude },
-              { unit: "km" }
-            );
-            return { ...vendor, distance };
+            const distance = location
+              ? haversine(location, {
+                  latitude: vendor.latitude,
+                  longitude: vendor.longitude,
+                })
+              : Infinity; // Use Infinity or a large number when location is null
+            return {
+              ...vendor,
+              distance,
+            };
           })
           .sort((a, b) => (a.distance ?? 0) - (b.distance ?? 0));
 
@@ -242,6 +246,7 @@ export default function Index() {
                 vendor={vendors[index]}
                 userLocation={location}
                 onClose={handleCardClose}
+                onPress={(vendor) => handleCardPress(vendor)} // Pass the required onPress prop
               />
             )}
             onSnapToItem={(index) => {
