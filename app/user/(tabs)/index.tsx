@@ -233,6 +233,7 @@ export default function Index() {
                 vendor={vendors[index]}
                 userLocation={location}
                 onClose={handleCardClose}
+                onPress={(vendor) => handleCardPress(vendor)} // Pass the vendor to handleCardPress
               />
             )}
             onSnapToItem={(index) => {

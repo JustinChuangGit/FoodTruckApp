@@ -10,41 +10,31 @@ import {
 } from "react-native";
 import { FontAwesome } from "@expo/vector-icons";
 import haversine from "haversine";
-
-interface Vendor {
-  uid: string;
-  name: string;
-  price: string;
-  rating: number;
-  image: string;
-  description: string;
-  latitude: number;
-  longitude: number;
-}
+import { Vendor } from "@/constants/types";
 
 interface VendorMapInfoCardProps {
   vendor: Vendor;
   onClose: () => void;
   userLocation: { latitude: number; longitude: number } | null;
+  onPress: (vendor: Vendor) => void;
 }
 
 const VendorMapInfoCard: React.FC<VendorMapInfoCardProps> = ({
   vendor,
   onClose,
   userLocation,
+  onPress,
 }) => {
-  const [isFavorited, setIsFavorited] = useState(false); // Tracks heart state
-  const [loading, setLoading] = useState(true); // Track image loading state
-  const scaleAnim = useRef(new Animated.Value(0)).current; // Scale starts at 0
-  const opacityAnim = useRef(new Animated.Value(0)).current; // Opacity starts at 0
+  const [isFavorited, setIsFavorited] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const scaleAnim = useRef(new Animated.Value(0)).current;
+  const opacityAnim = useRef(new Animated.Value(0)).current;
 
-  // Determine units dynamically based on locale
   const units = useMemo(() => {
-    const locale = Intl.DateTimeFormat().resolvedOptions().locale; // e.g., "en-US"
+    const locale = Intl.DateTimeFormat().resolvedOptions().locale;
     return locale.includes("US") ? "mile" : "km";
   }, []);
 
-  // Calculate distance dynamically
   const distance = useMemo(() => {
     if (userLocation) {
       const start = {
@@ -56,14 +46,12 @@ const VendorMapInfoCard: React.FC<VendorMapInfoCardProps> = ({
         longitude: vendor.longitude,
       };
 
-      // Calculate distance using Haversine
       const distanceValue = haversine(start, end, { unit: units });
-      return distanceValue.toFixed(1); // Round to 1 decimal place
+      return distanceValue.toFixed(1);
     }
     return null;
   }, [userLocation, vendor, units]);
 
-  // Appear animation
   useEffect(() => {
     Animated.parallel([
       Animated.timing(scaleAnim, {
@@ -79,26 +67,8 @@ const VendorMapInfoCard: React.FC<VendorMapInfoCardProps> = ({
     ]).start();
   }, []);
 
-  const handleClose = () => {
-    // Disappear animation
-    Animated.parallel([
-      Animated.timing(scaleAnim, {
-        toValue: 0,
-        duration: 300,
-        useNativeDriver: true,
-      }),
-      Animated.timing(opacityAnim, {
-        toValue: 0,
-        duration: 300,
-        useNativeDriver: true,
-      }),
-    ]).start(() => {
-      onClose(); // Remove the card after animation completes
-    });
-  };
-
   const handleHeartPress = () => {
-    setIsFavorited((prev) => !prev); // Toggle favorite state
+    setIsFavorited((prev) => !prev);
   };
 
   return (
@@ -106,13 +76,13 @@ const VendorMapInfoCard: React.FC<VendorMapInfoCardProps> = ({
       style={[
         styles.card,
         {
-          transform: [{ scale: scaleAnim }], // Scale animation
-          opacity: opacityAnim, // Opacity animation
+          transform: [{ scale: scaleAnim }],
+          opacity: opacityAnim,
         },
       ]}
     >
       {/* Close Button */}
-      <TouchableOpacity style={styles.closeButton} onPress={handleClose}>
+      <TouchableOpacity style={styles.closeButton} onPress={onClose}>
         <FontAwesome name="close" size={24} color="black" />
       </TouchableOpacity>
 
@@ -125,41 +95,44 @@ const VendorMapInfoCard: React.FC<VendorMapInfoCardProps> = ({
         />
       </TouchableOpacity>
 
-      {/* Image with Loading Indicator */}
-      <View style={styles.imageContainer}>
-        {loading && (
-          <ActivityIndicator
-            size="small"
-            color="#007bff"
-            style={styles.loadingIndicator}
-          />
-        )}
-        <Image
-          source={{ uri: vendor.image }}
-          style={styles.image}
-          onLoadStart={() => setLoading(true)} // Show loader
-          onLoad={() => setLoading(false)} // Hide loader once loaded
-        />
-      </View>
-
-      {/* Vendor Details */}
-      <View style={styles.infoContainer}>
-        <Text style={styles.title}>{vendor.name}</Text>
-        <Text style={styles.subtitle}>{vendor.description}</Text>
-
-        {/* Footer */}
-        <View style={styles.footer}>
-          <Text style={styles.price}>{vendor.price}</Text>
-          {distance && (
-            <Text style={styles.distance}>
-              {distance} {units} away
-            </Text>
+      {/* Main Card Area */}
+      <TouchableOpacity
+        style={styles.cardContent}
+        onPress={() => onPress(vendor)}
+      >
+        <View style={styles.imageContainer}>
+          {loading && (
+            <ActivityIndicator
+              size="small"
+              color="#007bff"
+              style={styles.loadingIndicator}
+            />
           )}
-          <Text style={styles.rating}>
-            <FontAwesome name="star" size={14} color="gold" /> {vendor.rating}
-          </Text>
+          <Image
+            source={{ uri: vendor.image }}
+            style={styles.image}
+            onLoadStart={() => setLoading(true)}
+            onLoad={() => setLoading(false)}
+          />
         </View>
-      </View>
+
+        <View style={styles.infoContainer}>
+          <Text style={styles.title}>{vendor.name}</Text>
+          <Text style={styles.subtitle}>{vendor.description}</Text>
+
+          <View style={styles.footer}>
+            <Text style={styles.price}>{vendor.price}</Text>
+            {distance && (
+              <Text style={styles.distance}>
+                {distance} {units} away
+              </Text>
+            )}
+            <Text style={styles.rating}>
+              <FontAwesome name="star" size={14} color="gold" /> {vendor.rating}
+            </Text>
+          </View>
+        </View>
+      </TouchableOpacity>
     </Animated.View>
   );
 };
@@ -173,7 +146,6 @@ const styles = StyleSheet.create({
     bottom: 125,
     left: 10,
     right: 10,
-    flexDirection: "row",
     borderRadius: 16,
     overflow: "hidden",
     elevation: 5,
@@ -181,6 +153,9 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 8,
+  },
+  cardContent: {
+    flexDirection: "row",
   },
   closeButton: {
     position: "absolute",
@@ -199,7 +174,7 @@ const styles = StyleSheet.create({
     height: 120,
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: "#e0e0e0", // Placeholder background while loading
+    backgroundColor: "#e0e0e0",
   },
   image: {
     width: "100%",
