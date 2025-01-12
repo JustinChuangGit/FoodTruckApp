@@ -9,6 +9,7 @@ import {
 } from "react-native";
 import { useRouter, useLocalSearchParams } from "expo-router";
 import { MenuItem } from "@/constants/types";
+import { FontAwesome } from "@expo/vector-icons";
 
 export default function UserVendorInfo() {
   const router = useRouter();
@@ -25,7 +26,6 @@ export default function UserVendorInfo() {
   }>();
 
   const {
-    uid,
     location = "{}",
     menu = "[]",
     name,
@@ -36,126 +36,117 @@ export default function UserVendorInfo() {
     rating,
   } = params;
 
-  const parsedLocation = JSON.parse(location); // Parse location object
   const parsedMenu: MenuItem[] = JSON.parse(menu);
+
   const decodedImage = decodeURIComponent(image);
 
-  const formatMenuWithHeaders = (menu: MenuItem[]) => {
-    const grouped = menu.reduce((acc: Record<string, MenuItem[]>, item) => {
-      if (!acc[item.category]) {
-        acc[item.category] = [];
-      }
-      acc[item.category].push(item);
-      return acc;
-    }, {});
+  const formatData = () => {
+    const headerData = [
+      {
+        type: "header",
+        component: (
+          <>
+            <View style={styles.logoContainer}>
+              {image ? (
+                <Image source={{ uri: image }} style={styles.logo} />
+              ) : (
+                <Text style={styles.imageFallbackText}>
+                  Image not available
+                </Text>
+              )}
+            </View>
+            <View style={styles.informationContainer}>
+              <Text style={styles.name}>{name}</Text>
+              <View style={styles.informationSubHeaderContainer}>
+                <Text style={styles.vendorPrice}>{vendorType} </Text>
+                <FontAwesome name="circle" size={8} color="#888" />
+                <Text style={styles.vendorPrice}> {price} </Text>
+                <FontAwesome name="circle" size={8} color="#888" />
+                <Text style={styles.vendorRating}> {rating}</Text>
+                <FontAwesome name="star" size={12} color="#888" />
+              </View>
+              <Text style={styles.description}>{description}</Text>
 
-    const formatted = [];
-    for (const [category, items] of Object.entries(grouped)) {
-      formatted.push({ type: "header", title: category }); // Header type
-      formatted.push(
-        ...items.map((item) => ({
-          ...item,
-          type: "item", // Item type
-        }))
-      );
-    }
-    return formatted;
+              <TouchableOpacity
+                style={styles.closeButton}
+                onPress={() => router.back()}
+              >
+                <Text style={styles.closeButtonText}>Close</Text>
+              </TouchableOpacity>
+              <View
+                style={{
+                  marginVertical: 16,
+                  height: 1,
+                  backgroundColor: "#ddd",
+                }}
+              />
+              <Text style={styles.menuHeader}>Menu</Text>
+            </View>
+          </>
+        ),
+      },
+    ];
+
+    const menuData = parsedMenu.length
+      ? parsedMenu.reduce((acc: any[], item) => {
+          const categoryIndex = acc.findIndex(
+            (data) => data.type === "category" && data.title === item.category
+          );
+          if (categoryIndex === -1) {
+            acc.push({ type: "category", title: item.category });
+          }
+          acc.push({ type: "item", ...item });
+          return acc;
+        }, [])
+      : [{ type: "empty", message: "No menu items available" }];
+
+    return [...headerData, ...menuData];
   };
 
-  console.log("image", image);
-  console.log("decodedImage", decodedImage);
+  const renderItem = ({ item }: { item: any }) => {
+    if (item.type === "header") {
+      return item.component;
+    } else if (item.type === "category") {
+      return <Text style={styles.categoryHeader}>{item.title}</Text>;
+    } else if (item.type === "item") {
+      return (
+        <View style={styles.menuItem}>
+          <View style={styles.menuItemTextContainer}>
+            <Text style={styles.menuItemName}>{item.name}</Text>
+            <Text style={styles.menuItemDescription}>{item.description}</Text>
+          </View>
+          <View style={styles.menuItemPriceContainer}>
+            <Text style={styles.menuItemPrice}>${item.price.toFixed(2)}</Text>
+          </View>
+        </View>
+      );
+    } else if (item.type === "empty") {
+      return <Text style={styles.emptyMenuText}>{item.message}</Text>;
+    }
+    return null;
+  };
 
   return (
-    <View style={styles.modalOverlay}>
-      <View style={styles.modalContent}>
-        <View style={styles.logoContainer}>
-          {image ? (
-            <Image
-              source={{ uri: image }}
-              style={styles.logo}
-              // onError={(error) => console.error("Image load error:", error)}
-            />
-          ) : (
-            <Text style={styles.imageFallbackText}>Image not available</Text>
-          )}
-        </View>
-        <View style={styles.modalInformationContainer}>
-          <Text style={styles.name}>{name}</Text>
-          <Text style={styles.description}>{description}</Text>
-          <Text style={styles.price}>Price: {price}</Text>
-          <Text style={styles.rating}>Rating: {rating}/5</Text>
-
-          <TouchableOpacity
-            style={styles.closeButton}
-            onPress={() => router.back()}
-          >
-            <Text style={styles.closeButtonText}>Close</Text>
-          </TouchableOpacity>
-
-          <View
-            style={{ marginVertical: 16, height: 1, backgroundColor: "#ddd" }}
-          />
-
-          <Text style={styles.menuHeader}>Menu</Text>
-          {parsedMenu.length > 0 ? (
-            <FlatList
-              data={formatMenuWithHeaders(parsedMenu)}
-              keyExtractor={(item, index) =>
-                item.type === "header"
-                  ? `header-${index}`
-                  : `item-${(item as MenuItem).name}-${index}`
-              }
-              renderItem={({ item }) => {
-                if (item.type === "header") {
-                  // Render headers safely
-
-                  return (
-                    <Text style={styles.categoryHeader}>
-                      {(item as { title: string }).title}
-                    </Text>
-                  );
-                } else if (isMenuItem(item)) {
-                  // Render menu items safely
-                  return (
-                    <View style={styles.menuItem}>
-                      <View style={styles.menuItemTextContainer}>
-                        <Text style={styles.menuItemName}>{item.name}</Text>
-                        <Text style={styles.menuItemDescription}>
-                          {item.description}
-                        </Text>
-                      </View>
-                      <View style={styles.menuItemPriceContainer}>
-                        <Text style={styles.menuItemPrice}>
-                          ${item.price.toFixed(2)}
-                        </Text>
-                      </View>
-                    </View>
-                  );
-                }
-                return null; // Fallback for unexpected types
-              }}
-              contentContainerStyle={styles.menuList}
-            />
-          ) : (
-            <Text style={styles.emptyMenuText}>No menu items available</Text>
-          )}
-        </View>
-      </View>
-    </View>
+    <FlatList
+      data={formatData()}
+      keyExtractor={(item, index) =>
+        item.type === "header"
+          ? `header-${index}`
+          : item.type === "category"
+          ? `category-${item.title}-${index}`
+          : `item-${item.name || item.message}-${index}`
+      }
+      renderItem={renderItem}
+      contentContainerStyle={styles.flatListContainer}
+    />
   );
 }
 
 const styles = StyleSheet.create({
-  modalOverlay: {
-    flex: 1,
-    justifyContent: "center",
-    backgroundColor: "rgba(0, 0, 0, 0.5)",
-  },
-  modalContent: {
-    backgroundColor: "#fff",
-    borderRadius: 20,
-    overflow: "hidden",
-    paddingBottom: 32,
+  flatListContainer: {
+    flexGrow: 1,
+    backgroundColor: "white",
+    paddingBottom: 16,
   },
   logoContainer: {
     alignItems: "center",
@@ -167,18 +158,16 @@ const styles = StyleSheet.create({
     height: "100%",
     resizeMode: "cover",
   },
-  modalInformationContainer: {
-    paddingHorizontal: 16,
+  informationContainer: {
+    padding: 16,
   },
   name: {
-    fontSize: 24,
+    fontSize: 30,
     fontWeight: "bold",
-    textAlign: "center",
-    marginBottom: 8,
+    marginBottom: 3,
   },
   description: {
     fontSize: 16,
-    textAlign: "center",
     color: "#555",
     marginBottom: 8,
   },
@@ -212,6 +201,7 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     marginTop: 20,
     marginBottom: 8,
+    paddingHorizontal: 16,
   },
   menuItem: {
     flexDirection: "row",
@@ -219,6 +209,7 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     borderBottomWidth: 1,
     borderBottomColor: "#ddd",
+    paddingHorizontal: 16,
   },
   menuItemName: {
     fontSize: 16,
@@ -244,15 +235,21 @@ const styles = StyleSheet.create({
     color: "#555",
     marginTop: 16,
   },
-  menuList: {
-    paddingBottom: 16, // Adjust for spacing below the last item
-  },
   imageFallbackText: {
     textAlign: "center",
     color: "#555",
   },
+  vendorPrice: {
+    fontSize: 14,
+    color: "#555",
+  },
+  vendorRating: {
+    fontSize: 14,
+    color: "#888",
+  },
+  informationSubHeaderContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 8,
+  },
 });
-
-function isMenuItem(item: any): item is MenuItem {
-  return item.type === "item";
-}
