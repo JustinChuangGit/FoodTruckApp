@@ -152,7 +152,6 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(0, 0, 0, 0.5)",
   },
   modalContent: {
-    margin: 20,
     backgroundColor: "#fff",
     borderRadius: 20,
     overflow: "hidden",
