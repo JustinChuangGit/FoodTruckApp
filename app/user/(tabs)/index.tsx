@@ -272,7 +272,7 @@ export default function Index() {
 
       <BottomSheet
         ref={bottomSheetRef}
-        index={1}
+        index={2}
         snapPoints={snapPoints}
         enableOverDrag={false}
         topInset={100}

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useRef, useState } from "react";
 import {
   View,
   Text,
@@ -6,11 +6,14 @@ import {
   FlatList,
   StyleSheet,
   TouchableOpacity,
+  Dimensions,
 } from "react-native";
 import { useRouter, useLocalSearchParams } from "expo-router";
 import { MenuItem } from "@/constants/types";
 import { FontAwesome } from "@expo/vector-icons";
-import { SafeAreaView } from "react-native-safe-area-context";
+import HorizontalLine from "@/components/default/HorizontalLine";
+
+const screenWidth = Dimensions.get("window").width;
 
 export default function UserVendorInfo() {
   const router = useRouter();
@@ -26,6 +29,8 @@ export default function UserVendorInfo() {
     rating: string;
   }>();
 
+  const [contentWidth, setContentWidth] = useState(0);
+
   const {
     location = "{}",
     menu = "[]",
@@ -38,9 +43,17 @@ export default function UserVendorInfo() {
   } = params;
 
   const parsedMenu: MenuItem[] = JSON.parse(menu);
+  const verticalFlatListRef = useRef<FlatList>(null);
 
-  const decodedImage = decodeURIComponent(image);
+  // Extract categories for the horizontal list
+  const categories = parsedMenu.reduce((acc: string[], item) => {
+    if (!acc.includes(item.category)) {
+      acc.push(item.category);
+    }
+    return acc;
+  }, []);
 
+  // Format data for the vertical FlatList
   const formatData = () => {
     const headerData = [
       {
@@ -84,36 +97,66 @@ export default function UserVendorInfo() {
               </View>
               <Text style={styles.description}>{description}</Text>
 
+              {/* Horizontal FlatList for Categories */}
+              <HorizontalLine />
               <View
                 style={{
-                  marginVertical: 16,
-                  height: 1,
-                  backgroundColor: "#ddd",
+                  alignItems: categories.length <= 3 ? "center" : "flex-start", // Center for 3 or fewer categories
                 }}
-              />
-              <Text style={styles.menuHeader}>Menu</Text>
+              >
+                <FlatList
+                  data={categories}
+                  keyExtractor={(item, index) => `horizontal-${index}`}
+                  horizontal
+                  renderItem={renderHorizontalItem}
+                  contentContainerStyle={styles.horizontalList}
+                  showsHorizontalScrollIndicator={false} // Allow scrolling for long lists
+                  scrollEnabled={categories.length > 3} // Enable scrolling only if there are more than 3 items
+                />
+              </View>
+
+              <HorizontalLine />
             </View>
           </>
         ),
       },
     ];
 
-    const menuData = parsedMenu.length
-      ? parsedMenu.reduce((acc: any[], item) => {
-          const categoryIndex = acc.findIndex(
-            (data) => data.type === "category" && data.title === item.category
-          );
-          if (categoryIndex === -1) {
-            acc.push({ type: "category", title: item.category });
-          }
-          acc.push({ type: "item", ...item });
-          return acc;
-        }, [])
-      : [{ type: "empty", message: "No menu items available" }];
+    const menuData = parsedMenu.reduce((acc: any[], item) => {
+      const categoryIndex = acc.findIndex(
+        (data) => data.type === "category" && data.title === item.category
+      );
+      if (categoryIndex === -1) {
+        acc.push({ type: "category", title: item.category });
+      }
+      acc.push({ type: "item", ...item });
+      return acc;
+    }, []);
 
     return [...headerData, ...menuData];
   };
 
+  // Scroll the vertical FlatList to a specific category
+  const scrollToCategory = (category: string) => {
+    const index = formatData().findIndex(
+      (item) => item.type === "category" && item.title === category
+    );
+    if (index !== -1 && verticalFlatListRef.current) {
+      verticalFlatListRef.current.scrollToIndex({ index, animated: true });
+    }
+  };
+
+  // Render a single item in the horizontal FlatList
+  const renderHorizontalItem = ({ item }: { item: string }) => (
+    <TouchableOpacity
+      style={styles.horizontalItem}
+      onPress={() => scrollToCategory(item)}
+    >
+      <Text style={styles.horizontalItemText}>{item}</Text>
+    </TouchableOpacity>
+  );
+
+  // Render a single item in the vertical FlatList
   const renderItem = ({ item }: { item: any }) => {
     if (item.type === "header") {
       return item.component;
@@ -138,8 +181,9 @@ export default function UserVendorInfo() {
   };
 
   return (
-    <View>
+    <View style={{ flex: 1 }}>
       <FlatList
+        ref={verticalFlatListRef}
         data={formatData()}
         keyExtractor={(item, index) =>
           item.type === "header"
@@ -161,6 +205,19 @@ const styles = StyleSheet.create({
     backgroundColor: "white",
     paddingBottom: 16,
   },
+  horizontalList: {
+    flexDirection: "row", // Ensures horizontal layout
+    // alignItems: "center", // Vertically center items
+    paddingHorizontal: 8, // Add spacing if necessary
+  },
+  horizontalItem: {
+    marginRight: 16,
+  },
+  horizontalItemText: {
+    color: "black",
+    fontSize: 25,
+    fontWeight: "bold",
+  },
   logoContainer: {
     alignItems: "center",
     height: 300,
@@ -171,46 +228,22 @@ const styles = StyleSheet.create({
     height: "100%",
     resizeMode: "cover",
   },
+  imageFallbackText: {
+    color: "#555",
+    fontSize: 16,
+    textAlign: "center",
+    marginTop: 16,
+  },
   informationContainer: {
     padding: 16,
   },
   name: {
     fontSize: 30,
     fontWeight: "bold",
-    marginBottom: 3,
   },
   description: {
     fontSize: 16,
     color: "#555",
-    marginBottom: 8,
-  },
-  price: {
-    fontSize: 16,
-    marginBottom: 4,
-  },
-  rating: {
-    fontSize: 16,
-    marginBottom: 16,
-  },
-  closeButton: {
-    position: "absolute", // Make the button positioned absolutely
-    top: 50, // Distance from the top
-    left: 10, // Distance from the left
-    paddingVertical: 10,
-    paddingHorizontal: 20,
-    borderRadius: 5,
-    alignItems: "center",
-    justifyContent: "center",
-    zIndex: 10, // Ensure the button appears above other content
-  },
-  closeButtonText: {
-    color: "#fff",
-    fontSize: 16,
-  },
-  menuHeader: {
-    fontSize: 30,
-    fontWeight: "bold",
-    marginBottom: 8,
   },
   categoryHeader: {
     fontSize: 25,
@@ -251,9 +284,21 @@ const styles = StyleSheet.create({
     color: "#555",
     marginTop: 16,
   },
-  imageFallbackText: {
-    textAlign: "center",
-    color: "#555",
+  closeButton: {
+    position: "absolute",
+    top: 50,
+    left: 10,
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 5,
+    alignItems: "center",
+    justifyContent: "center",
+    zIndex: 10,
+  },
+  icon: {
+    position: "absolute",
+    top: 19,
+    left: 26,
   },
   vendorPrice: {
     fontSize: 14,
@@ -267,13 +312,5 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     marginBottom: 8,
-  },
-  iconOutline: {
-    position: "absolute",
-  },
-  icon: {
-    position: "absolute",
-    top: 19,
-    left: 26,
   },
 });
