@@ -164,13 +164,18 @@ export default function UserVendorInfo() {
       return <Text style={styles.categoryHeader}>{item.title}</Text>;
     } else if (item.type === "item") {
       return (
-        <View style={styles.menuItem}>
-          <View style={styles.menuItemTextContainer}>
-            <Text style={styles.menuItemName}>{item.name}</Text>
-            <Text style={styles.menuItemDescription}>{item.description}</Text>
+        <View style={{ display: "flex" }}>
+          <View style={styles.menuItem}>
+            <View style={styles.menuItemTextContainer}>
+              <Text style={styles.menuItemName}>{item.name}</Text>
+              <Text style={styles.menuItemDescription}>{item.description}</Text>
+            </View>
+            <View style={styles.menuItemPriceContainer}>
+              <Text style={styles.menuItemPrice}>${item.price.toFixed(2)}</Text>
+            </View>
           </View>
-          <View style={styles.menuItemPriceContainer}>
-            <Text style={styles.menuItemPrice}>${item.price.toFixed(2)}</Text>
+          <View style={{ paddingHorizontal: 16 }}>
+            <HorizontalLine />
           </View>
         </View>
       );
@@ -208,7 +213,6 @@ const styles = StyleSheet.create({
   horizontalList: {
     flexDirection: "row", // Ensures horizontal layout
     // alignItems: "center", // Vertically center items
-    paddingHorizontal: 8, // Add spacing if necessary
   },
   horizontalItem: {
     marginRight: 16,
@@ -235,7 +239,8 @@ const styles = StyleSheet.create({
     marginTop: 16,
   },
   informationContainer: {
-    padding: 16,
+    paddingTop: 16,
+    paddingHorizontal: 16,
   },
   name: {
     fontSize: 30,
@@ -256,8 +261,6 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     paddingVertical: 10,
-    borderBottomWidth: 1,
-    borderBottomColor: "#ddd",
     paddingHorizontal: 16,
   },
   menuItemName: {
