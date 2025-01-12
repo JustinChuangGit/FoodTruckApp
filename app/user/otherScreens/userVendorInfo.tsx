@@ -10,6 +10,7 @@ import {
 import { useRouter, useLocalSearchParams } from "expo-router";
 import { MenuItem } from "@/constants/types";
 import { FontAwesome } from "@expo/vector-icons";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function UserVendorInfo() {
   const router = useRouter();
@@ -47,6 +48,22 @@ export default function UserVendorInfo() {
         component: (
           <>
             <View style={styles.logoContainer}>
+              <TouchableOpacity
+                onPress={() => router.back()}
+                style={styles.closeButton}
+              >
+                <FontAwesome
+                  name="circle"
+                  size={40}
+                  color="rgba(0, 0, 0, 0.5)"
+                />
+                <FontAwesome
+                  name="chevron-left"
+                  size={24}
+                  color="white"
+                  style={styles.icon}
+                />
+              </TouchableOpacity>
               {image ? (
                 <Image source={{ uri: image }} style={styles.logo} />
               ) : (
@@ -67,12 +84,6 @@ export default function UserVendorInfo() {
               </View>
               <Text style={styles.description}>{description}</Text>
 
-              <TouchableOpacity
-                style={styles.closeButton}
-                onPress={() => router.back()}
-              >
-                <Text style={styles.closeButtonText}>Close</Text>
-              </TouchableOpacity>
               <View
                 style={{
                   marginVertical: 16,
@@ -127,18 +138,20 @@ export default function UserVendorInfo() {
   };
 
   return (
-    <FlatList
-      data={formatData()}
-      keyExtractor={(item, index) =>
-        item.type === "header"
-          ? `header-${index}`
-          : item.type === "category"
-          ? `category-${item.title}-${index}`
-          : `item-${item.name || item.message}-${index}`
-      }
-      renderItem={renderItem}
-      contentContainerStyle={styles.flatListContainer}
-    />
+    <View>
+      <FlatList
+        data={formatData()}
+        keyExtractor={(item, index) =>
+          item.type === "header"
+            ? `header-${index}`
+            : item.type === "category"
+            ? `category-${item.title}-${index}`
+            : `item-${item.name || item.message}-${index}`
+        }
+        renderItem={renderItem}
+        contentContainerStyle={styles.flatListContainer}
+      />
+    </View>
   );
 }
 
@@ -180,12 +193,15 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   closeButton: {
-    marginTop: 16,
-    backgroundColor: "#007bff",
+    position: "absolute", // Make the button positioned absolutely
+    top: 50, // Distance from the top
+    left: 10, // Distance from the left
     paddingVertical: 10,
     paddingHorizontal: 20,
     borderRadius: 5,
-    alignSelf: "center",
+    alignItems: "center",
+    justifyContent: "center",
+    zIndex: 10, // Ensure the button appears above other content
   },
   closeButtonText: {
     color: "#fff",
@@ -251,5 +267,13 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     marginBottom: 8,
+  },
+  iconOutline: {
+    position: "absolute",
+  },
+  icon: {
+    position: "absolute",
+    top: 19,
+    left: 26,
   },
 });
