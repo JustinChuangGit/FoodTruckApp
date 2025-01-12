@@ -7,6 +7,7 @@ import {
   StyleSheet,
   TouchableOpacity,
   Dimensions,
+  ActivityIndicator,
 } from "react-native";
 import { useRouter, useLocalSearchParams } from "expo-router";
 import { MenuItem } from "@/constants/types";
@@ -30,6 +31,7 @@ export default function UserVendorInfo() {
   }>();
 
   const [contentWidth, setContentWidth] = useState(0);
+  const [imageLoading, setImageLoading] = useState(true);
 
   const {
     location = "{}",
@@ -78,7 +80,21 @@ export default function UserVendorInfo() {
                 />
               </TouchableOpacity>
               {image ? (
-                <Image source={{ uri: image }} style={styles.logo} />
+                <>
+                  {imageLoading && (
+                    <ActivityIndicator
+                      size="large"
+                      color="#007bff"
+                      style={styles.loadingIndicator}
+                    />
+                  )}
+                  <Image
+                    source={{ uri: image }}
+                    style={styles.logo}
+                    onLoad={() => setImageLoading(false)} // Image loaded
+                    onLoadStart={() => setImageLoading(true)} // Start loading
+                  />
+                </>
               ) : (
                 <Text style={styles.imageFallbackText}>
                   Image not available
@@ -315,5 +331,11 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     marginBottom: 8,
+  },
+  loadingIndicator: {
+    position: "absolute", // Ensure it overlaps the image
+    top: "50%", // Center it vertically
+    left: "50%", // Center it horizontally
+    transform: [{ translateX: -15 }, { translateY: -15 }], // Adjust for spinner size
   },
 });
