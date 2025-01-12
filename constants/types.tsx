@@ -38,3 +38,18 @@ export interface Section {
   title: string;
   vendors: Vendor[];
 }
+
+export interface ActiveVendor {
+  uid: string; // Unique identifier for the vendor
+  timestamp: string; // ISO timestamp for when the vendor was set
+  location: {
+    latitude: number; // Latitude of the vendor's location
+    longitude: number; // Longitude of the vendor's location
+  };
+  menu: MenuItem[]; // Array of menu items
+  name: string; // Vendor's name
+  vendorType: string; // Type of the vendor
+  price: string; // Price range or pricing information
+  description: string; // Vendor's description
+  image: string | null; // Vendor's image URL or null if not provided
+}

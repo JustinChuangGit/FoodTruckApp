@@ -35,6 +35,7 @@ import { Section } from "@/constants/types";
 
 //TODO: Replace with collections from Firestore
 import liveVendors from "../../../dummyVendorMapData.json";
+import { router } from "expo-router";
 
 const { width } = Dimensions.get("window");
 
@@ -190,7 +191,30 @@ export default function Index() {
 
   const handleCardPress = (vendor: Vendor) => {
     setSelectedVendor(vendor);
-    setModalVisible(true);
+
+    const location = JSON.stringify({
+      latitude: vendor.latitude,
+      longitude: vendor.longitude,
+    });
+    const menu = JSON.stringify(vendor.menu);
+
+    console.log("Index encoded image", encodeURIComponent(vendor.image));
+    console.log("Index original image", vendor.image);
+
+    router.push({
+      pathname: "/user/otherScreens/userVendorInfo",
+      params: {
+        uid: vendor.uid,
+        location: encodeURIComponent(location),
+        menu: encodeURIComponent(menu),
+        name: vendor.name,
+        vendorType: vendor.vendorType,
+        price: vendor.price,
+        description: vendor.description,
+        image: encodeURIComponent(vendor.image), // Encode the image URL
+        rating: vendor.rating,
+      },
+    });
   };
 
   const closeModal = () => {
@@ -276,86 +300,95 @@ export default function Index() {
         </BottomSheetView>
       </BottomSheet>
 
-      <Modal
-        visible={isModalVisible}
-        animationType="slide"
-        transparent={true}
-        onRequestClose={closeModal}
-      >
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalContent}>
+      {isModalVisible && (
+        <Modal
+          animationType="slide"
+          transparent={true}
+          onRequestClose={closeModal}
+        >
+          <View style={styles.modalOverlay}>
             {selectedVendor && (
-              <>
-                {/* Vendor Image */}
-                <Image
-                  source={{ uri: selectedVendor.image }}
-                  style={styles.logo}
-                />
-
-                {/* Vendor Name */}
-                <Text style={styles.name}>{selectedVendor.name}</Text>
-
-                {/* Vendor Description */}
-                <Text style={styles.description}>
-                  {selectedVendor.description}
-                </Text>
-
-                {/* Vendor Price Range */}
-                <Text style={styles.price}>Price: {selectedVendor.price}</Text>
-
-                {/* Vendor Rating */}
-                <Text style={styles.rating}>
-                  Rating: {selectedVendor.rating}/5
-                </Text>
-
-                {/* Close Button */}
-                <TouchableOpacity
-                  style={styles.closeButton}
-                  onPress={closeModal}
-                >
-                  <Text style={styles.closeButtonText}>Close</Text>
-                </TouchableOpacity>
-
-                {/* Horizontal Line */}
-                <HorizontalLine />
-
-                {/* Vendor Menu */}
-                <Text style={styles.menuHeader}>Menu</Text>
-                {selectedVendor.menu && selectedVendor.menu.length > 0 ? (
-                  <FlatList
-                    data={formatMenuWithHeaders(selectedVendor.menu)} // Add headers to menu data
-                    keyExtractor={(item, index) => item.id || `header-${index}`} // Handle both menu items and headers
-                    renderItem={({ item }) =>
-                      item.type === "header" ? (
-                        <Text style={styles.categoryHeader}>{item.title}</Text> // Render category header
-                      ) : (
-                        <View style={styles.menuItem}>
-                          <View style={styles.menuItemTextContainer}>
-                            <Text style={styles.menuItemName}>{item.name}</Text>
-                            <Text style={styles.menuItemDescription}>
-                              {item.description}
-                            </Text>
-                          </View>
-                          <View style={styles.menuItemPriceContainer}>
-                            <Text style={styles.menuItemPrice}>
-                              ${item.price}
-                            </Text>
-                          </View>
-                        </View>
-                      )
-                    }
-                    contentContainerStyle={styles.menuList}
+              <View style={styles.modalContent}>
+                <SafeAreaView style={styles.logoContainer}>
+                  <Image
+                    source={{ uri: selectedVendor.image }}
+                    style={styles.logo}
                   />
-                ) : (
-                  <Text style={styles.emptyMenuText}>
-                    No menu items available
+                </SafeAreaView>
+                <View style={styles.modalInformationContainer}>
+                  {/* Vendor Name */}
+                  <Text style={styles.name}>{selectedVendor.name}</Text>
+
+                  {/* Vendor Description */}
+                  <Text style={styles.description}>
+                    {selectedVendor.description}
                   </Text>
-                )}
-              </>
+
+                  {/* Vendor Price Range */}
+                  <Text style={styles.price}>
+                    Price: {selectedVendor.price}
+                  </Text>
+
+                  {/* Vendor Rating */}
+                  <Text style={styles.rating}>
+                    Rating: {selectedVendor.rating}/5
+                  </Text>
+
+                  {/* Close Button */}
+                  <TouchableOpacity
+                    style={styles.closeButton}
+                    onPress={closeModal}
+                  >
+                    <Text style={styles.closeButtonText}>Close</Text>
+                  </TouchableOpacity>
+
+                  {/* Horizontal Line */}
+                  <HorizontalLine />
+
+                  {/* Vendor Menu */}
+                  <Text style={styles.menuHeader}>Menu</Text>
+                  {selectedVendor.menu && selectedVendor.menu.length > 0 ? (
+                    <FlatList
+                      data={formatMenuWithHeaders(selectedVendor.menu)} // Add headers to menu data
+                      keyExtractor={(item, index) =>
+                        item.id || `header-${index}`
+                      } // Handle both menu items and headers
+                      renderItem={({ item }) =>
+                        item.type === "header" ? (
+                          <Text style={styles.categoryHeader}>
+                            {item.title}
+                          </Text> // Render category header
+                        ) : (
+                          <View style={styles.menuItem}>
+                            <View style={styles.menuItemTextContainer}>
+                              <Text style={styles.menuItemName}>
+                                {item.name}
+                              </Text>
+                              <Text style={styles.menuItemDescription}>
+                                {item.description}
+                              </Text>
+                            </View>
+                            <View style={styles.menuItemPriceContainer}>
+                              <Text style={styles.menuItemPrice}>
+                                ${item.price}
+                              </Text>
+                            </View>
+                          </View>
+                        )
+                      }
+                      contentContainerStyle={styles.menuList}
+                    />
+                  ) : (
+                    <Text style={styles.emptyMenuText}>
+                      No menu items available
+                    </Text>
+                  )}
+                </View>
+              </View>
             )}
           </View>
-        </View>
-      </Modal>
+        </Modal>
+      )}
     </SafeAreaView>
   );
 }
@@ -406,14 +439,13 @@ const styles = StyleSheet.create({
     backgroundColor: "#fff", // Modal background
     borderTopLeftRadius: 20, // Rounded corners at the top
     borderTopRightRadius: 20,
-    padding: 16, // Add padding for content
     paddingBottom: 32, // Extra padding to account for the safe area
   },
   logo: {
-    width: 100,
-    height: 100,
-    borderRadius: 50,
-    marginBottom: 16,
+    width: "100%", // Fill the container's width
+    height: "100%", // Fill the container's height
+    resizeMode: "cover", // Scale the image to cover the container
+    zIndex: 1, // Place the image above other content
   },
   name: {
     fontSize: 24,
@@ -492,5 +524,14 @@ const styles = StyleSheet.create({
   },
   menuItemPriceContainer: {
     justifyContent: "center",
+  },
+  logoContainer: {
+    alignItems: "center",
+    marginBottom: 16,
+    backgroundColor: "red",
+    height: 300,
+  },
+  modalInformationContainer: {
+    paddingHorizontal: 16,
   },
 });
