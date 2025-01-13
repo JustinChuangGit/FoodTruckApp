@@ -8,6 +8,11 @@ import {
   ScrollView,
   Image,
   ActivityIndicator,
+  Alert,
+  KeyboardAvoidingView,
+  TouchableWithoutFeedback,
+  Keyboard,
+  Platform,
 } from "react-native";
 import { useRouter } from "expo-router";
 import * as ImagePicker from "expo-image-picker";
@@ -82,6 +87,24 @@ export default function VendorEditAccountScreen() {
       return;
     }
 
+    // Validate required fields
+    if (!name.trim()) {
+      Alert.alert("Validation Error", "Name is required.");
+      return;
+    }
+    if (!price.trim()) {
+      Alert.alert("Validation Error", "Price is required.");
+      return;
+    }
+    if (!vendorType.trim()) {
+      Alert.alert("Validation Error", "Vendor Type is required.");
+      return;
+    }
+    if (!description.trim()) {
+      Alert.alert("Validation Error", "Description is required.");
+      return;
+    }
+
     const vendorData: VendorAccountInfo = {
       price,
       vendorType,
@@ -92,14 +115,15 @@ export default function VendorEditAccountScreen() {
 
     try {
       await updateVendorAccountData(user.uid, vendorData);
-      // Ensure 'image' is either a string or undefined
+
+      // Update Redux state with the updated vendor data
       const updatedUser = {
         ...user,
         ...vendorData,
         image: image || undefined, // Convert null to undefined if necessary
       };
 
-      dispatch(setUser(updatedUser)); // Update Redux state with the updated vendor data
+      dispatch(setUser(updatedUser));
 
       router.back(); // Navigate back after saving
     } catch (error) {
@@ -133,121 +157,132 @@ export default function VendorEditAccountScreen() {
   ];
 
   return (
-    <View style={styles.container}>
-      <SafeAreaView edges={["top"]} />
-      <View style={styles.header}>
-        <TouchableOpacity
-          style={styles.backButton}
-          onPress={() => router.back()}
-        >
-          <FontAwesome name="chevron-left" size={24} color="black" />
-        </TouchableOpacity>
-        <Text style={styles.headerText}>Edit Profile</Text>
-      </View>
+    <KeyboardAvoidingView
+      style={{ flex: 1 }}
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
+    >
+      <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+        <View style={styles.container}>
+          <SafeAreaView edges={["top"]} />
+          <View style={styles.header}>
+            <TouchableOpacity
+              style={styles.backButton}
+              onPress={() => router.back()}
+            >
+              <FontAwesome name="chevron-left" size={24} color="black" />
+            </TouchableOpacity>
+            <Text style={styles.headerText}>Edit Profile</Text>
+          </View>
 
-      <ScrollView contentContainerStyle={styles.formContainer}>
-        <View style={styles.imageContainer}>
-          {loading ? (
-            <View style={styles.placeholderImage}>
-              <ActivityIndicator size="large" color="blue" />
-            </View>
-          ) : image ? (
-            <Image source={{ uri: image }} style={styles.profileImage} />
-          ) : (
-            <View style={styles.placeholderImage}>
-              <Text style={styles.placeholderText}>Please Add Your Logo</Text>
-            </View>
-          )}
+          <ScrollView contentContainerStyle={styles.formContainer}>
+            <View style={styles.imageContainer}>
+              {loading ? (
+                <View style={styles.placeholderImage}>
+                  <ActivityIndicator size="large" color="blue" />
+                </View>
+              ) : image ? (
+                <Image source={{ uri: image }} style={styles.profileImage} />
+              ) : (
+                <View style={styles.placeholderImage}>
+                  <Text style={styles.placeholderText}>
+                    Please Add Your Logo
+                  </Text>
+                </View>
+              )}
 
-          <TouchableOpacity onPress={pickImage}>
-            <Text style={styles.editImageText}>Edit Logo</Text>
-          </TouchableOpacity>
+              <TouchableOpacity onPress={pickImage}>
+                <Text style={styles.editImageText}>Edit Logo</Text>
+              </TouchableOpacity>
+            </View>
+
+            <Text style={styles.label}>Name</Text>
+            <TextInput
+              style={styles.input}
+              value={name}
+              onChangeText={setName}
+              placeholder="Enter name"
+            />
+
+            <Text style={styles.label}>Price</Text>
+            <SelectDropdown
+              data={priceOptions}
+              defaultValue={priceOptions.find(
+                (option) => option.title === price
+              )}
+              onSelect={(selectedItem) => setPrice(selectedItem.title)}
+              renderButton={(selectedItem, isOpened) => (
+                <View style={styles.dropdownButtonStyle}>
+                  <Text style={styles.dropdownButtonTxtStyle}>
+                    {(selectedItem && selectedItem.title) || "Select Price"}
+                  </Text>
+                  <Icon
+                    name={isOpened ? "chevron-up" : "chevron-down"}
+                    style={styles.dropdownButtonArrowStyle}
+                  />
+                </View>
+              )}
+              renderItem={(item, index, isSelected) => (
+                <View
+                  style={{
+                    ...styles.dropdownItemStyle,
+                    ...(isSelected && { backgroundColor: "#D2D9DF" }),
+                  }}
+                >
+                  <Text style={styles.dropdownItemTxtStyle}>{item.title}</Text>
+                </View>
+              )}
+              showsVerticalScrollIndicator={false}
+              dropdownStyle={styles.dropdownMenuStyle}
+            />
+
+            <Text style={styles.label}>Vendor Type</Text>
+            <SelectDropdown
+              data={vendorTypeOptions}
+              defaultValue={vendorTypeOptions.find(
+                (option) => option.title === vendorType
+              )}
+              onSelect={(selectedItem) => setVendorType(selectedItem.title)}
+              renderButton={(selectedItem, isOpened) => (
+                <View style={styles.dropdownButtonStyle}>
+                  <Text style={styles.dropdownButtonTxtStyle}>
+                    {selectedItem ? selectedItem.title : "Select Vendor Type"}
+                  </Text>
+                  <Icon
+                    name={isOpened ? "chevron-up" : "chevron-down"}
+                    style={styles.dropdownButtonArrowStyle}
+                  />
+                </View>
+              )}
+              renderItem={(item, index, isSelected) => (
+                <View
+                  style={{
+                    ...styles.dropdownItemStyle,
+                    ...(isSelected && { backgroundColor: "#D2D9DF" }),
+                  }}
+                >
+                  <Text style={styles.dropdownItemTxtStyle}>{item.title}</Text>
+                </View>
+              )}
+              showsVerticalScrollIndicator={false}
+              dropdownStyle={styles.dropdownMenuStyle}
+            />
+
+            <Text style={styles.label}>Description</Text>
+            <TextInput
+              style={[styles.input, styles.textArea]}
+              value={description}
+              onChangeText={setDescription}
+              placeholder="Enter description"
+              multiline
+            />
+
+            <TouchableOpacity style={styles.saveButton} onPress={handleSave}>
+              <Text style={styles.saveButtonText}>Save</Text>
+            </TouchableOpacity>
+          </ScrollView>
         </View>
-
-        <Text style={styles.label}>Name</Text>
-        <TextInput
-          style={styles.input}
-          value={name}
-          onChangeText={setName}
-          placeholder="Enter name"
-        />
-
-        <Text style={styles.label}>Price</Text>
-        <SelectDropdown
-          data={priceOptions}
-          defaultValue={priceOptions.find((option) => option.title === price)}
-          onSelect={(selectedItem) => setPrice(selectedItem.title)}
-          renderButton={(selectedItem, isOpened) => (
-            <View style={styles.dropdownButtonStyle}>
-              <Text style={styles.dropdownButtonTxtStyle}>
-                {(selectedItem && selectedItem.title) || "Select Price"}
-              </Text>
-              <Icon
-                name={isOpened ? "chevron-up" : "chevron-down"}
-                style={styles.dropdownButtonArrowStyle}
-              />
-            </View>
-          )}
-          renderItem={(item, index, isSelected) => (
-            <View
-              style={{
-                ...styles.dropdownItemStyle,
-                ...(isSelected && { backgroundColor: "#D2D9DF" }),
-              }}
-            >
-              <Text style={styles.dropdownItemTxtStyle}>{item.title}</Text>
-            </View>
-          )}
-          showsVerticalScrollIndicator={false}
-          dropdownStyle={styles.dropdownMenuStyle}
-        />
-
-        <Text style={styles.label}>Vendor Type</Text>
-        <SelectDropdown
-          data={vendorTypeOptions}
-          defaultValue={vendorTypeOptions.find(
-            (option) => option.title === vendorType
-          )}
-          onSelect={(selectedItem) => setVendorType(selectedItem.title)}
-          renderButton={(selectedItem, isOpened) => (
-            <View style={styles.dropdownButtonStyle}>
-              <Text style={styles.dropdownButtonTxtStyle}>
-                {selectedItem ? selectedItem.title : "Select Vendor Type"}
-              </Text>
-              <Icon
-                name={isOpened ? "chevron-up" : "chevron-down"}
-                style={styles.dropdownButtonArrowStyle}
-              />
-            </View>
-          )}
-          renderItem={(item, index, isSelected) => (
-            <View
-              style={{
-                ...styles.dropdownItemStyle,
-                ...(isSelected && { backgroundColor: "#D2D9DF" }),
-              }}
-            >
-              <Text style={styles.dropdownItemTxtStyle}>{item.title}</Text>
-            </View>
-          )}
-          showsVerticalScrollIndicator={false}
-          dropdownStyle={styles.dropdownMenuStyle}
-        />
-
-        <Text style={styles.label}>Description</Text>
-        <TextInput
-          style={[styles.input, styles.textArea]}
-          value={description}
-          onChangeText={setDescription}
-          placeholder="Enter description"
-          multiline
-        />
-
-        <TouchableOpacity style={styles.saveButton} onPress={handleSave}>
-          <Text style={styles.saveButtonText}>Save</Text>
-        </TouchableOpacity>
-      </ScrollView>
-    </View>
+      </TouchableWithoutFeedback>
+    </KeyboardAvoidingView>
   );
 }
 
