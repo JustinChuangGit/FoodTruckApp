@@ -39,37 +39,6 @@ import { router } from "expo-router";
 
 const { width } = Dimensions.get("window");
 
-function formatMenuWithHeaders(
-  menu: {
-    id: string;
-    name: string;
-    description: string;
-    price: number;
-    category: string;
-  }[]
-) {
-  const grouped = menu.reduce((acc: Record<string, any[]>, item) => {
-    if (!acc[item.category]) {
-      acc[item.category] = [];
-    }
-    acc[item.category].push(item);
-    return acc;
-  }, {});
-
-  const formatted = [];
-  for (const [category, items] of Object.entries(grouped)) {
-    formatted.push({ type: "header", title: category }); // Add header
-    formatted.push(
-      ...items.map((item) => ({
-        ...item,
-        type: "item",
-        price: item.price.toFixed(2), // Convert price to string
-      }))
-    ); // Add items
-  }
-  return formatted;
-}
-
 function getNearbyVendors(
   vendors: Vendor[],
   location: LocationCoordinates | null
@@ -116,7 +85,6 @@ export default function Index() {
   const [carouselIndex, setCarouselIndex] = useState(0);
   const mapRef = useRef<MapView>(null);
   const bottomSheetRef = useRef<BottomSheet>(null);
-  const [isModalVisible, setModalVisible] = useState(false);
   const SECTIONDATA = formatSections([
     getNearbyVendors(vendors, location),
     getNearbyVendors(vendors, location),
@@ -164,7 +132,6 @@ export default function Index() {
         console.error("Error fetching active vendors:", error); // Log errors
       }
     );
-
     return () => unsubscribe();
   }, []);
 
@@ -172,34 +139,48 @@ export default function Index() {
     const index = vendors.findIndex((v) => v.uid === vendor.uid);
     setSelectedVendor(vendor);
     setCarouselIndex(index);
-    if (mapRef.current) {
+    // if (mapRef.current) {
+    //   mapRef.current.animateToRegion(
+    //     {
+    //       latitude: vendor.latitude, // Assuming Vendor type has latitude/longitude
+    //       longitude: vendor.longitude,
+    //       latitudeDelta: 0.01,
+    //       longitudeDelta: 0.01,
+    //     },
+    //     500
+    //   );
+    // }
+  };
+
+  useEffect(() => {
+    if (selectedVendor && mapRef.current) {
       mapRef.current.animateToRegion(
         {
-          latitude: vendor.latitude, // Assuming Vendor type has latitude/longitude
-          longitude: vendor.longitude,
+          latitude: selectedVendor.latitude,
+          longitude: selectedVendor.longitude,
           latitudeDelta: 0.01,
           longitudeDelta: 0.01,
         },
-        500
+        500 // Animation duration
       );
     }
-  };
+  }, [selectedVendor]);
 
   const handleCardClose = () => {
     setSelectedVendor(null);
+    setCarouselIndex(0);
   };
 
   const handleCardPress = (vendor: Vendor) => {
     setSelectedVendor(vendor);
+    const index = vendors.findIndex((v) => v.uid === vendor.uid);
+    setCarouselIndex(index);
 
     const location = JSON.stringify({
       latitude: vendor.latitude,
       longitude: vendor.longitude,
     });
     const menu = JSON.stringify(vendor.menu);
-
-    console.log("Index encoded image", encodeURIComponent(vendor.image));
-    console.log("Index original image", vendor.image);
 
     router.push({
       pathname: "/user/otherScreens/userVendorInfo",
@@ -215,11 +196,6 @@ export default function Index() {
         rating: vendor.rating,
       },
     });
-  };
-
-  const closeModal = () => {
-    setModalVisible(false);
-    setSelectedVendor(null);
   };
 
   return (

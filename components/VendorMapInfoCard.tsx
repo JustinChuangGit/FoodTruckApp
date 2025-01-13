@@ -109,6 +109,7 @@ const VendorMapInfoCard: React.FC<VendorMapInfoCardProps> = ({
             />
           )}
           <Image
+            key={vendor.image}
             source={{ uri: vendor.image }}
             style={styles.image}
             onLoadStart={() => setLoading(true)}
@@ -175,12 +176,11 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     backgroundColor: "#e0e0e0",
+    overflow: "hidden",
   },
   image: {
     width: "100%",
     height: "100%",
-    borderTopLeftRadius: 16,
-    borderBottomLeftRadius: 16,
   },
   loadingIndicator: {
     position: "absolute",

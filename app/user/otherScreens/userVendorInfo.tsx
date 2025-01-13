@@ -1,4 +1,4 @@
-import React, { useRef, useState } from "react";
+import React, { useRef, useState, useEffect } from "react";
 import {
   View,
   Text,
@@ -89,6 +89,7 @@ export default function UserVendorInfo() {
                     />
                   )}
                   <Image
+                    key={image}
                     source={{ uri: image }}
                     style={styles.logo}
                     onLoad={() => setImageLoading(false)} // Image loaded
@@ -200,6 +201,10 @@ export default function UserVendorInfo() {
     }
     return null;
   };
+
+  useEffect(() => {
+    setImageLoading(true);
+  }, [image]);
 
   return (
     <View style={{ flex: 1 }}>
