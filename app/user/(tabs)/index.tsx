@@ -9,6 +9,7 @@ import {
   Modal,
   Image,
   TouchableOpacity,
+  Animated,
 } from "react-native";
 import MapView, {
   Marker,
@@ -94,6 +95,7 @@ export default function Index() {
     getNearbyVendors(vendors, location),
   ]);
   const snapPoints = useMemo(() => ["15%", "50%", "60%"], []);
+  const scaleAnim = useRef(new Animated.Value(0)).current; // Initial scale value
 
   useEffect(() => {
     (async () => {
@@ -135,23 +137,6 @@ export default function Index() {
     return () => unsubscribe();
   }, []);
 
-  const handleMarkerPress = (vendor: Vendor) => {
-    const index = vendors.findIndex((v) => v.uid === vendor.uid);
-    setSelectedVendor(vendor);
-    setCarouselIndex(index);
-    // if (mapRef.current) {
-    //   mapRef.current.animateToRegion(
-    //     {
-    //       latitude: vendor.latitude, // Assuming Vendor type has latitude/longitude
-    //       longitude: vendor.longitude,
-    //       latitudeDelta: 0.01,
-    //       longitudeDelta: 0.01,
-    //     },
-    //     500
-    //   );
-    // }
-  };
-
   useEffect(() => {
     if (selectedVendor && mapRef.current) {
       mapRef.current.animateToRegion(
@@ -164,7 +149,28 @@ export default function Index() {
         500 // Animation duration
       );
     }
+    if (selectedVendor) {
+      // Grow animation
+      Animated.timing(scaleAnim, {
+        toValue: 1, // Full size
+        duration: 300, // Animation duration
+        useNativeDriver: true,
+      }).start();
+    } else {
+      // Shrink animation
+      Animated.timing(scaleAnim, {
+        toValue: 0, // Shrink to nothing
+        duration: 300,
+        useNativeDriver: true,
+      }).start();
+    }
   }, [selectedVendor]);
+
+  const handleMarkerPress = (vendor: Vendor) => {
+    const index = vendors.findIndex((v) => v.uid === vendor.uid);
+    setSelectedVendor(vendor);
+    setCarouselIndex(index);
+  };
 
   const handleCardClose = () => {
     setSelectedVendor(null);
@@ -220,6 +226,26 @@ export default function Index() {
               onPress={() => handleMarkerPress(vendor)}
             />
           ))}
+
+          {selectedVendor && (
+            <Marker
+              coordinate={{
+                latitude: selectedVendor.latitude,
+                longitude: selectedVendor.longitude,
+              }}
+              zIndex={999} // Higher zIndex for selected
+            >
+              {/* Animated Marker */}
+              <Animated.View
+                style={[
+                  styles.selectedMarker,
+                  { transform: [{ scale: scaleAnim }] },
+                ]}
+              >
+                <View style={styles.selectedMarkerInner} />
+              </Animated.View>
+            </Marker>
+          )}
         </MapView>
       )}
 
@@ -419,5 +445,26 @@ const styles = StyleSheet.create({
   },
   modalInformationContainer: {
     paddingHorizontal: 16,
+  },
+  selectedMarker: {
+    width: 30,
+    height: 30,
+    borderRadius: 15, // Make it a circle for better appearance
+    backgroundColor: "#FF6F61", // Slightly transparent white
+    justifyContent: "center",
+    alignItems: "center",
+    shadowColor: "#000", // Optional: Add shadow for better visibility
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 3,
+    zIndex: 1, // Place the marker above other content
+    elevation: 5, // Android shadow
+  },
+  selectedMarkerInner: {
+    width: 10,
+    height: 10,
+    borderRadius: 15, // Inner circle
+    backgroundColor: "white", // Inner circle color
+    zIndex: 999, // Place the marker above other content
   },
 });
