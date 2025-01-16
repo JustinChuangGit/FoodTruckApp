@@ -41,13 +41,19 @@ export default function VendorAccountScreen() {
           <FontAwesome name="chevron-right" size={16} color="#007aff" />
         </TouchableOpacity>
 
-        <TouchableOpacity style={styles.menuItem}>
+        <TouchableOpacity
+          style={styles.menuItem}
+          onPress={() => router.push("/sharedScreens/signInAndSecurityScreen")}
+        >
           <Text style={styles.menuText}>Sign In and Security</Text>
           <FontAwesome name="chevron-right" size={16} color="#007aff" />
         </TouchableOpacity>
 
-        <TouchableOpacity style={styles.menuItem}>
-          <Text style={styles.menuText}>Terms of service</Text>
+        <TouchableOpacity
+          style={styles.menuItem}
+          onPress={() => router.push("/sharedScreens/termsAndServiceScreen")}
+        >
+          <Text style={styles.menuText}>Terms of Service</Text>
           <FontAwesome name="chevron-right" size={16} color="#007aff" />
         </TouchableOpacity>
       </View>

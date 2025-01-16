@@ -15,6 +15,10 @@ export default function RootLayout() {
             <Stack.Screen name="auth" options={{ headerShown: false }} />
             <Stack.Screen name="user" options={{ headerShown: false }} />
             <Stack.Screen name="vendor" options={{ headerShown: false }} />
+            <Stack.Screen
+              name="sharedScreens"
+              options={{ headerShown: false }}
+            />
           </Stack>
         </PersistGate>
       </Provider>
