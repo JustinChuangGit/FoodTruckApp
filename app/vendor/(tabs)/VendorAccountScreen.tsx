@@ -8,9 +8,21 @@ import {
 } from "react-native";
 import { useRouter } from "expo-router";
 import { FontAwesome } from "@expo/vector-icons";
+import { useDispatch } from "react-redux"; // Import useDispatch
+import { signOutUser } from "@/services/auth"; // Import signOutUser
 
 export default function VendorAccountScreen() {
   const router = useRouter();
+  const dispatch = useDispatch(); // Initialize the Redux dispatch
+
+  const handleSignOut = async () => {
+    try {
+      await signOutUser(dispatch); // Call the signOut function and pass the dispatch
+      router.replace("/auth/LoginScreen"); // Navigate to the sign-in screen after signing out
+    } catch (error) {
+      console.error("Error signing out:", error);
+    }
+  };
 
   return (
     <SafeAreaView style={styles.container}>
@@ -35,7 +47,7 @@ export default function VendorAccountScreen() {
           style={styles.menuItem}
           onPress={() =>
             router.push("/vendor/otherScreens/vendorEditAccountScreen")
-          } // Correct path
+          }
         >
           <Text style={styles.menuText}>Account Information</Text>
           <FontAwesome name="chevron-right" size={16} color="#007aff" />
@@ -59,7 +71,7 @@ export default function VendorAccountScreen() {
       </View>
 
       {/* Sign Out Button */}
-      <TouchableOpacity style={styles.signOutButton}>
+      <TouchableOpacity style={styles.signOutButton} onPress={handleSignOut}>
         <Text style={styles.signOutText}>Sign out</Text>
       </TouchableOpacity>
     </SafeAreaView>
@@ -78,11 +90,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     borderBottomWidth: 1,
     borderBottomColor: "#ddd",
-  },
-  backButton: {
-    fontSize: 18,
-    color: "#000",
-    marginRight: 10,
   },
   headerText: {
     fontSize: 40,

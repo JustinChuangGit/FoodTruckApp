@@ -50,13 +50,12 @@ const authSlice = createSlice({
   },
 });
 
-
-// Export the new action
+// Export actions
 export const { setUser, clearUser, updateMenu } = authSlice.actions;
 
-
-// Export selectors for accessing user state
-export const selectUser = (state: { auth: AuthState }) => state.auth.user;
+// Export selectors
+export const selectUser = (state: { auth: AuthState }) =>
+  state.auth.user && state.auth.isAuthenticated ? state.auth.user : null;
 export const selectIsAuthenticated = (state: { auth: AuthState }) =>
   state.auth.isAuthenticated;
 

@@ -8,8 +8,8 @@ import {
 } from "firebase/auth";
 import { app } from "../firebaseConfig"; // Adjust the path if needed
 import { saveUserData, getUserData } from "./firestore"; // Adjust the path as needed
-import { setUser } from "../redux/authSlice"; // Adjust the path as needed
-import { AppDispatch } from "../redux/store"; // Adjust the path as needed
+import { setUser, clearUser } from "../redux/authSlice"; // Adjust the path as needed
+import { AppDispatch, persistor } from "../redux/store"; // Adjust the path as needed
 import ReactNativeAsyncStorage from "@react-native-async-storage/async-storage";
 import { collection, getDocs, getDoc, doc } from "firebase/firestore"; // Import necessary Firestore methods
 import { db } from "@/services/firestore"; // Import the Firestore instance
@@ -106,15 +106,25 @@ export const signIn = async (dispatch: AppDispatch, email: string, password: str
 };
 
 // Function to sign out the user
-export const signOutUser = async (): Promise<void> => {
+export const signOutUser = async (dispatch: AppDispatch): Promise<void> => {
   try {
     await signOut(auth);
+
+    // Clear Redux store
+    dispatch(clearUser());
+    console.log("Cleared Redux state");
+
+    // Purge persisted Redux store
+    await persistor.purge();
+    console.log("Cleared Redux persist state");
+
     console.log("User signed out successfully");
   } catch (error) {
     console.error("Error signing out:", error);
     throw error;
   }
 };
+
 
 export const onAuthStateChange = (
   callback: (user: { uid: string; email: string; isVendor: boolean } | null) => void

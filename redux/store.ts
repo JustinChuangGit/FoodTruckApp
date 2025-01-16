@@ -13,6 +13,14 @@ const persistConfig = {
 // Wrap the authReducer with persistence capabilities
 const persistedReducer = persistReducer(persistConfig, authReducer);
 
+// Middleware to clear persisted state when clearing user
+const clearPersistMiddleware = (store: any) => (next: any) => (action: any) => {
+  if (action.type === "auth/clearUser") {
+    persistor.purge(); // Clear persisted state when the user logs out
+  }
+  return next(action);
+};
+
 // Configure the store
 export const store = configureStore({
   reducer: {
@@ -23,7 +31,7 @@ export const store = configureStore({
       serializableCheck: {
         ignoredActions: [FLUSH, REHYDRATE, PAUSE, PERSIST, PURGE, REGISTER], // Ignore redux-persist actions
       },
-    }),
+    }).concat(clearPersistMiddleware), // Add custom middleware
 });
 
 // Configure persistor for redux-persist
