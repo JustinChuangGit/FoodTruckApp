@@ -1,57 +1,116 @@
 import React from "react";
-import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
+import {
+  View,
+  Text,
+  StyleSheet,
+  TouchableOpacity,
+  SafeAreaView,
+} from "react-native";
 import { useRouter } from "expo-router";
+import { FontAwesome } from "@expo/vector-icons";
 
 export default function VendorAccountScreen() {
   const router = useRouter();
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Vendor Account Screen</Text>
-      <Text>This is a dummy screen for vendor account details.</Text>
+    <SafeAreaView style={styles.container}>
+      {/* Header */}
+      <View style={styles.header}>
+        <Text style={styles.headerText}>Account</Text>
+      </View>
 
-      {/* Navigate to Edit Menu */}
-      <TouchableOpacity
-        style={styles.editMenuButton}
-        onPress={() => router.push("/vendor/otherScreens/vendorEditMenuScreen")} // Correct path
-      >
-        <Text style={styles.editMenuButtonText}>Edit Menu</Text>
+      {/* Menu Options */}
+      <View style={styles.menuContainer}>
+        <TouchableOpacity
+          style={styles.menuItem}
+          onPress={() =>
+            router.push("/vendor/otherScreens/vendorEditMenuScreen")
+          }
+        >
+          <Text style={styles.menuText}>Edit Menu</Text>
+          <FontAwesome name="chevron-right" size={16} color="#007aff" />
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={styles.menuItem}
+          onPress={() =>
+            router.push("/vendor/otherScreens/vendorEditAccountScreen")
+          } // Correct path
+        >
+          <Text style={styles.menuText}>Account Information</Text>
+          <FontAwesome name="chevron-right" size={16} color="#007aff" />
+        </TouchableOpacity>
+
+        <TouchableOpacity style={styles.menuItem}>
+          <Text style={styles.menuText}>Sign In and Security</Text>
+          <FontAwesome name="chevron-right" size={16} color="#007aff" />
+        </TouchableOpacity>
+
+        <TouchableOpacity style={styles.menuItem}>
+          <Text style={styles.menuText}>Terms of service</Text>
+          <FontAwesome name="chevron-right" size={16} color="#007aff" />
+        </TouchableOpacity>
+      </View>
+
+      {/* Sign Out Button */}
+      <TouchableOpacity style={styles.signOutButton}>
+        <Text style={styles.signOutText}>Sign out</Text>
       </TouchableOpacity>
-      <TouchableOpacity
-        style={styles.editMenuButton}
-        onPress={() =>
-          router.push("/vendor/otherScreens/vendorEditAccountScreen")
-        } // Correct path
-      >
-        <Text style={styles.editMenuButtonText}>Edit Account</Text>
-      </TouchableOpacity>
-    </View>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: "center",
+    backgroundColor: "#fff",
+  },
+  header: {
+    flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#f9f9f9",
+    height: 100,
+    paddingHorizontal: 20,
+    borderBottomWidth: 1,
+    borderBottomColor: "#ddd",
   },
-  title: {
-    fontSize: 24,
+  backButton: {
+    fontSize: 18,
+    color: "#000",
+    marginRight: 10,
+  },
+  headerText: {
+    fontSize: 40,
     fontWeight: "bold",
-    marginBottom: 10,
-    color: "#333",
+    color: "#000",
   },
-  editMenuButton: {
+  menuContainer: {
     marginTop: 20,
-    backgroundColor: "blue",
-    padding: 15,
-    borderRadius: 8,
+  },
+  menuItem: {
+    paddingVertical: 15,
+    paddingHorizontal: 20,
+    borderBottomWidth: 1,
+    borderBottomColor: "#ddd",
+    flexDirection: "row",
+    justifyContent: "space-between",
     alignItems: "center",
   },
-  editMenuButtonText: {
-    color: "#fff",
+  menuText: {
+    fontSize: 18,
+    color: "#007aff", // Blue color similar to iOS settings
+  },
+  signOutButton: {
+    marginTop: "auto",
+    marginBottom: 30,
+    alignSelf: "center",
+    paddingHorizontal: 30,
+    paddingVertical: 10,
+    borderRadius: 25,
+    borderWidth: 1,
+    borderColor: "#000",
+  },
+  signOutText: {
     fontSize: 16,
-    fontWeight: "bold",
+    color: "#000",
   },
 });
