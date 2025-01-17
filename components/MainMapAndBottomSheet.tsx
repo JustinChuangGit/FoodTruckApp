@@ -24,77 +24,24 @@ import BottomSheet, {
 } from "@gorhom/bottom-sheet";
 import Carousel from "react-native-reanimated-carousel";
 import haversine from "haversine";
-import MyRow from "../components/MyRow";
 import HorizontalLine from "@/components/default/HorizontalLine";
-import VendorMarker from "../../../components/VendorMarker";
-import VendorMapInfoCard from "../../../components/VendorMapInfoCard";
-import { SECTIONS } from "../../../constants/UserConstants";
+import VendorMarker from "@/components/VendorMarker";
+import VendorMapInfoCard from "@/components/VendorMapInfoCard";
 import { Vendor, LocationCoordinates } from "@/constants/types";
 import { collection, onSnapshot } from "firebase/firestore";
 import { db, getVendorInfo } from "@/services/firestore";
 import { Section } from "@/constants/types";
-
-//TODO: Replace with collections from Firestore
-import liveVendors from "../../../dummyVendorMapData.json";
 import { router } from "expo-router";
-import MainMapAndBottomSheet from "@/components/MainMapAndBottomSheet";
 
 const { width } = Dimensions.get("window");
 
-function getNearbyVendors(
-  vendors: Vendor[],
-  location: LocationCoordinates | null
-): { id: string; title: string; vendors: Vendor[] } {
-  if (!location) {
-    return {
-      id: "nearby",
-      title: "Nearby Vendors",
-      vendors: [],
-    };
-  }
-
-  const sortedVendors = vendors
-    .map((vendor) => ({
-      ...vendor,
-      distance: haversine(location, {
-        latitude: vendor.latitude,
-        longitude: vendor.longitude,
-      }),
-    }))
-    .sort((a, b) => (a.distance ?? 0) - (b.distance ?? 0));
-
-  return {
-    id: "nearby",
-    title: "Nearby Vendors",
-    vendors: sortedVendors,
-  };
-}
-
-function formatSections(
-  sections: { id: string; title: string; vendors: Vendor[] }[]
-): Section[] {
-  return sections.map((section, index) => ({
-    id: (index + 1).toString(),
-    title: section.title,
-    vendors: section.vendors,
-  }));
-}
-
-export default function Index() {
+export default function MainMapAndBottomSheet() {
   const [location, setLocation] = useState<LocationCoordinates | null>(null);
   const [vendors, setVendors] = useState<Vendor[]>([]);
   const [selectedVendor, setSelectedVendor] = useState<Vendor | null>(null);
   const [carouselIndex, setCarouselIndex] = useState(0);
   const mapRef = useRef<MapView>(null);
   const bottomSheetRef = useRef<BottomSheet>(null);
-  const SECTIONDATA = formatSections([
-    getNearbyVendors(vendors, location),
-    getNearbyVendors(vendors, location),
-    getNearbyVendors(vendors, location),
-    getNearbyVendors(vendors, location),
-    getNearbyVendors(vendors, location),
-    getNearbyVendors(vendors, location),
-  ]);
   const snapPoints = useMemo(() => ["15%", "50%", "60%"], []);
   const scaleAnim = useRef(new Animated.Value(0)).current; // Initial scale value
 
@@ -205,7 +152,105 @@ export default function Index() {
     });
   };
 
-  return <MainMapAndBottomSheet />;
+  return (
+    <SafeAreaView style={styles.container}>
+      {location && (
+        <MapView
+          ref={mapRef}
+          style={styles.map}
+          provider={PROVIDER_DEFAULT}
+          showsUserLocation={true}
+          initialRegion={{
+            latitude: location.latitude,
+            longitude: location.longitude,
+            latitudeDelta: 0.01,
+            longitudeDelta: 0.01,
+          }}
+        >
+          {vendors.map((vendor) => (
+            <VendorMarker
+              key={vendor.uid}
+              vendor={vendor}
+              onPress={() => handleMarkerPress(vendor)}
+            />
+          ))}
+
+          {selectedVendor && (
+            <Marker
+              coordinate={{
+                latitude: selectedVendor.latitude,
+                longitude: selectedVendor.longitude,
+              }}
+              zIndex={999} // Higher zIndex for selected
+            >
+              {/* Animated Marker */}
+              <Animated.View
+                style={[
+                  styles.selectedMarker,
+                  { transform: [{ scale: scaleAnim }] },
+                ]}
+              >
+                <View style={styles.selectedMarkerInner} />
+              </Animated.View>
+            </Marker>
+          )}
+        </MapView>
+      )}
+
+      {selectedVendor && (
+        <View style={styles.carouselContainer}>
+          <Carousel
+            width={width * 0.9}
+            height={250}
+            data={vendors}
+            renderItem={({ index }) => (
+              <VendorMapInfoCard
+                vendor={vendors[index]}
+                userLocation={location}
+                onClose={handleCardClose}
+                onPress={(vendor) => handleCardPress(vendor)} // Pass the vendor to handleCardPress
+              />
+            )}
+            onSnapToItem={(index) => {
+              setCarouselIndex(index);
+              handleMarkerPress(vendors[index]);
+            }}
+            defaultIndex={carouselIndex}
+          />
+        </View>
+      )}
+
+      <BottomSheet
+        ref={bottomSheetRef}
+        index={2}
+        snapPoints={snapPoints}
+        enableOverDrag={false}
+        topInset={100}
+      >
+        <BottomSheetView style={styles.bottomSheetContent}>
+          <View style={styles.dragSectionHeaderContainer}>
+            <Text style={styles.dragSectionHeader}>For You</Text>
+            <Text style={styles.dragSectionSubheader}>
+              Checkout some spots we think you'd like
+            </Text>
+            <HorizontalLine />
+          </View>
+          {/* <BottomSheetFlatList
+            data={SECTIONDATA}
+            showsVerticalScrollIndicator={false}
+            keyExtractor={(item) => item.id}
+            renderItem={({ item }) => (
+              <MyRow section={item} onCardPress={handleCardPress} />
+            )}
+            contentContainerStyle={{
+              paddingHorizontal: 0, // Remove extra padding here
+              paddingBottom: 16, // Optional for spacing at the bottom
+            }}
+          /> */}
+        </BottomSheetView>
+      </BottomSheet>
+    </SafeAreaView>
+  );
 }
 
 const styles = StyleSheet.create({
