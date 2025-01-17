@@ -20,12 +20,14 @@ interface MainMapAndBottomSheetProps {
   vendors: Vendor[];
   location: LocationCoordinates | null;
   sections: { id: string; title: string; vendors: Vendor[] }[];
+  children?: React.ReactNode; // Allow dynamic content to be passed as children
 }
 
 export default function MainMapAndBottomSheet({
   sections,
   location,
   vendors,
+  children,
 }: MainMapAndBottomSheetProps) {
   const [selectedVendor, setSelectedVendor] = useState<Vendor | null>(null);
   const [carouselIndex, setCarouselIndex] = useState(0);
@@ -177,27 +179,7 @@ export default function MainMapAndBottomSheet({
         topInset={100}
       >
         <BottomSheetView style={styles.bottomSheetContent}>
-          <View style={styles.dragSectionHeaderContainer}>
-            <Text style={styles.dragSectionHeader}>For You</Text>
-            <Text style={styles.dragSectionSubheader}>
-              Checkout some spots we think you'd like
-            </Text>
-            <HorizontalLine />
-          </View>
-          {sections && (
-            <BottomSheetFlatList
-              data={sections}
-              showsVerticalScrollIndicator={false}
-              keyExtractor={(item) => item.id}
-              renderItem={({ item }) => (
-                <MyRow section={item} onCardPress={handleCardPress} />
-              )}
-              contentContainerStyle={{
-                paddingHorizontal: 0, // Remove extra padding here
-                paddingBottom: 16, // Optional for spacing at the bottom
-              }}
-            />
-          )}
+          {children}
         </BottomSheetView>
       </BottomSheet>
     </SafeAreaView>
