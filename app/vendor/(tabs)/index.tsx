@@ -4,36 +4,72 @@ import {
   Alert,
   Text,
   StyleSheet,
-  FlatList,
   Dimensions,
-  Modal,
-  Image,
   TouchableOpacity,
   Animated,
 } from "react-native";
-import MapView, {
-  Marker,
-  PROVIDER_DEFAULT,
-  PROVIDER_GOOGLE,
-} from "react-native-maps";
+import MapView, { Marker, PROVIDER_DEFAULT } from "react-native-maps";
 import * as Location from "expo-location";
 import { SafeAreaView } from "react-native-safe-area-context";
-import BottomSheet, { BottomSheetView } from "@gorhom/bottom-sheet";
+import BottomSheet, {
+  BottomSheetView,
+  BottomSheetFlatList,
+} from "@gorhom/bottom-sheet";
 import Carousel from "react-native-reanimated-carousel";
 import haversine from "haversine";
+import MyRow from "@/components/MyRow";
 import HorizontalLine from "@/components/default/HorizontalLine";
 import VendorMarker from "../../../components/VendorMarker";
 import VendorMapInfoCard from "../../../components/VendorMapInfoCard";
 import { Vendor, LocationCoordinates } from "@/constants/types";
+import { collection, onSnapshot } from "firebase/firestore";
+import { db } from "@/services/firestore";
+import { Section } from "@/constants/types";
+import { router } from "expo-router";
 import { useSelector } from "react-redux";
 import { selectUser } from "../../../redux/authSlice"; // Update the path as needed
-import { doc, setDoc, deleteDoc, getDoc } from "firebase/firestore";
-import { db } from "../../../services/firestore"; // Adjust the path to your Firestore utility file
-
-//TODO: Replace with collections from Firestore
-import liveVendors from "../../../dummyVendorMapData.json";
+import { doc, setDoc, deleteDoc } from "firebase/firestore";
 
 const { width } = Dimensions.get("window");
+
+function getNearbyVendors(
+  vendors: Vendor[],
+  location: LocationCoordinates | null
+): { id: string; title: string; vendors: Vendor[] } {
+  if (!location) {
+    return {
+      id: "nearby",
+      title: "Nearby Vendors",
+      vendors: [],
+    };
+  }
+
+  const sortedVendors = vendors
+    .map((vendor) => ({
+      ...vendor,
+      distance: haversine(location, {
+        latitude: vendor.latitude,
+        longitude: vendor.longitude,
+      }),
+    }))
+    .sort((a, b) => (a.distance ?? 0) - (b.distance ?? 0));
+
+  return {
+    id: "nearby",
+    title: "Nearby Vendors",
+    vendors: sortedVendors,
+  };
+}
+
+function formatSections(
+  sections: { id: string; title: string; vendors: Vendor[] }[]
+): Section[] {
+  return sections.map((section, index) => ({
+    id: (index + 1).toString(),
+    title: section.title,
+    vendors: section.vendors,
+  }));
+}
 
 export default function Index() {
   const [location, setLocation] = useState<LocationCoordinates | null>(null);
@@ -42,113 +78,120 @@ export default function Index() {
   const [carouselIndex, setCarouselIndex] = useState(0);
   const mapRef = useRef<MapView>(null);
   const bottomSheetRef = useRef<BottomSheet>(null);
-  const [isModalVisible, setModalVisible] = useState(false);
+  const SECTIONDATA = formatSections([getNearbyVendors(vendors, location)]);
+  const snapPoints = useMemo(() => ["15%", "50%", "60%"], []);
+  const scaleAnim = useRef(new Animated.Value(0)).current; // Initial scale value
   const [isVendorActive, setVendorActive] = useState(false);
   const [buttonColorAnim] = useState(new Animated.Value(0));
-
-  const snapPoints = useMemo(() => ["15%", "50%", "90%"], []);
   const user = useSelector(selectUser);
   const userName = user?.name || "Vendor Name";
 
   useEffect(() => {
     (async () => {
-      try {
-        const { status } = await Location.requestForegroundPermissionsAsync();
-        if (status !== "granted") {
-          Alert.alert("Permission Denied", "Location permission is required.");
-          return;
-        }
-        const { coords } = await Location.getCurrentPositionAsync({});
-        const { latitude, longitude } = coords;
-        setLocation({ latitude, longitude });
-
-        const sortedVendors = vendors
-          .map((vendor) => {
-            const distance = location
-              ? haversine(location, {
-                  latitude: vendor.latitude,
-                  longitude: vendor.longitude,
-                })
-              : Infinity; // Use Infinity or a large number when location is null
-            return {
-              ...vendor,
-              distance,
-            };
-          })
-          .sort((a, b) => (a.distance ?? 0) - (b.distance ?? 0));
-
-        setVendors(sortedVendors);
-      } catch (error) {
-        Alert.alert("Error", "Unable to fetch location.");
+      const { status } = await Location.requestForegroundPermissionsAsync();
+      if (status !== "granted") {
+        Alert.alert("Permission Denied", "Location permission is required.");
+        return;
       }
+      const { coords } = await Location.getCurrentPositionAsync({});
+      setLocation(coords);
     })();
   }, []);
 
   useEffect(() => {
-    const checkVendorStatus = async () => {
-      if (!user?.uid) {
-        console.error("User UID is not available");
-        return;
+    const unsubscribe = onSnapshot(
+      collection(db, "activeVendors"),
+      (snapshot) => {
+        const updatedVendors = snapshot.docs.map((doc) => {
+          const data = doc.data();
+          return {
+            uid: doc.id,
+            latitude: data.location?.latitude,
+            longitude: data.location?.longitude,
+            price: data.price || "$$", // Default price if not provided
+            name: data.name || "Unknown Vendor",
+            rating: data.rating || 0, // Default rating if not provided
+            description: data.description || "No description available",
+            image: data.image || "https://via.placeholder.com/150", // Default image
+            menu: data.menu || [], // Include menu field, default to an empty array
+            vendorType: data.vendorType || "Other", // Default vendor type
+          };
+        });
+        setVendors(updatedVendors);
+      },
+      (error) => {
+        console.error("Error fetching active vendors:", error); // Log errors
       }
+    );
+    return () => unsubscribe();
+  }, []);
 
-      try {
-        const docRef = doc(db, "activeVendors", user.uid);
-        const docSnap = await getDoc(docRef);
-
-        if (docSnap.exists()) {
-          setVendorActive(true);
-          Animated.timing(buttonColorAnim, {
-            toValue: 1, // Set to "active" color
-            duration: 500,
-            useNativeDriver: false,
-          }).start();
-        } else {
-          setVendorActive(false);
-          Animated.timing(buttonColorAnim, {
-            toValue: 0, // Set to "inactive" color
-            duration: 500,
-            useNativeDriver: false,
-          }).start();
-        }
-      } catch (error) {
-        console.error("Error checking vendor active status:", error);
-      }
-    };
-
-    checkVendorStatus();
-  }, [user?.uid]);
+  useEffect(() => {
+    if (selectedVendor && mapRef.current) {
+      mapRef.current.animateToRegion(
+        {
+          latitude: selectedVendor.latitude,
+          longitude: selectedVendor.longitude,
+          latitudeDelta: 0.01,
+          longitudeDelta: 0.01,
+        },
+        500 // Animation duration
+      );
+    }
+    if (selectedVendor) {
+      // Grow animation
+      Animated.timing(scaleAnim, {
+        toValue: 1, // Full size
+        duration: 300, // Animation duration
+        useNativeDriver: true,
+      }).start();
+    } else {
+      // Shrink animation
+      Animated.timing(scaleAnim, {
+        toValue: 0, // Shrink to nothing
+        duration: 300,
+        useNativeDriver: true,
+      }).start();
+    }
+  }, [selectedVendor]);
 
   const handleMarkerPress = (vendor: Vendor) => {
     const index = vendors.findIndex((v) => v.uid === vendor.uid);
     setSelectedVendor(vendor);
     setCarouselIndex(index);
-    if (mapRef.current) {
-      mapRef.current.animateToRegion(
-        {
-          latitude: vendor.latitude,
-          longitude: vendor.longitude,
-          latitudeDelta: 0.01,
-          longitudeDelta: 0.01,
-        },
-        500
-      );
-    }
   };
 
   const handleCardClose = () => {
     setSelectedVendor(null);
+    setCarouselIndex(0);
   };
 
   const handleCardPress = (vendor: Vendor) => {
     setSelectedVendor(vendor);
-    setModalVisible(true);
-  };
+    const index = vendors.findIndex((v) => v.uid === vendor.uid);
+    setCarouselIndex(index);
 
-  const closeModal = () => {
-    setModalVisible(false);
-    setSelectedVendor(null);
-  };
+    const location = JSON.stringify({
+      latitude: vendor.latitude,
+      longitude: vendor.longitude,
+    });
+    const menu = JSON.stringify(vendor.menu);
 
+    router.push({
+      pathname: "/user/otherScreens/userVendorInfo",
+      params: {
+        uid: vendor.uid,
+        location: encodeURIComponent(location),
+        menu: encodeURIComponent(menu),
+        name: vendor.name,
+        vendorType: vendor.vendorType,
+        price: vendor.price,
+        description: vendor.description,
+        image: encodeURIComponent(vendor.image), // Encode the image URL
+        rating: vendor.rating,
+      },
+    });
+  };
   const toggleVendorActive = async (uid: string | undefined) => {
     if (!uid) {
       console.error("User UID is not available");
@@ -232,6 +275,26 @@ export default function Index() {
               onPress={() => handleMarkerPress(vendor)}
             />
           ))}
+
+          {selectedVendor && (
+            <Marker
+              coordinate={{
+                latitude: selectedVendor.latitude,
+                longitude: selectedVendor.longitude,
+              }}
+              zIndex={999} // Higher zIndex for selected
+            >
+              {/* Animated Marker */}
+              <Animated.View
+                style={[
+                  styles.selectedMarker,
+                  { transform: [{ scale: scaleAnim }] },
+                ]}
+              >
+                <View style={styles.selectedMarkerInner} />
+              </Animated.View>
+            </Marker>
+          )}
         </MapView>
       )}
 
@@ -246,7 +309,7 @@ export default function Index() {
                 vendor={vendors[index]}
                 userLocation={location}
                 onClose={handleCardClose}
-                onPress={(vendor) => handleCardPress(vendor)} // Pass the required onPress prop
+                onPress={(vendor) => handleCardPress(vendor)} // Pass the vendor to handleCardPress
               />
             )}
             onSnapToItem={(index) => {
@@ -258,11 +321,18 @@ export default function Index() {
         </View>
       )}
 
-      <BottomSheet ref={bottomSheetRef} index={1} snapPoints={snapPoints}>
+      <BottomSheet
+        ref={bottomSheetRef}
+        index={2}
+        snapPoints={snapPoints}
+        enableOverDrag={false}
+        topInset={100}
+      >
         <BottomSheetView style={styles.bottomSheetContent}>
-          <Text style={styles.dragSectionHeader}>{userName}</Text>
+          {" "}
+          <Text style={styles.dragSectionHeader}>{userName}</Text>{" "}
           <Text style={styles.dragSectionSubheader}>Manage your store</Text>
-          <HorizontalLine />
+          <HorizontalLine />{" "}
           <TouchableOpacity
             onPress={() => user && toggleVendorActive(user.uid)}
           >
@@ -277,60 +347,20 @@ export default function Index() {
               </Text>
             </Animated.View>
           </TouchableOpacity>
+          <BottomSheetFlatList
+            data={SECTIONDATA}
+            showsVerticalScrollIndicator={false}
+            keyExtractor={(item) => item.id}
+            renderItem={({ item }) => (
+              <MyRow section={item} onCardPress={handleCardPress} />
+            )}
+            contentContainerStyle={{
+              paddingHorizontal: 0, // Remove extra padding here
+              paddingBottom: 16, // Optional for spacing at the bottom
+            }}
+          />
         </BottomSheetView>
       </BottomSheet>
-
-      <Modal
-        visible={isModalVisible}
-        animationType="slide"
-        transparent={true}
-        onRequestClose={closeModal}
-      >
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalContent}>
-            {selectedVendor && (
-              <>
-                <Image
-                  source={{ uri: selectedVendor.image }}
-                  style={styles.logo}
-                />
-                <Text style={styles.name}>{selectedVendor.name}</Text>
-                <Text style={styles.description}>
-                  {selectedVendor.description}
-                </Text>
-                <Text style={styles.price}>Price: {selectedVendor.price}</Text>
-                <Text style={styles.rating}>
-                  Rating: {selectedVendor.rating}/5
-                </Text>
-                <TouchableOpacity
-                  style={styles.closeButton}
-                  onPress={closeModal}
-                >
-                  <Text style={styles.closeButtonText}>Close</Text>
-                </TouchableOpacity>
-                <HorizontalLine />
-
-                {/* Dummy Menu */}
-                <Text style={styles.menuHeader}>Menu</Text>
-                {/* <FlatList
-                  data={dummyMenu}
-                  keyExtractor={(item) => item.id}
-                  renderItem={({ item }) => (
-                    <View style={styles.menuItem}>
-                      <Text style={styles.menuItemName}>{item.name}</Text>
-                      <Text style={styles.menuItemDescription}>
-                        {item.description}
-                      </Text>
-                      <Text style={styles.menuItemPrice}>{item.price}</Text>
-                    </View>
-                  )}
-                  contentContainerStyle={styles.menuList}
-                /> */}
-              </>
-            )}
-          </View>
-        </View>
-      </Modal>
     </SafeAreaView>
   );
 }
@@ -461,5 +491,26 @@ const styles = StyleSheet.create({
     color: "#fff",
     fontSize: 16,
     fontWeight: "bold",
+  },
+  selectedMarker: {
+    width: 30,
+    height: 30,
+    borderRadius: 15, // Make it a circle for better appearance
+    backgroundColor: "#FF6F61", // Slightly transparent white
+    justifyContent: "center",
+    alignItems: "center",
+    shadowColor: "#000", // Optional: Add shadow for better visibility
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 3,
+    zIndex: 1, // Place the marker above other content
+    elevation: 5, // Android shadow
+  },
+  selectedMarkerInner: {
+    width: 10,
+    height: 10,
+    borderRadius: 15, // Inner circle
+    backgroundColor: "white", // Inner circle color
+    zIndex: 999, // Place the marker above other content
   },
 });

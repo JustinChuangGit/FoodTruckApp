@@ -24,7 +24,7 @@ import BottomSheet, {
 } from "@gorhom/bottom-sheet";
 import Carousel from "react-native-reanimated-carousel";
 import haversine from "haversine";
-import MyRow from "../components/MyRow";
+import MyRow from "@/components/MyRow";
 import HorizontalLine from "@/components/default/HorizontalLine";
 import VendorMarker from "../../../components/VendorMarker";
 import VendorMapInfoCard from "../../../components/VendorMapInfoCard";
