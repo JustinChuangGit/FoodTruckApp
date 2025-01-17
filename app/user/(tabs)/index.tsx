@@ -5,47 +5,8 @@ import haversine from "haversine";
 import { Vendor, LocationCoordinates } from "@/constants/types";
 import { collection, onSnapshot } from "firebase/firestore";
 import { db, getVendorInfo } from "@/services/firestore";
-import { Section } from "@/constants/types";
 import MainMapAndBottomSheet from "@/components/MainMapAndBottomSheet";
-
-function getNearbyVendors(
-  vendors: Vendor[],
-  location: LocationCoordinates | null
-): { id: string; title: string; vendors: Vendor[] } {
-  if (!location) {
-    return {
-      id: "nearby",
-      title: "Nearby Vendors",
-      vendors: [],
-    };
-  }
-
-  const sortedVendors = vendors
-    .map((vendor) => ({
-      ...vendor,
-      distance: haversine(location, {
-        latitude: vendor.latitude,
-        longitude: vendor.longitude,
-      }),
-    }))
-    .sort((a, b) => (a.distance ?? 0) - (b.distance ?? 0));
-
-  return {
-    id: "nearby",
-    title: "Nearby Vendors",
-    vendors: sortedVendors,
-  };
-}
-
-function formatSections(
-  sections: { id: string; title: string; vendors: Vendor[] }[]
-): Section[] {
-  return sections.map((section, index) => ({
-    id: (index + 1).toString(),
-    title: section.title,
-    vendors: section.vendors,
-  }));
-}
+import { getNearbyVendors, formatSections } from "@/functions/sectionFunctions";
 
 export default function Index() {
   const [location, setLocation] = useState<LocationCoordinates | null>(null);
