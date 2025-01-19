@@ -30,6 +30,8 @@ import { db } from "@/services/firestore"; // Adjust to your Firebase configurat
 
 import { useDispatch } from "react-redux";
 import { updateMenu } from "../../../redux/authSlice"; // Adjust the path as needed
+import { munchColors } from "@/constants/Colors";
+import { munchStyles } from "@/constants/styles";
 
 export default function EditMenuItemsScreen() {
   const router = useRouter();
@@ -295,9 +297,9 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
   },
   addButton: {
-    backgroundColor: "blue",
+    backgroundColor: munchColors.primary,
     padding: 16,
-    borderRadius: 8,
+    borderRadius: munchStyles.smallRadius,
     alignItems: "center",
     marginTop: 16,
     marginBottom: 16,
@@ -320,7 +322,7 @@ const styles = StyleSheet.create({
     fontSize: 20,
     fontWeight: "bold",
     marginBottom: 8,
-    color: "blue",
+    color: munchColors.primary,
   },
   itemContainer: {
     padding: 8,
@@ -369,7 +371,7 @@ const styles = StyleSheet.create({
   },
   modalButton: {
     flex: 1,
-    backgroundColor: "blue",
+    backgroundColor: munchColors.primary,
     padding: 12,
     borderRadius: 8,
     alignItems: "center",

@@ -30,6 +30,38 @@ import { VendorAccountInfo } from "../../../constants/types"; // Update the path
 import { uploadImage } from "../../../services/storage"; // Update the path as needed
 import { useDispatch } from "react-redux";
 import { setUser } from "../../../redux/authSlice"; // Update the path as needed
+import { munchColors } from "@/constants/Colors";
+import Carousel from "react-native-reanimated-carousel";
+import { Dimensions } from "react-native";
+import Pagination from "react-native-reanimated-carousel";
+import { munchStyles } from "@/constants/styles";
+
+const screenWidth = Dimensions.get("window").width; // Get the screen width
+
+const priceOptions = [
+  { title: "$", icon: "currency-usd" },
+  { title: "$$", icon: "currency-usd" },
+  { title: "$$$", icon: "currency-usd" },
+];
+
+const vendorTypeOptions = [
+  { title: "American" },
+  { title: "Italian" },
+  { title: "Japanese" },
+  { title: "Chinese" },
+  { title: "Indian" },
+  { title: "Mexican" },
+  { title: "Thai" },
+  { title: "Mediterranean" },
+  { title: "Korean" },
+  { title: "Vietnamese" },
+  { title: "Spanish" },
+  { title: "Greek" },
+  { title: "Middle Eastern" },
+  { title: "Brazilian" },
+  { title: "Produce" },
+  { title: "Other" },
+];
 
 export default function VendorEditAccountScreen() {
   const router = useRouter();
@@ -37,15 +69,26 @@ export default function VendorEditAccountScreen() {
   const dispatch = useDispatch();
 
   // State for vendor account info
-  const [imageLoading, setImageLoading] = useState(true); // Track if the image is loading
   const [loading, setLoading] = useState(false); // For image upload
-  const [image, setImage] = useState(user?.image || null); // Use Redux image initially
+  const [images, setImages] = useState<
+    { id: "logo" | "truck"; uri: string | null; placeholder: string }[]
+  >([
+    {
+      id: "logo",
+      uri: user?.image || null,
+      placeholder: "Please Add Your Logo",
+    },
+    { id: "truck", uri: null, placeholder: "Please Add Your Truck Image" },
+  ]);
+
   const [price, setPrice] = useState(user?.price || "");
   const [vendorType, setVendorType] = useState(user?.vendorType || "");
   const [name, setName] = useState(user?.name || "");
   const [description, setDescription] = useState(user?.description || "");
+  const [activeIndex, setActiveIndex] = useState(0); // Track the current active index
 
-  const pickImage = async () => {
+  // Function to pick and upload image
+  const pickImage = async (fileName: "logo" | "truck"): Promise<void> => {
     const result = await ImagePicker.launchImageLibraryAsync({
       allowsEditing: true,
       aspect: [1, 1],
@@ -59,24 +102,29 @@ export default function VendorEditAccountScreen() {
 
     if (!result.canceled && result.assets && result.assets.length > 0) {
       const localUri = result.assets[0].uri;
-      setLoading(true); // Set loading to true before starting the upload
+      setLoading(true);
 
       try {
-        const imagePath = `vendors/${user?.uid}/logo.jpg`;
-
+        const imagePath = `vendors/${user?.uid}/${fileName}.jpg`; // Dynamically set file name
         const downloadURL = await uploadImage(localUri, imagePath);
 
-        setImage(downloadURL);
-        dispatch(setUser({ ...user, image: downloadURL })); // Update Redux state
+        setImages((prevImages) =>
+          prevImages.map((img) =>
+            img.id === fileName ? { ...img, uri: downloadURL } : img
+          )
+        );
 
-        const vendorData: Partial<VendorAccountInfo> = { image: downloadURL };
-        await updateVendorAccountData(user.uid, vendorData);
+        if (fileName === "logo") {
+          dispatch(setUser({ ...user, image: downloadURL })); // Update Redux state for logo
+          const vendorData: Partial<VendorAccountInfo> = { image: downloadURL };
+          await updateVendorAccountData(user.uid, vendorData); // Update Firestore
+        }
 
-        console.log("Image URL updated in Firestore!");
+        console.log(`${fileName} image updated successfully!`);
       } catch (error) {
-        console.error("Error uploading image:", error);
+        console.error(`Error uploading ${fileName} image:`, error);
       } finally {
-        setLoading(false); // Set loading to false after upload is complete
+        setLoading(false);
       }
     }
   };
@@ -87,21 +135,13 @@ export default function VendorEditAccountScreen() {
       return;
     }
 
-    // Validate required fields
-    if (!name.trim()) {
-      Alert.alert("Validation Error", "Name is required.");
-      return;
-    }
-    if (!price.trim()) {
-      Alert.alert("Validation Error", "Price is required.");
-      return;
-    }
-    if (!vendorType.trim()) {
-      Alert.alert("Validation Error", "Vendor Type is required.");
-      return;
-    }
-    if (!description.trim()) {
-      Alert.alert("Validation Error", "Description is required.");
+    if (
+      !name.trim() ||
+      !price.trim() ||
+      !vendorType.trim() ||
+      !description.trim()
+    ) {
+      Alert.alert("Validation Error", "All fields are required.");
       return;
     }
 
@@ -110,51 +150,48 @@ export default function VendorEditAccountScreen() {
       vendorType,
       name,
       description,
-      image, // This will already have the correct download URL
+      image: images.find((img) => img.id === "logo")?.uri || null, // Save logo image
     };
 
     try {
       await updateVendorAccountData(user.uid, vendorData);
-
-      // Update Redux state with the updated vendor data
-      const updatedUser = {
-        ...user,
-        ...vendorData,
-        image: image || undefined, // Convert null to undefined if necessary
-      };
-
-      dispatch(setUser(updatedUser));
-
-      router.back(); // Navigate back after saving
+      dispatch(
+        setUser({
+          ...user,
+          ...vendorData,
+          image: vendorData.image || undefined,
+        })
+      ); // Convert null to undefined
+      router.back();
     } catch (error) {
       console.error("Error updating vendor data:", error);
     }
   };
 
-  const priceOptions = [
-    { title: "$", icon: "currency-usd" },
-    { title: "$$", icon: "currency-usd" },
-    { title: "$$$", icon: "currency-usd" },
-  ];
-
-  const vendorTypeOptions = [
-    { title: "American" },
-    { title: "Italian" },
-    { title: "Japanese" },
-    { title: "Chinese" },
-    { title: "Indian" },
-    { title: "Mexican" },
-    { title: "Thai" },
-    { title: "Mediterranean" },
-    { title: "Korean" },
-    { title: "Vietnamese" },
-    { title: "Spanish" },
-    { title: "Greek" },
-    { title: "Middle Eastern" },
-    { title: "Brazilian" },
-    { title: "Produce" },
-    { title: "Other" },
-  ];
+  const renderCarouselItem = ({
+    item,
+  }: {
+    item: { id: "logo" | "truck"; uri: string | null; placeholder: string };
+  }) => (
+    <View style={styles.imageContainer}>
+      {loading ? (
+        <View style={styles.placeholderImage}>
+          <ActivityIndicator size="large" color="blue" />
+        </View>
+      ) : item.uri ? (
+        <Image source={{ uri: item.uri }} style={styles.profileImage} />
+      ) : (
+        <View style={styles.placeholderImage}>
+          <Text style={styles.placeholderText}>{item.placeholder}</Text>
+        </View>
+      )}
+      <TouchableOpacity onPress={() => pickImage(item.id)}>
+        <Text style={styles.editImageText}>
+          {item.id === "logo" ? "Edit Logo" : "Edit Truck Image"}
+        </Text>
+      </TouchableOpacity>
+    </View>
+  );
 
   return (
     <KeyboardAvoidingView
@@ -162,8 +199,7 @@ export default function VendorEditAccountScreen() {
       behavior={Platform.OS === "ios" ? "padding" : "height"}
     >
       <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-        <View style={styles.container}>
-          <SafeAreaView edges={["top"]} />
+        <SafeAreaView style={styles.container}>
           <View style={styles.header}>
             <TouchableOpacity
               style={styles.backButton}
@@ -173,28 +209,32 @@ export default function VendorEditAccountScreen() {
             </TouchableOpacity>
             <Text style={styles.headerText}>Edit Profile</Text>
           </View>
-
           <ScrollView contentContainerStyle={styles.formContainer}>
-            <View style={styles.imageContainer}>
-              {loading ? (
-                <View style={styles.placeholderImage}>
-                  <ActivityIndicator size="large" color="blue" />
-                </View>
-              ) : image ? (
-                <Image source={{ uri: image }} style={styles.profileImage} />
-              ) : (
-                <View style={styles.placeholderImage}>
-                  <Text style={styles.placeholderText}>
-                    Please Add Your Logo
-                  </Text>
-                </View>
-              )}
-
-              <TouchableOpacity onPress={pickImage}>
-                <Text style={styles.editImageText}>Edit Logo</Text>
-              </TouchableOpacity>
+            <View style={styles.carouselContainer}>
+              <Carousel
+                data={images}
+                renderItem={renderCarouselItem}
+                width={screenWidth}
+                height={250}
+                onSnapToItem={(index) => setActiveIndex(index)} // Update active index
+                loop={false}
+                style={styles.carouselContainer}
+              />
+              <View style={styles.paginationContainer}>
+                {images.map((_, index) => (
+                  <View
+                    key={index}
+                    style={[
+                      styles.dot,
+                      activeIndex === index
+                        ? styles.activeDot
+                        : styles.inactiveDot,
+                    ]}
+                  />
+                ))}
+              </View>
             </View>
-
+            {/* Form Inputs */}
             <Text style={styles.label}>Name</Text>
             <TextInput
               style={styles.input}
@@ -202,7 +242,6 @@ export default function VendorEditAccountScreen() {
               onChangeText={setName}
               placeholder="Enter name"
             />
-
             <Text style={styles.label}>Price</Text>
             <SelectDropdown
               data={priceOptions}
@@ -275,22 +314,18 @@ export default function VendorEditAccountScreen() {
               placeholder="Enter description"
               multiline
             />
-
             <TouchableOpacity style={styles.saveButton} onPress={handleSave}>
               <Text style={styles.saveButtonText}>Save</Text>
             </TouchableOpacity>
           </ScrollView>
-        </View>
+        </SafeAreaView>
       </TouchableWithoutFeedback>
     </KeyboardAvoidingView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#fff",
-  },
+  container: { flex: 1, backgroundColor: "#fff" },
   header: {
     flexDirection: "row",
     alignItems: "center",
@@ -298,9 +333,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#fff",
     paddingHorizontal: 10,
   },
-  backButton: {
-    marginRight: 10,
-  },
+  backButton: { marginRight: 10 },
   headerText: {
     fontSize: 20,
     fontWeight: "bold",
@@ -308,15 +341,26 @@ const styles = StyleSheet.create({
     flex: 1,
     textAlign: "center",
   },
-  formContainer: {
-    padding: 16,
+  formContainer: { padding: 16 },
+  carouselContainer: {
+    marginBottom: 16,
+    alignItems: "center", // Center horizontally
+    justifyContent: "center", // Center vertically
+    flex: 1, // Allow the container to take available space
   },
-  label: {
-    fontSize: 16,
-    fontWeight: "bold",
-    marginBottom: 8,
-    color: "#333",
+  imageContainer: { alignItems: "center", marginBottom: 16 },
+  profileImage: { width: 225, height: 225, borderRadius: 120 },
+  placeholderImage: {
+    width: 225,
+    height: 225,
+    borderRadius: 120,
+    backgroundColor: "#ddd",
+    alignItems: "center",
+    justifyContent: "center",
   },
+  placeholderText: { color: "#888" },
+  editImageText: { color: munchColors.primary, marginTop: 8 },
+  label: { fontSize: 16, fontWeight: "bold", marginBottom: 8, color: "#333" },
   input: {
     borderWidth: 1,
     borderColor: "#ddd",
@@ -325,6 +369,15 @@ const styles = StyleSheet.create({
     marginBottom: 16,
     fontSize: 16,
   },
+  textArea: { height: 100 },
+  saveButton: {
+    backgroundColor: munchColors.primary,
+    padding: 16,
+    borderRadius: munchStyles.smallRadius,
+    alignItems: "center",
+    marginTop: 16,
+  },
+  saveButtonText: { color: "#fff", fontSize: 16, fontWeight: "bold" },
   dropdownButtonStyle: {
     width: "100%",
     height: 50,
@@ -342,13 +395,7 @@ const styles = StyleSheet.create({
     fontWeight: "500",
     color: "#151E26",
   },
-  dropdownButtonArrowStyle: {
-    fontSize: 28,
-  },
-  dropdownButtonIconStyle: {
-    fontSize: 28,
-    marginRight: 8,
-  },
+  dropdownButtonArrowStyle: { fontSize: 28 },
   dropdownMenuStyle: {
     backgroundColor: "#E9ECEF",
     borderRadius: 10,
@@ -368,53 +415,27 @@ const styles = StyleSheet.create({
     fontWeight: "500",
     color: "#151E26",
   },
-  dropdownItemIconStyle: {
-    fontSize: 28,
-    marginRight: 8,
-  },
-  textArea: {
-    height: 100,
-  },
-  saveButton: {
-    backgroundColor: "blue",
-    padding: 16,
-    borderRadius: 8,
-    alignItems: "center",
-    marginTop: 16,
-  },
-  saveButtonText: {
-    color: "#fff",
-    fontSize: 16,
-    fontWeight: "bold",
-  },
-  switchContainer: {
+  paginationContainer: {
     flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    marginBottom: 16,
-  },
-  imageContainer: {
-    alignItems: "center",
-    marginBottom: 16,
-  },
-  profileImage: {
-    width: 225,
-    height: 225,
-    borderRadius: 120,
-  },
-  placeholderImage: {
-    width: 225,
-    height: 225,
-    borderRadius: 120,
-    backgroundColor: "#ddd",
-    alignItems: "center",
     justifyContent: "center",
-  },
-  placeholderText: {
-    color: "#888",
-  },
-  editImageText: {
-    color: "blue",
+    alignItems: "center",
     marginTop: 8,
+  },
+  dot: {
+    width: 10,
+    height: 10,
+    borderRadius: 5,
+    backgroundColor: munchColors.primary, // Active dot color
+    marginHorizontal: 5,
+  },
+  inactiveDot: {
+    width: 10,
+    height: 10,
+    borderRadius: 5,
+    backgroundColor: "#ccc", // Inactive dot color
+    marginHorizontal: 5,
+  },
+  activeDot: {
+    backgroundColor: munchColors.primary, // Active dot color
   },
 });

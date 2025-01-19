@@ -10,6 +10,7 @@ import { useRouter } from "expo-router";
 import { FontAwesome } from "@expo/vector-icons";
 import { useDispatch } from "react-redux"; // Import useDispatch
 import { signOutUser } from "@/services/auth"; // Import signOutUser
+import { munchColors } from "@/constants/Colors";
 
 export default function VendorAccountScreen() {
   const router = useRouter();
@@ -40,7 +41,11 @@ export default function VendorAccountScreen() {
           }
         >
           <Text style={styles.menuText}>Edit Menu</Text>
-          <FontAwesome name="chevron-right" size={16} color="#007aff" />
+          <FontAwesome
+            name="chevron-right"
+            size={16}
+            style={styles.rightChevron}
+          />
         </TouchableOpacity>
 
         <TouchableOpacity
@@ -50,7 +55,11 @@ export default function VendorAccountScreen() {
           }
         >
           <Text style={styles.menuText}>Account Information</Text>
-          <FontAwesome name="chevron-right" size={16} color="#007aff" />
+          <FontAwesome
+            name="chevron-right"
+            size={16}
+            style={styles.rightChevron}
+          />
         </TouchableOpacity>
 
         <TouchableOpacity
@@ -58,7 +67,11 @@ export default function VendorAccountScreen() {
           onPress={() => router.push("/sharedScreens/signInAndSecurityScreen")}
         >
           <Text style={styles.menuText}>Sign In and Security</Text>
-          <FontAwesome name="chevron-right" size={16} color="#007aff" />
+          <FontAwesome
+            name="chevron-right"
+            size={16}
+            style={styles.rightChevron}
+          />
         </TouchableOpacity>
 
         <TouchableOpacity
@@ -66,7 +79,11 @@ export default function VendorAccountScreen() {
           onPress={() => router.push("/sharedScreens/termsAndServiceScreen")}
         >
           <Text style={styles.menuText}>Terms of Service</Text>
-          <FontAwesome name="chevron-right" size={16} color="#007aff" />
+          <FontAwesome
+            name="chevron-right"
+            size={16}
+            style={styles.rightChevron}
+          />
         </TouchableOpacity>
       </View>
 
@@ -110,7 +127,7 @@ const styles = StyleSheet.create({
   },
   menuText: {
     fontSize: 18,
-    color: "#007aff", // Blue color similar to iOS settings
+    color: munchColors.primary, // Blue color similar to iOS settings
   },
   signOutButton: {
     marginTop: "auto",
@@ -125,5 +142,8 @@ const styles = StyleSheet.create({
   signOutText: {
     fontSize: 16,
     color: "#000",
+  },
+  rightChevron: {
+    color: munchColors.primary,
   },
 });
