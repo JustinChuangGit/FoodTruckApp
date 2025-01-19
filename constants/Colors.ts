@@ -24,3 +24,7 @@ export const Colors = {
     tabIconSelected: tintColorDark,
   },
 };
+
+export const munchColors = {
+  primary: '#ed8200',
+}

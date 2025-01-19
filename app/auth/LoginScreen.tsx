@@ -12,6 +12,8 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { signIn } from "../../services/auth"; // Adjust the path if necessary
 import { useDispatch } from "react-redux";
 import { AppDispatch } from "../../redux/store";
+import { munchColors } from "@/constants/Colors";
+import { munchStyles } from "@/constants/styles";
 
 export default function LoginScreen() {
   const router = useRouter();
@@ -38,7 +40,7 @@ export default function LoginScreen() {
   };
 
   return (
-    <SafeAreaView style={styles.container}>
+    <View style={styles.container}>
       <View style={styles.logoContainer}>
         <Image
           source={require("@/assets/images/munchLogo.png")}
@@ -75,7 +77,7 @@ export default function LoginScreen() {
           color="gray"
         />
       </View>
-    </SafeAreaView>
+    </View>
   );
 }
 
@@ -83,19 +85,28 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     justifyContent: "center",
-    paddingHorizontal: 24,
-    backgroundColor: "#ed8200", // Orange background
+    backgroundColor: munchColors.primary, // Orange background
   },
   logoContainer: {
     alignItems: "center",
     marginBottom: 20,
+    marginTop: 75,
   },
   logo: {
-    width: 200,
-    height: 200,
+    width: 300,
+    height: 300,
   },
   inputContainer: {
-    marginBottom: 16,
+    flex: 1,
+    backgroundColor: "white",
+    borderTopLeftRadius: munchStyles.borderRadius,
+    borderTopRightRadius: munchStyles.borderRadius,
+    padding: 24,
+    elevation: 4, // Adds shadow for Android
+    shadowColor: "#000", // Shadow for iOS
+    shadowOffset: { width: 0, height: 2 }, // Shadow offset
+    shadowOpacity: 0.1, // Shadow opacity
+    shadowRadius: 4, // Shadow radius
   },
   input: {
     height: 48,
