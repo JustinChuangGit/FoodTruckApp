@@ -1,7 +1,13 @@
-// app/auth/LoginScreen.tsx
 import { useRouter } from "expo-router";
 import React, { useState } from "react";
-import { View, Text, TextInput, Button, Alert } from "react-native";
+import {
+  View,
+  TextInput,
+  Button,
+  Alert,
+  Image,
+  StyleSheet,
+} from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { signIn } from "../../services/auth"; // Adjust the path if necessary
 import { useDispatch } from "react-redux";
@@ -32,45 +38,75 @@ export default function LoginScreen() {
   };
 
   return (
-    <SafeAreaView className="flex-1 justify-center px-6 bg-gray-100">
-      <Text className="text-3xl font-bold text-center mb-6 text-black">
-        Login
-      </Text>
-
-      {/* Username Input */}
-      <TextInput
-        className="h-12 border border-gray-400 rounded mb-4 px-3 bg-white"
-        placeholder="Email"
-        placeholderTextColor="#A9A9A9"
-        autoCapitalize="none"
-        keyboardType="email-address"
-        value={email}
-        onChangeText={setEmail}
-      />
-
-      {/* Password Input */}
-      <TextInput
-        className="h-12 border border-gray-400 rounded mb-4 px-3 bg-white"
-        placeholder="Password"
-        placeholderTextColor="#A9A9A9"
-        secureTextEntry
-        value={password}
-        onChangeText={setPassword}
-      />
-
-      {/* Login Button */}
-      <View className="mb-3">
-        <Button title="Login" onPress={handleLogin} />
+    <SafeAreaView style={styles.container}>
+      <View style={styles.logoContainer}>
+        <Image
+          source={require("@/assets/images/munchLogo.png")}
+          style={styles.logo}
+          resizeMode="contain"
+        />
       </View>
-
-      {/* Sign Up Button */}
-      <Button
-        title="Sign Up"
-        onPress={() => {
-          router.push("/auth/SignupScreen");
-        }}
-        color="gray"
-      />
+      <View style={styles.inputContainer}>
+        <TextInput
+          style={styles.input}
+          placeholder="Email"
+          placeholderTextColor="#A9A9A9"
+          autoCapitalize="none"
+          keyboardType="email-address"
+          value={email}
+          onChangeText={setEmail}
+        />
+        <TextInput
+          style={styles.input}
+          placeholder="Password"
+          placeholderTextColor="#A9A9A9"
+          secureTextEntry
+          value={password}
+          onChangeText={setPassword}
+        />
+        <View style={styles.buttonContainer}>
+          <Button title="Login" onPress={handleLogin} />
+        </View>
+        <Button
+          title="Sign Up"
+          onPress={() => {
+            router.push("/auth/SignupScreen");
+          }}
+          color="gray"
+        />
+      </View>
     </SafeAreaView>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    justifyContent: "center",
+    paddingHorizontal: 24,
+    backgroundColor: "#ed8200", // Orange background
+  },
+  logoContainer: {
+    alignItems: "center",
+    marginBottom: 20,
+  },
+  logo: {
+    width: 200,
+    height: 200,
+  },
+  inputContainer: {
+    marginBottom: 16,
+  },
+  input: {
+    height: 48,
+    borderColor: "gray",
+    borderWidth: 1,
+    borderRadius: 4,
+    marginBottom: 16,
+    paddingHorizontal: 12,
+    backgroundColor: "white",
+  },
+  buttonContainer: {
+    marginBottom: 12,
+  },
+});
