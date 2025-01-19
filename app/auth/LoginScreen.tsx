@@ -18,6 +18,7 @@ import { useDispatch } from "react-redux";
 import { AppDispatch } from "../../redux/store";
 import { munchColors } from "@/constants/Colors";
 import { munchStyles } from "@/constants/styles";
+import HorizontalLine from "@/components/default/HorizontalLine";
 
 export default function LoginScreen() {
   const router = useRouter();
@@ -58,6 +59,7 @@ export default function LoginScreen() {
           </View>
           <View style={styles.inputContainer}>
             <Text style={styles.header}>Login</Text>
+            <HorizontalLine />
             <TextInput
               style={styles.input}
               placeholder="Email"
