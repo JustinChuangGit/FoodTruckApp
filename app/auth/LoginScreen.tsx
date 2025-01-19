@@ -7,6 +7,8 @@ import {
   Alert,
   Image,
   StyleSheet,
+  Text,
+  TouchableOpacity,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { signIn } from "../../services/auth"; // Adjust the path if necessary
@@ -49,6 +51,7 @@ export default function LoginScreen() {
         />
       </View>
       <View style={styles.inputContainer}>
+        <Text style={styles.header}>Login</Text>
         <TextInput
           style={styles.input}
           placeholder="Email"
@@ -66,16 +69,21 @@ export default function LoginScreen() {
           value={password}
           onChangeText={setPassword}
         />
-        <View style={styles.buttonContainer}>
-          <Button title="Login" onPress={handleLogin} />
+        <View style={styles.subInputContainer}>
+          <TouchableOpacity onPress={() => {}}>
+            <Text style={styles.linkText}>Forgot Password?</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            onPress={() => {
+              router.push("/auth/SignupScreen");
+            }}
+          >
+            <Text style={styles.linkText}>Create an Account</Text>
+          </TouchableOpacity>
         </View>
-        <Button
-          title="Sign Up"
-          onPress={() => {
-            router.push("/auth/SignupScreen");
-          }}
-          color="gray"
-        />
+        <TouchableOpacity style={styles.button} onPress={handleLogin}>
+          <Text style={styles.buttonText}>Login</Text>
+        </TouchableOpacity>
       </View>
     </View>
   );
@@ -99,9 +107,9 @@ const styles = StyleSheet.create({
   inputContainer: {
     flex: 1,
     backgroundColor: "white",
-    borderTopLeftRadius: munchStyles.borderRadius,
-    borderTopRightRadius: munchStyles.borderRadius,
-    padding: 24,
+    borderTopLeftRadius: munchStyles.cardRadius,
+    borderTopRightRadius: munchStyles.cardRadius,
+    padding: 30,
     elevation: 4, // Adds shadow for Android
     shadowColor: "#000", // Shadow for iOS
     shadowOffset: { width: 0, height: 2 }, // Shadow offset
@@ -112,12 +120,42 @@ const styles = StyleSheet.create({
     height: 48,
     borderColor: "gray",
     borderWidth: 1,
-    borderRadius: 4,
+    borderRadius: munchStyles.smallRadius,
     marginBottom: 16,
     paddingHorizontal: 12,
     backgroundColor: "white",
   },
   buttonContainer: {
     marginBottom: 12,
+  },
+  header: {
+    fontSize: 30,
+    fontWeight: "bold",
+    marginBottom: 24,
+    paddingTop: 10,
+  },
+  subInputContainer: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginBottom: 16,
+  },
+
+  button: {
+    backgroundColor: munchColors.primary,
+    paddingVertical: 15,
+    borderRadius: munchStyles.smallRadius,
+    alignItems: "center",
+    marginBottom: 16,
+  },
+  buttonText: {
+    color: "white",
+    fontSize: 16,
+    fontWeight: "bold",
+  },
+  linkText: {
+    color: "gray",
+    fontSize: 14,
+    textAlign: "center",
+    marginTop: 10,
   },
 });

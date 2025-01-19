@@ -1,3 +1,5 @@
 export const munchStyles = {
-    borderRadius: 40,
+    cardRadius: 40,
+    smallRadius: 20
+
 }
