@@ -78,7 +78,11 @@ export default function VendorEditAccountScreen() {
       uri: user?.image || null,
       placeholder: "Please Add Your Logo",
     },
-    { id: "truck", uri: null, placeholder: "Please Add Your Truck Image" },
+    {
+      id: "truck",
+      uri: user?.truckImage || null, // Use truckImage from Redux state
+      placeholder: "Please Add Your Truck Image",
+    },
   ]);
 
   const [price, setPrice] = useState(user?.price || "");
@@ -114,13 +118,17 @@ export default function VendorEditAccountScreen() {
           )
         );
 
-        if (fileName === "logo") {
-          dispatch(setUser({ ...user, image: downloadURL })); // Update Redux state for logo
-          const vendorData: Partial<VendorAccountInfo> = { image: downloadURL };
-          await updateVendorAccountData(user.uid, vendorData); // Update Firestore
-        }
+        // Update Redux and Firestore
+        const updatedUser = {
+          ...user,
+          [fileName === "logo" ? "image" : "truckImage"]: downloadURL,
+        };
+        dispatch(setUser(updatedUser)); // Update Redux state
 
-        console.log(`${fileName} image updated successfully!`);
+        const vendorData: Partial<VendorAccountInfo> = {
+          [fileName === "logo" ? "image" : "truckImage"]: downloadURL,
+        };
+        await updateVendorAccountData(user.uid, vendorData); // Update Firestore
       } catch (error) {
         console.error(`Error uploading ${fileName} image:`, error);
       } finally {

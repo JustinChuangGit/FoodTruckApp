@@ -8,7 +8,8 @@ export interface User {
   email: string;
   name: string;
   isVendor: boolean;
-  image?: string;
+  image?: string; // For the logo
+  truckImage?: string; // New field for the truck image
   price?: string;
   vendorType?: string;
   description?: string;
