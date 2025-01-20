@@ -19,6 +19,13 @@ export default function SharedScreensLayout() {
           headerShown: false,
         }}
       />
+      <Stack.Screen
+        name="reportBugScreen"
+        options={{
+          title: "Report A Bug",
+          headerShown: false,
+        }}
+      />
     </Stack>
   );
 }
