@@ -115,6 +115,7 @@ export default function Index() {
             image: data.image || "https://via.placeholder.com/150", // Default image
             menu: data.menu || [], // Include menu field, default to an empty array
             vendorType: data.vendorType || "Other", // Default vendor type
+            truckImage: data.truckImage || "https://via.placeholder.com/150", // Default truck image
           };
         });
         setVendors(updatedVendors);
@@ -189,6 +190,7 @@ export default function Index() {
         description: vendor.description,
         image: encodeURIComponent(vendor.image), // Encode the image URL
         rating: vendor.rating,
+        truckImage: encodeURIComponent(vendor.truckImage), // Encode the truck image URL
       },
     });
   };
@@ -230,6 +232,7 @@ export default function Index() {
           price: user.price, // Include vendor's price range
           description: user.description, // Include vendor's description
           image: user.image || null, // Include vendor's
+          truckImage: user.truckImage || null, // Include vendor's truck image
         });
 
         console.log(

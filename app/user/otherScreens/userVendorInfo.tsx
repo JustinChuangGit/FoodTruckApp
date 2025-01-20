@@ -28,10 +28,12 @@ export default function UserVendorInfo() {
     description: string;
     image: string;
     rating: string;
+    truckImage: string;
   }>();
 
   const [contentWidth, setContentWidth] = useState(0);
   const [imageLoading, setImageLoading] = useState(true);
+  const [truckImageLoading, setTruckImageLoading] = useState(true); // Loading state for truck image
 
   const {
     location = "{}",
@@ -42,6 +44,7 @@ export default function UserVendorInfo() {
     description,
     image,
     rating,
+    truckImage,
   } = params;
 
   const parsedMenu: MenuItem[] = JSON.parse(menu);
@@ -104,6 +107,24 @@ export default function UserVendorInfo() {
             </View>
             <View style={styles.informationContainer}>
               <Text style={styles.name}>{name}</Text>
+              <View style={styles.circleContainer}>
+                <View style={styles.circle}>
+                  {truckImageLoading && (
+                    <ActivityIndicator
+                      size="small"
+                      color="#007bff"
+                      style={styles.loadingIndicator}
+                    />
+                  )}
+                  <Image
+                    source={{ uri: truckImage }}
+                    style={styles.circleLogo}
+                    onLoad={() => setTruckImageLoading(false)} // Image successfully loaded
+                    onLoadStart={() => setTruckImageLoading(true)} // Start loading
+                    onError={() => setTruckImageLoading(false)} // Stop spinner if image fails to load
+                  />
+                </View>
+              </View>
               <View style={styles.informationSubHeaderContainer}>
                 <Text style={styles.vendorPrice}>{vendorType} </Text>
                 <FontAwesome name="circle" size={8} color="#888" />
@@ -342,5 +363,27 @@ const styles = StyleSheet.create({
     top: "50%", // Center it vertically
     left: "50%", // Center it horizontally
     transform: [{ translateX: -15 }, { translateY: -15 }], // Adjust for spinner size
+  },
+  circleContainer: {
+    position: "absolute",
+    top: -65, // Adjust based on your layout
+    right: 16, // Adjust to align the circle to the right
+    zIndex: 10, // Ensure it appears above other elements
+  },
+  circle: {
+    width: 125, // Diameter of the circle
+    height: 125,
+    borderRadius: 80, // Makes it a perfect circle
+    backgroundColor: "white",
+    borderWidth: 2,
+    borderColor: "black",
+    justifyContent: "center",
+    alignItems: "center",
+    overflow: "hidden",
+  },
+  circleLogo: {
+    width: "100%", // Adjust the logo size within the circle
+    height: "100%",
+    resizeMode: "contain",
   },
 });

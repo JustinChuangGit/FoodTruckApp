@@ -10,6 +10,7 @@ export interface Vendor {
   distance?: number;
   menu: MenuItem[];
   vendorType: string;
+  truckImage: string;
 }
 
 export interface VendorAccountInfo {
