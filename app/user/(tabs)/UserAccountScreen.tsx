@@ -1,26 +1,121 @@
 import React from "react";
-import { View, Text, StyleSheet } from "react-native";
+import {
+  View,
+  Text,
+  StyleSheet,
+  TouchableOpacity,
+  SafeAreaView,
+} from "react-native";
+import { useRouter } from "expo-router";
+import { FontAwesome } from "@expo/vector-icons";
+import { useDispatch } from "react-redux"; // Import useDispatch
+import { signOutUser } from "@/services/auth"; // Import signOutUser
+import { munchColors } from "@/constants/Colors";
 
 export default function UserAccountScreen() {
+  const router = useRouter();
+  const dispatch = useDispatch(); // Initialize the Redux dispatch
+
+  const handleSignOut = async () => {
+    try {
+      await signOutUser(dispatch); // Call the signOut function and pass the dispatch
+      router.replace("/auth/LoginScreen"); // Navigate to the sign-in screen after signing out
+    } catch (error) {
+      console.error("Error signing out:", error);
+    }
+  };
+
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>User Account Screen</Text>
-      <Text>This is a dummy screen for user account details.</Text>
-    </View>
+    <SafeAreaView style={styles.container}>
+      {/* Header */}
+      <View style={styles.header}>
+        <Text style={styles.headerText}>Account</Text>
+      </View>
+
+      {/* Menu Options */}
+      <View style={styles.menuContainer}>
+        <TouchableOpacity
+          style={styles.menuItem}
+          onPress={() => router.push("/sharedScreens/signInAndSecurityScreen")}
+        >
+          <Text style={styles.menuText}>Sign In and Security</Text>
+          <FontAwesome
+            name="chevron-right"
+            size={16}
+            style={styles.rightChevron}
+          />
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={styles.menuItem}
+          onPress={() => router.push("/sharedScreens/termsAndServiceScreen")}
+        >
+          <Text style={styles.menuText}>Terms of Service</Text>
+          <FontAwesome
+            name="chevron-right"
+            size={16}
+            style={styles.rightChevron}
+          />
+        </TouchableOpacity>
+      </View>
+
+      {/* Sign Out Button */}
+      <TouchableOpacity style={styles.signOutButton} onPress={handleSignOut}>
+        <Text style={styles.signOutText}>Sign out</Text>
+      </TouchableOpacity>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: "#f9f9f9",
+    backgroundColor: "#fff",
   },
-  title: {
-    fontSize: 24,
+  header: {
+    flexDirection: "row",
+    alignItems: "center",
+    height: 100,
+    paddingHorizontal: 20,
+    borderBottomWidth: 1,
+    borderBottomColor: "#ddd",
+  },
+  headerText: {
+    fontSize: 40,
     fontWeight: "bold",
-    marginBottom: 10,
-    color: "#333",
+    color: "#000",
+  },
+  menuContainer: {
+    marginTop: 20,
+  },
+  menuItem: {
+    paddingVertical: 15,
+    paddingHorizontal: 20,
+    borderBottomWidth: 1,
+    borderBottomColor: "#ddd",
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+  },
+  menuText: {
+    fontSize: 18,
+    color: munchColors.primary, // Blue color similar to iOS settings
+  },
+  signOutButton: {
+    marginTop: "auto",
+    marginBottom: 30,
+    alignSelf: "center",
+    paddingHorizontal: 30,
+    paddingVertical: 10,
+    borderRadius: 25,
+    borderWidth: 1,
+    borderColor: "#000",
+  },
+  signOutText: {
+    fontSize: 16,
+    color: "#000",
+  },
+  rightChevron: {
+    color: munchColors.primary,
   },
 });

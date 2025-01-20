@@ -19,6 +19,7 @@ import { AppDispatch } from "../../redux/store";
 import { munchColors } from "@/constants/Colors";
 import { munchStyles } from "@/constants/styles";
 import HorizontalLine from "@/components/default/HorizontalLine";
+import { ScrollView } from "react-native-gesture-handler";
 
 export default function SignupScreen() {
   const router = useRouter();
@@ -27,6 +28,7 @@ export default function SignupScreen() {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [isVendor, setIsVendor] = useState(false);
   const [name, setName] = useState("");
+  const [phone, setPhone] = useState("");
 
   const dispatch = useDispatch<AppDispatch>();
 
@@ -36,7 +38,14 @@ export default function SignupScreen() {
       return;
     }
     try {
-      const user = await signUp(dispatch, email, password, isVendor, name);
+      const user = await signUp(
+        dispatch,
+        email,
+        password,
+        isVendor,
+        name,
+        phone
+      );
       console.log("User signed up:", user);
       router.replace(isVendor ? "/vendor" : "/user");
     } catch (error) {
@@ -49,7 +58,8 @@ export default function SignupScreen() {
       behavior={Platform.OS === "ios" ? "padding" : "height"}
       style={styles.container}
     >
-      <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+      {/* <TouchableWithoutFeedback onPress={Keyboard.dismiss}> */}
+      <ScrollView scrollEnabled={false} contentContainerStyle={{ flexGrow: 1 }}>
         <View style={styles.inner}>
           <View style={styles.inputContainer}>
             <View style={styles.headerContainer}>
@@ -75,6 +85,15 @@ export default function SignupScreen() {
               keyboardType="email-address"
               value={email}
               onChangeText={setEmail}
+            />
+            <TextInput
+              style={styles.input}
+              placeholder="Phone"
+              placeholderTextColor="#A9A9A9"
+              autoCapitalize="none"
+              keyboardType="phone-pad"
+              value={phone}
+              onChangeText={setPhone}
             />
 
             {/* Password Input */}
@@ -124,7 +143,7 @@ export default function SignupScreen() {
             </TouchableOpacity>
           </View>
         </View>
-      </TouchableWithoutFeedback>
+      </ScrollView>
     </KeyboardAvoidingView>
   );
 }

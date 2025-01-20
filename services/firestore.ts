@@ -9,11 +9,9 @@ export const db = getFirestore(app);
 // Function to save user data
 export const saveUserData = async (
   uid: string,
-  data: { email: string; name: string; isVendor: boolean }
+  data: { email: string; name: string; isVendor: boolean, phone: string }
 ): Promise<void> => {
   try {
-    console.log("isVendor:", data.isVendor);
-
     if(data.isVendor){
       await setDoc(doc(db, "vendors", uid), data);
       console.log("Vendor data saved successfully");
