@@ -12,6 +12,7 @@ import {
   Platform,
   TouchableWithoutFeedback,
   Keyboard,
+  ScrollView,
 } from "react-native";
 import { signIn } from "../../services/auth";
 import { useDispatch } from "react-redux";
@@ -48,7 +49,10 @@ export default function LoginScreen() {
       behavior={Platform.OS === "ios" ? "padding" : "height"}
       style={styles.container}
     >
-      <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+      <ScrollView
+        contentContainerStyle={styles.scrollContainer}
+        showsVerticalScrollIndicator={false}
+      >
         <View style={styles.inner}>
           <View style={styles.logoContainer}>
             <Image
@@ -94,7 +98,7 @@ export default function LoginScreen() {
             </TouchableOpacity>
           </View>
         </View>
-      </TouchableWithoutFeedback>
+      </ScrollView>
     </KeyboardAvoidingView>
   );
 }
@@ -166,5 +170,9 @@ const styles = StyleSheet.create({
     fontSize: 14,
     textAlign: "center",
     marginTop: 10,
+  },
+  scrollContainer: {
+    flexGrow: 1,
+    justifyContent: "center",
   },
 });
