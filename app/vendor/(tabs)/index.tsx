@@ -179,7 +179,7 @@ export default function Index() {
     const menu = JSON.stringify(vendor.menu);
 
     router.push({
-      pathname: "/user/otherScreens/userVendorInfo",
+      pathname: "/sharedScreens/userVendorInfo",
       params: {
         uid: vendor.uid,
         location: encodeURIComponent(location),

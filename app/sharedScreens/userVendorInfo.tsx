@@ -13,6 +13,7 @@ import { useRouter, useLocalSearchParams } from "expo-router";
 import { MenuItem } from "@/constants/types";
 import { FontAwesome } from "@expo/vector-icons";
 import HorizontalLine from "@/components/default/HorizontalLine";
+import { munchColors } from "@/constants/Colors";
 
 const screenWidth = Dimensions.get("window").width;
 
@@ -315,7 +316,7 @@ const styles = StyleSheet.create({
   },
   menuItemPrice: {
     fontSize: 14,
-    color: "#007bff",
+    color: munchColors.primary,
   },
   menuItemTextContainer: {
     flex: 1,

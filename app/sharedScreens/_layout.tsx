@@ -26,6 +26,13 @@ export default function SharedScreensLayout() {
           headerShown: false,
         }}
       />
+      <Stack.Screen
+        name="userVendorInfo"
+        options={{
+          title: "User Vendor Info",
+          headerShown: false,
+        }}
+      />
     </Stack>
   );
 }
