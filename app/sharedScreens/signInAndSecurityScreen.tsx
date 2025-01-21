@@ -12,6 +12,7 @@ import { useRouter } from "expo-router";
 import { FontAwesome } from "@expo/vector-icons";
 import { munchColors } from "@/constants/Colors";
 import { munchStyles } from "@/constants/styles";
+import { changePassword } from "@/services/auth"; // Import the function
 
 export default function ChangePasswordScreen() {
   const router = useRouter();
@@ -19,8 +20,9 @@ export default function ChangePasswordScreen() {
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmNewPassword, setConfirmNewPassword] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleChangePassword = () => {
+  const handleChangePassword = async () => {
     if (!currentPassword || !newPassword || !confirmNewPassword) {
       Alert.alert("Error", "All fields are required.");
       return;
@@ -31,12 +33,22 @@ export default function ChangePasswordScreen() {
       return;
     }
 
-    // Add your password change logic here
-    Alert.alert("Success", "Password changed successfully!");
-    setCurrentPassword("");
-    setNewPassword("");
-    setConfirmNewPassword("");
-    router.back(); // Navigate back after successful password change
+    setIsSubmitting(true);
+
+    try {
+      // Call the changePassword function
+      await changePassword(currentPassword, newPassword);
+      Alert.alert("Success", "Password changed successfully!");
+      setCurrentPassword("");
+      setNewPassword("");
+      setConfirmNewPassword("");
+      router.back(); // Navigate back
+    } catch (error: any) {
+      console.error("Error:", error);
+      Alert.alert("Error", error.message || "An unexpected error occurred.");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -85,8 +97,11 @@ export default function ChangePasswordScreen() {
         <TouchableOpacity
           style={styles.saveButton}
           onPress={handleChangePassword}
+          disabled={isSubmitting}
         >
-          <Text style={styles.saveButtonText}>Change Password</Text>
+          <Text style={styles.saveButtonText}>
+            {isSubmitting ? "Changing Password..." : "Change Password"}
+          </Text>
         </TouchableOpacity>
       </View>
     </SafeAreaView>

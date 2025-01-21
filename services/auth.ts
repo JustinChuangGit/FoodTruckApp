@@ -5,6 +5,9 @@ import {
   signOut,
   onAuthStateChanged,
   getReactNativePersistence,
+  updatePassword,
+  reauthenticateWithCredential,
+  EmailAuthProvider
 } from "firebase/auth";
 import { app } from "../firebaseConfig"; // Adjust the path if needed
 import { saveUserData, getUserData } from "./firestore"; // Adjust the path as needed
@@ -153,3 +156,30 @@ export const onAuthStateChange = (
   });
 };
 
+// Function to change the password
+export const changePassword = async (
+  currentPassword: string,
+  newPassword: string
+): Promise<void> => {
+  if (!auth.currentUser) {
+    throw new Error("No authenticated user found.");
+  }
+
+  const user = auth.currentUser;
+
+  try {
+    // Reauthenticate the user with their current password
+    const credential = EmailAuthProvider.credential(
+      user.email || "",
+      currentPassword
+    );
+    await reauthenticateWithCredential(user, credential);
+
+    // Update the password
+    await updatePassword(user, newPassword);
+    console.log("Password updated successfully");
+  } catch (error) {
+    console.error("Error changing password:", error);
+    throw error; // Re-throw to handle in the UI
+  }
+};
