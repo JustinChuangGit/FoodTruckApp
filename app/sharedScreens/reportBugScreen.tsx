@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { isValidElement, useState } from "react";
 import {
   View,
   TextInput,
@@ -7,14 +7,27 @@ import {
   Alert,
   StyleSheet,
 } from "react-native";
-import emailjs from "emailjs-com";
+import emailjs from "emailjs-com"; // Import EmailJS
+import { useRouter } from "expo-router";
+import { useDispatch, useSelector } from "react-redux"; // Import useDispatch
+import { selectUser } from "@/redux/authSlice"; // Update the path as needed
 
-export default function ReportBugScreen() {
-  const [description, setDescription] = useState("");
-  const [email, setEmail] = useState("");
-  const [isSubmitting, setIsSubmitting] = useState(false);
+export default function ReportBugScreen(): JSX.Element {
+  // Define state with appropriate types
+  const router = useRouter();
+  const dispatch = useDispatch();
+  const user = useSelector(selectUser);
+  const name = user?.name;
+  const email = user?.email;
+  const uid = user?.uid;
+  const isvendor = user?.isVendor;
+  const [description, setDescription] = useState<string>("");
+  const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
 
-  const handleSubmit = async () => {
+  // Initialize EmailJS
+  emailjs.init("hQlTc-DR44Rw5ebKP"); // Replace with your EmailJS public key
+
+  const handleSubmit = async (): Promise<void> => {
     if (!description) {
       Alert.alert("Error", "Please describe the bug.");
       return;
@@ -22,24 +35,29 @@ export default function ReportBugScreen() {
 
     setIsSubmitting(true);
 
-    const templateParams = {
-      description,
-      email,
-    };
-
     try {
-      await emailjs.send(
-        "your_service_id", // Replace with your EmailJS service ID
-        "your_template_id", // Replace with your EmailJS template ID
-        templateParams,
-        "your_public_key" // Replace with your EmailJS public key
+      // Use EmailJS to send the email
+      const response = await emailjs.send(
+        "service_dqjygmb", // Replace with your EmailJS service ID
+        "template_n4ob3wm", // Replace with your EmailJS template ID
+        {
+          description,
+          email,
+          name,
+          uid,
+          isvendor,
+        }
       );
-      Alert.alert("Thank You", "Your bug report has been submitted!");
-      setDescription("");
-      setEmail("");
-    } catch (error) {
-      console.error("Bug report failed:", error);
-      Alert.alert("Error", "Failed to send bug report. Please try again.");
+
+      if (response.status === 200) {
+        Alert.alert("Thank You", "Your bug report has been submitted!");
+        setDescription("");
+      } else {
+        throw new Error("Failed to send email");
+      }
+    } catch (error: any) {
+      console.error("Error:", error);
+      Alert.alert("Error", error.text || "An unexpected error occurred.");
     } finally {
       setIsSubmitting(false);
     }
@@ -55,13 +73,7 @@ export default function ReportBugScreen() {
         onChangeText={setDescription}
         multiline
       />
-      <TextInput
-        style={styles.input}
-        placeholder="Your email (optional)"
-        value={email}
-        onChangeText={setEmail}
-        keyboardType="email-address"
-      />
+
       <TouchableOpacity
         style={styles.button}
         onPress={handleSubmit}
