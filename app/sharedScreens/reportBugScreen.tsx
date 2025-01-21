@@ -11,6 +11,11 @@ import emailjs from "emailjs-com"; // Import EmailJS
 import { useRouter } from "expo-router";
 import { useDispatch, useSelector } from "react-redux"; // Import useDispatch
 import { selectUser } from "@/redux/authSlice"; // Update the path as needed
+import { FontAwesome } from "@expo/vector-icons";
+import { SafeAreaView } from "react-native-safe-area-context";
+import HorizontalLine from "@/components/default/HorizontalLine";
+import { munchColors } from "@/constants/Colors";
+import { munchStyles } from "@/constants/styles";
 
 export default function ReportBugScreen(): JSX.Element {
   // Define state with appropriate types
@@ -65,24 +70,43 @@ export default function ReportBugScreen(): JSX.Element {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.header}>Report a Bug</Text>
-      <TextInput
-        style={styles.input}
-        placeholder="Describe the bug you encountered..."
-        value={description}
-        onChangeText={setDescription}
-        multiline
-      />
+      <SafeAreaView style={{ flex: 1 }}>
+        <View style={styles.header}>
+          <TouchableOpacity
+            style={styles.backButton}
+            onPress={() => router.back()}
+          >
+            <FontAwesome name="chevron-left" size={24} color="black" />
+          </TouchableOpacity>
+          <Text style={styles.headerText}>Report A Bug</Text>
+        </View>
+        <HorizontalLine />
 
-      <TouchableOpacity
-        style={styles.button}
-        onPress={handleSubmit}
-        disabled={isSubmitting}
-      >
-        <Text style={styles.buttonText}>
-          {isSubmitting ? "Submitting..." : "Submit Bug Report"}
-        </Text>
-      </TouchableOpacity>
+        <View style={styles.container}>
+          <Text style={styles.subheader}>
+            Did you run into a problem? Let us know and we will work to fix it
+            as soon as possible:
+          </Text>
+          <TextInput
+            style={styles.input}
+            placeholder="Describe the bug you encountered in as much detail as possible..."
+            placeholderTextColor={"grey"}
+            value={description}
+            onChangeText={setDescription}
+            multiline
+          />
+
+          <TouchableOpacity
+            style={styles.button}
+            onPress={handleSubmit}
+            disabled={isSubmitting}
+          >
+            <Text style={styles.buttonText}>
+              {isSubmitting ? "Submitting..." : "Submit Bug Report"}
+            </Text>
+          </TouchableOpacity>
+        </View>
+      </SafeAreaView>
     </View>
   );
 }
@@ -91,13 +115,8 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 20,
-    backgroundColor: "#f9f9f9",
   },
-  header: {
-    fontSize: 24,
-    fontWeight: "bold",
-    marginBottom: 20,
-  },
+
   input: {
     backgroundColor: "#fff",
     borderRadius: 8,
@@ -106,16 +125,39 @@ const styles = StyleSheet.create({
     padding: 15,
     marginBottom: 20,
     textAlignVertical: "top",
+    height: 150, // Adjust height as needed
+    marginTop: 10,
   },
   button: {
-    backgroundColor: "#007BFF",
+    backgroundColor: munchColors.primary,
     paddingVertical: 15,
-    borderRadius: 8,
+    borderRadius: munchStyles.smallRadius,
     alignItems: "center",
   },
   buttonText: {
     color: "#fff",
     fontSize: 16,
     fontWeight: "bold",
+  },
+  header: {
+    flexDirection: "row",
+    alignItems: "center",
+    height: 60, // Fixed height
+    paddingHorizontal: 10,
+  },
+  headerText: {
+    fontSize: 20,
+    fontWeight: "bold",
+    color: "#000",
+    flex: 1, // Push the text to the center within the row layout
+    marginLeft: 10, // Space between back button and title
+  },
+  backButton: {
+    marginRight: 10, // Space between back button and title
+  },
+
+  subheader: {
+    fontSize: 16,
+    marginBottom: 10,
   },
 });
