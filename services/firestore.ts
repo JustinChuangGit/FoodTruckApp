@@ -51,7 +51,7 @@ export const getUserData = async (uid: string): Promise<any> => {
 // Function to update user data
 export const updateUserData = async (
   uid: string,
-  updates: Partial<{ email: string; name: string; isVendor: boolean }>
+  updates: Partial<{ email: string; name: string; isVendor: boolean; acceptedTerms: string }>
 ): Promise<void> => {
   try {
     await updateDoc(doc(db, "users", uid), updates);
@@ -61,6 +61,7 @@ export const updateUserData = async (
     throw error;
   }
 };
+
 
 
 
@@ -234,3 +235,12 @@ export const getVendorAccountData = async (uid: string) => {
 };
 
 
+export const saveTermsAcceptance = async (uid: string): Promise<void> => {
+  try {
+    await updateUserData(uid, { acceptedTerms: new Date().toISOString() });
+    console.log("Terms acceptance saved successfully.");
+  } catch (error) {
+    console.error("Error saving terms acceptance:", error);
+    throw error;
+  }
+};

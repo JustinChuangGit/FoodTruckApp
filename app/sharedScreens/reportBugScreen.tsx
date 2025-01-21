@@ -16,6 +16,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import HorizontalLine from "@/components/default/HorizontalLine";
 import { munchColors } from "@/constants/Colors";
 import { munchStyles } from "@/constants/styles";
+import { info } from "console";
 
 export default function ReportBugScreen(): JSX.Element {
   // Define state with appropriate types
@@ -82,7 +83,7 @@ export default function ReportBugScreen(): JSX.Element {
         </View>
         <HorizontalLine />
 
-        <View style={styles.container}>
+        <View style={styles.infoContainer}>
           <Text style={styles.subheader}>
             Did you run into a problem? Let us know and we will work to fix it
             as soon as possible:
@@ -114,6 +115,8 @@ export default function ReportBugScreen(): JSX.Element {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+  },
+  infoContainer: {
     padding: 20,
   },
 

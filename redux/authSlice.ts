@@ -14,6 +14,7 @@ export interface User {
   vendorType?: string;
   description?: string;
   menu?: MenuItem[]; // Add menu field
+  acceptedTerms?: string; // New field for accepted terms
 }
 
 // Define the initial state

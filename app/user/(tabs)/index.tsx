@@ -126,6 +126,7 @@ export default function Index() {
             image: data.image || "https://via.placeholder.com/150", // Default image
             menu: data.menu || [], // Include menu field, default to an empty array
             vendorType: data.vendorType || "Other", // Default vendor type
+            truckImage: data.truckImage || "https://via.placeholder.com/150", // Default truck image
           };
         });
         setVendors(updatedVendors);
