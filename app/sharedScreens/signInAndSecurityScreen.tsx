@@ -10,6 +10,8 @@ import {
 } from "react-native";
 import { useRouter } from "expo-router";
 import { FontAwesome } from "@expo/vector-icons";
+import { munchColors } from "@/constants/Colors";
+import { munchStyles } from "@/constants/styles";
 
 export default function ChangePasswordScreen() {
   const router = useRouter();
@@ -113,6 +115,7 @@ const styles = StyleSheet.create({
     fontSize: 20,
     fontWeight: "bold",
     color: "#000",
+    marginLeft: 10,
   },
   form: {
     padding: 20,
@@ -132,9 +135,9 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
   saveButton: {
-    backgroundColor: "#007aff",
+    backgroundColor: munchColors.primary,
     padding: 15,
-    borderRadius: 8,
+    borderRadius: munchStyles.smallRadius,
     alignItems: "center",
     marginTop: 16,
   },
