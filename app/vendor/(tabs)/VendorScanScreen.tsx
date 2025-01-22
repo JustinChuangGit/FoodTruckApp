@@ -10,7 +10,7 @@ import {
 import { CameraView, useCameraPermissions } from "expo-camera";
 import { useRouter } from "expo-router";
 import { db } from "@/services/firestore";
-import { doc, getDoc, setDoc } from "firebase/firestore";
+import { doc, getDoc, setDoc, updateDoc, increment } from "firebase/firestore";
 import { useDispatch } from "react-redux";
 import { selectUser } from "@/redux/authSlice"; // Update the path as needed
 import { useSelector } from "react-redux";
@@ -104,6 +104,13 @@ export default function VendorScanScreen() {
         doc(db, "vendors", vendorUid, "transactions", vendorTransactionID),
         vendorTransactionData
       );
+
+      // Update the user's rewardPoints
+      await updateDoc(userDocRef, {
+        rewardPoints: increment(10), // Increment rewardPoints by 10
+      });
+
+      console.log(`Added 10 points to user: ${data}`);
 
       // Redirect to the success screen
       router.push("/vendor/otherScreens/vendorScanSuccessScreen");
