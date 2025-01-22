@@ -114,7 +114,10 @@ export default function VendorScanScreen() {
         "An error occurred while processing the scan. Please try again."
       );
     } finally {
-      isScanning.current = false;
+      // Release the scanning lock after a delay
+      setTimeout(() => {
+        isScanning.current = false;
+      }, 3000); // 3-second delay
     }
   };
 

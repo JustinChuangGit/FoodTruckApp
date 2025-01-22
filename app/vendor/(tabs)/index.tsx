@@ -29,6 +29,8 @@ import { router } from "expo-router";
 import { useSelector } from "react-redux";
 import { selectUser } from "../../../redux/authSlice"; // Update the path as needed
 import { doc, setDoc, deleteDoc } from "firebase/firestore";
+import { useDispatch } from "react-redux";
+import { updateLocation } from "@/redux/authSlice"; // Adjust the path
 
 const { width } = Dimensions.get("window");
 
@@ -86,6 +88,8 @@ export default function Index() {
   const user = useSelector(selectUser);
   const userName = user?.name || "Vendor Name";
 
+  const dispatch = useDispatch();
+
   useEffect(() => {
     (async () => {
       const { status } = await Location.requestForegroundPermissionsAsync();
@@ -94,7 +98,11 @@ export default function Index() {
         return;
       }
       const { coords } = await Location.getCurrentPositionAsync({});
+      const { latitude, longitude } = coords;
       setLocation(coords);
+
+      // Dispatch the action to update the location in Redux
+      dispatch(updateLocation({ latitude, longitude }));
     })();
   }, []);
 
