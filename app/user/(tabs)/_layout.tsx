@@ -16,11 +16,12 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
-        name="UserEventsScreen"
+        name="UserRewardsScreen"
         options={{
-          title: "Events",
+          title: "Rewards",
+          headerShown: false,
           tabBarIcon: ({ color }) => (
-            <FontAwesome size={28} name="calendar" color={color} />
+            <FontAwesome size={28} name="star" color={color} />
           ),
         }}
       />
