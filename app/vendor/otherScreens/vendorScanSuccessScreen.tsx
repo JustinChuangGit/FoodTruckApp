@@ -1,12 +1,32 @@
-import React, { useRef } from "react";
-import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
+import React, { useEffect, useRef } from "react";
+import {
+  View,
+  Text,
+  StyleSheet,
+  TouchableOpacity,
+  Vibration,
+} from "react-native";
 import { useRouter } from "expo-router";
 import ConfettiCannon from "react-native-confetti-cannon";
+import { Audio } from "expo-av";
 import { munchStyles } from "@/constants/styles";
 
 export default function VendorScanSuccessScreen() {
   const router = useRouter();
   const confettiRef = useRef(null);
+
+  const playSound = async () => {
+    const { sound } = await Audio.Sound.createAsync(
+      require("@/assets/sounds/scanSuccess.mp3") // Replace with the actual path to your sound file
+    );
+    await sound.playAsync();
+  };
+
+  useEffect(() => {
+    // Trigger vibration and play sound when the screen loads
+    Vibration.vibrate(500); // Vibrates for 500ms
+    playSound();
+  }, []);
 
   return (
     <View style={styles.container}>
