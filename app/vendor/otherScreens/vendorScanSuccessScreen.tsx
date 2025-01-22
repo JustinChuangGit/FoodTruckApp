@@ -17,15 +17,14 @@ export default function VendorScanSuccessScreen() {
 
   const playSound = async () => {
     const { sound } = await Audio.Sound.createAsync(
-      require("@/assets/sounds/scanSuccess.mp3") // Replace with the actual path to your sound file
+      require("@/assets/sounds/scanSuccess.mp3")
     );
     await sound.playAsync();
   };
 
   useEffect(() => {
-    // Trigger vibration and play sound when the screen loads
-    Vibration.vibrate(500); // Vibrates for 500ms
     playSound();
+    Vibration.vibrate(250); // Vibrates for 500ms
   }, []);
 
   return (
