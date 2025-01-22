@@ -1,7 +1,7 @@
 import React from "react";
 import { View, Text, StyleSheet } from "react-native";
 
-export default function VendorEventsScreen() {
+export default function VendorScanScreen() {
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Vendor Events Screen</Text>
