@@ -1,15 +1,57 @@
-import React from "react";
-import { View, Text, StyleSheet } from "react-native";
+import React, { useEffect, useRef, useState } from "react";
+import { View, Text, StyleSheet, Alert, Vibration } from "react-native";
 import { useSelector } from "react-redux";
 import QRCode from "react-native-qrcode-svg";
-import { selectUser } from "@/redux/authSlice"; // Import the selector from your authSlice
+import { selectUser } from "@/redux/authSlice";
+import { doc, onSnapshot } from "firebase/firestore";
+import { db } from "@/services/firestore";
+import ConfettiCannon from "react-native-confetti-cannon";
+import { Audio } from "expo-av";
 
 export default function UserRewardsScreen() {
-  // Retrieve the user from the Redux state
   const user = useSelector(selectUser);
-
-  // Extract the UID, with a fallback in case user data is unavailable
+  const [rewardPoints, setRewardPoints] = useState<number>(0);
+  const [confettiVisible, setConfettiVisible] = useState(false);
+  const confettiRef = useRef(null);
   const userUID = user?.uid || "default-uid";
+
+  useEffect(() => {
+    if (!userUID || userUID === "default-uid") {
+      Alert.alert("Error", "User UID is missing.");
+      return;
+    }
+
+    // Set up Firestore listener for reward points
+    const userDocRef = doc(db, "users", userUID);
+    const unsubscribe = onSnapshot(userDocRef, (docSnapshot) => {
+      if (docSnapshot.exists()) {
+        const data = docSnapshot.data();
+        const points = data.rewardPoints || 0;
+
+        // Trigger confetti, sound, and vibration if reward points increase
+        if (points > rewardPoints) {
+          setConfettiVisible(true);
+          playSound();
+          Vibration.vibrate(500); // Vibrate for 500ms
+        }
+
+        setRewardPoints(points);
+      } else {
+        console.warn("User document does not exist in Firestore.");
+      }
+    });
+
+    // Cleanup the listener when the component unmounts
+    return () => unsubscribe();
+  }, [userUID, rewardPoints]);
+
+  // Function to play a sound
+  const playSound = async () => {
+    const { sound } = await Audio.Sound.createAsync(
+      require("@/assets/sounds/scanSuccess.mp3") // Replace with the path to your sound file
+    );
+    await sound.playAsync();
+  };
 
   return (
     <View style={styles.container}>
@@ -18,11 +60,24 @@ export default function UserRewardsScreen() {
         Show this QR code to earn rewards or access features.
       </Text>
       <QRCode
-        value={userUID} // Encode the user's UID in the QR code
-        size={200} // QR code size
-        color="black" // QR code color
-        backgroundColor="white" // Background color
+        value={userUID}
+        size={200}
+        color="black"
+        backgroundColor="white"
       />
+      <Text style={styles.rewardPoints}>Reward Points: {rewardPoints}</Text>
+
+      {/* Confetti animation */}
+      {confettiVisible && (
+        <ConfettiCannon
+          ref={confettiRef}
+          count={200}
+          origin={{ x: -10, y: 0 }}
+          autoStart={true}
+          fadeOut={true}
+          onAnimationEnd={() => setConfettiVisible(false)} // Hide confetti after animation
+        />
+      )}
     </View>
   );
 }
@@ -46,5 +101,11 @@ const styles = StyleSheet.create({
     color: "#555",
     textAlign: "center",
     marginBottom: 20,
+  },
+  rewardPoints: {
+    fontSize: 20,
+    fontWeight: "bold",
+    marginTop: 20,
+    color: "#4CAF50",
   },
 });
