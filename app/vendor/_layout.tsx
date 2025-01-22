@@ -17,6 +17,10 @@ export default function VendorLayout() {
           name="otherScreens/vendorEditAccountScreen"
           options={{ headerShown: false }}
         />
+        <Stack.Screen
+          name="otherScreens/vendorScanSuccessScreen"
+          options={{ headerShown: false }}
+        />
       </Stack>
     </Provider>
   );

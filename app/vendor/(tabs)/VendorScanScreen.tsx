@@ -1,13 +1,7 @@
-import React, { useState } from "react";
-import {
-  View,
-  Text,
-  StyleSheet,
-  Button,
-  Alert,
-  Dimensions,
-} from "react-native";
+import React, { useState, useRef } from "react";
+import { View, Text, StyleSheet, Button, Dimensions } from "react-native";
 import { CameraView, useCameraPermissions } from "expo-camera";
+import { useRouter } from "expo-router";
 
 const { width } = Dimensions.get("window");
 
@@ -17,6 +11,10 @@ const borderWidth = 10; // Line thickness
 
 export default function VendorScanScreen() {
   const [permission, requestPermission] = useCameraPermissions();
+  const router = useRouter();
+
+  // Lock to prevent multiple scans
+  const isScanning = useRef(false);
 
   if (!permission) {
     return <View />;
@@ -34,8 +32,21 @@ export default function VendorScanScreen() {
   }
 
   const handleBarcodeScanned = ({ data }: { data: string }) => {
-    Alert.alert("QR Code Scanned", data);
+    if (isScanning.current) {
+      // Prevent multiple scans
+      return;
+    }
+
+    isScanning.current = true; // Lock scanning
     console.log("Scanned Data:", data);
+
+    // Redirect to success screen
+    router.push("/vendor/otherScreens/vendorScanSuccessScreen");
+
+    // Optional: Unlock scanning after a delay (if needed)
+    setTimeout(() => {
+      isScanning.current = false;
+    }, 3000); // 3 seconds delay
   };
 
   return (
