@@ -42,7 +42,10 @@ export default function VendorScanSuccessScreen() {
       <Text style={styles.message}>You gained a new customer!</Text>
 
       {/* Button to Scan Again */}
-      <TouchableOpacity style={styles.button} onPress={() => router.back()}>
+      <TouchableOpacity
+        style={styles.button}
+        onPress={() => router.replace("/vendor/(tabs)/VendorScanScreen")}
+      >
         <Text style={styles.buttonText}>Go Back</Text>
       </TouchableOpacity>
     </View>

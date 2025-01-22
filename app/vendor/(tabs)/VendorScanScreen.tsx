@@ -113,7 +113,7 @@ export default function VendorScanScreen() {
       console.log(`Added 10 points to user: ${data}`);
 
       // Redirect to the success screen
-      router.push("/vendor/otherScreens/vendorScanSuccessScreen");
+      router.replace("/vendor/otherScreens/vendorScanSuccessScreen");
     } catch (error) {
       console.error("Error processing scan:", error);
       Alert.alert(
