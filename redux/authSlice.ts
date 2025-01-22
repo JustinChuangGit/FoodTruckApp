@@ -8,13 +8,15 @@ export interface User {
   email: string;
   name: string;
   isVendor: boolean;
-  image?: string; // For the logo
-  truckImage?: string; // New field for the truck image
+  image?: string;
+  truckImage?: string;
   price?: string;
   vendorType?: string;
   description?: string;
-  menu?: MenuItem[]; // Add menu field
-  acceptedTerms?: string; // New field for accepted terms
+  menu?: MenuItem[];
+  acceptedTerms?: string;
+  latitude?: number; // Add latitude
+  longitude?: number; // Add longitude
 }
 
 // Define the initial state
@@ -43,9 +45,22 @@ const authSlice = createSlice({
       state.isAuthenticated = false;
       console.log("Redux State after clearUser:", JSON.stringify(state, null, 2));
     },
+    updateLocation: (
+      state,
+      action: PayloadAction<{ latitude: number; longitude: number }>
+    ) => {
+      if (state.user) {
+        state.user.latitude = action.payload.latitude;
+        state.user.longitude = action.payload.longitude;
+        console.log(
+          "Redux State after updateLocation:",
+          JSON.stringify(state, null, 2)
+        );
+      }
+    },
     updateMenu: (state, action: PayloadAction<MenuItem[]>) => {
       if (state.user) {
-        state.user.menu = action.payload; // Update the menu for the current user
+        state.user.menu = action.payload;
         console.log("Redux State after updateMenu:", JSON.stringify(state, null, 2));
       }
     },
@@ -53,7 +68,7 @@ const authSlice = createSlice({
 });
 
 // Export actions
-export const { setUser, clearUser, updateMenu } = authSlice.actions;
+export const { setUser, clearUser, updateLocation, updateMenu } = authSlice.actions;
 
 // Export selectors
 export const selectUser = (state: { auth: AuthState }) =>
