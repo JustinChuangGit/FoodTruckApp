@@ -1,16 +1,30 @@
-import React from "react";
+import React, { useRef } from "react";
 import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
 import { useRouter } from "expo-router";
+import ConfettiCannon from "react-native-confetti-cannon";
+import { munchStyles } from "@/constants/styles";
 
 export default function VendorScanSuccessScreen() {
   const router = useRouter();
+  const confettiRef = useRef(null);
 
   return (
     <View style={styles.container}>
-      <Text style={styles.successText}>✅ Scan Successful!</Text>
-      <Text style={styles.message}>The QR code was scanned successfully.</Text>
+      {/* Confetti Animation */}
+      <ConfettiCannon
+        count={200}
+        origin={{ x: -10, y: 0 }}
+        fadeOut={true}
+        autoStart={true}
+      />
+
+      {/* Success Message */}
+      <Text style={styles.successText}>Scan Successful!</Text>
+      <Text style={styles.message}>You gained a new customer!</Text>
+
+      {/* Button to Scan Again */}
       <TouchableOpacity style={styles.button} onPress={() => router.back()}>
-        <Text style={styles.buttonText}>Scan Another</Text>
+        <Text style={styles.buttonText}>Go Back</Text>
       </TouchableOpacity>
     </View>
   );
@@ -39,7 +53,11 @@ const styles = StyleSheet.create({
     backgroundColor: "white",
     paddingVertical: 10,
     paddingHorizontal: 20,
-    borderRadius: 8,
+    borderRadius: munchStyles.smallRadius,
+    width: 180,
+    height: 50,
+    justifyContent: "center",
+    alignItems: "center",
   },
   buttonText: {
     fontSize: 16,
