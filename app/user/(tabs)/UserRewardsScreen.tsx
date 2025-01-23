@@ -16,12 +16,12 @@ export default function UserRewardsScreen() {
   const userUID = user?.uid || "default-uid";
 
   useEffect(() => {
-    if (!userUID || userUID === "default-uid") {
-      Alert.alert("Error", "User UID is missing.");
+    if (!userUID) {
+      // Prevent Alert when user signs out
+      console.warn("No valid user UID. Listener will not be set up.");
       return;
     }
 
-    // Set up Firestore listener for reward points
     const userDocRef = doc(db, "users", userUID);
     const unsubscribe = onSnapshot(userDocRef, (docSnapshot) => {
       if (docSnapshot.exists()) {
@@ -41,7 +41,7 @@ export default function UserRewardsScreen() {
       }
     });
 
-    // Cleanup the listener when the component unmounts
+    // Cleanup the listener when the component unmounts or userUID changes
     return () => unsubscribe();
   }, [userUID, rewardPoints]);
 
@@ -55,7 +55,7 @@ export default function UserRewardsScreen() {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>User Rewards</Text>
+      <Text style={styles.title}>Rewards</Text>
       <Text style={styles.subtitle}>
         Show this QR code to earn rewards or access features.
       </Text>
