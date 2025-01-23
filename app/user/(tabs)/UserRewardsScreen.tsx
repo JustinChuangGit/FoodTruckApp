@@ -10,7 +10,9 @@ import { Audio } from "expo-av";
 
 export default function UserRewardsScreen() {
   const user = useSelector(selectUser);
-  const [rewardPoints, setRewardPoints] = useState<number>(0);
+  const [rewardPoints, setRewardPoints] = useState<number>(
+    user?.rewardPoints || 0
+  );
   const [confettiVisible, setConfettiVisible] = useState(false);
   const confettiRef = useRef(null);
   const userUID = user?.uid || "default-uid";

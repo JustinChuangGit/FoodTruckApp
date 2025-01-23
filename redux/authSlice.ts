@@ -16,7 +16,8 @@ export interface User {
   menu?: MenuItem[];
   acceptedTerms?: string;
   latitude?: number; // Add latitude
-  longitude?: number; // Add longitude
+  longitude?: number;  // Add longitude
+  rewardPoints?: number; // Add reward points
 }
 
 // Define the initial state
