@@ -78,6 +78,7 @@ export default function UserRewardsScreen() {
             backgroundColor="white"
           />
         </View>
+        <Text style={styles.title}>Scan to Earn Rewards</Text>
       </SafeAreaView>
       <View style={styles.rewardsPointsContainer}>
         <View style={styles.rewardsPointsSubContainer}>
@@ -128,10 +129,11 @@ const styles = StyleSheet.create({
     color: "#000",
   },
   title: {
-    fontSize: 24,
+    fontSize: 32,
     fontWeight: "bold",
-    marginBottom: 10,
-    color: "#333",
+    marginBottom: 125,
+    marginTop: 30,
+    color: "#FFF",
   },
   subtitle: {
     fontSize: 16,
@@ -159,7 +161,6 @@ const styles = StyleSheet.create({
     shadowColor: "#000",
     marginHorizontal: "auto",
     marginTop: 20,
-    marginBottom: 175,
   },
   rewardsPointsContainer: {
     alignItems: "center",
