@@ -1,5 +1,12 @@
 import React, { useEffect, useRef, useState } from "react";
-import { View, Text, StyleSheet, Alert, Vibration } from "react-native";
+import {
+  View,
+  Text,
+  StyleSheet,
+  Alert,
+  Vibration,
+  SafeAreaView,
+} from "react-native";
 import { useSelector } from "react-redux";
 import QRCode from "react-native-qrcode-svg";
 import { selectUser } from "@/redux/authSlice";
@@ -7,6 +14,9 @@ import { doc, onSnapshot } from "firebase/firestore";
 import { db } from "@/services/firestore";
 import ConfettiCannon from "react-native-confetti-cannon";
 import { Audio } from "expo-av";
+import { munchStyles } from "@/constants/styles";
+import { FontAwesome } from "@expo/vector-icons";
+import { munchColors } from "@/constants/Colors";
 
 export default function UserRewardsScreen() {
   const user = useSelector(selectUser);
@@ -57,17 +67,32 @@ export default function UserRewardsScreen() {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Rewards</Text>
-      <Text style={styles.subtitle}>
-        Show this QR code to earn rewards or access features.
-      </Text>
-      <QRCode
-        value={userUID}
-        size={200}
-        color="black"
-        backgroundColor="white"
-      />
-      <Text style={styles.rewardPoints}>Reward Points: {rewardPoints}</Text>
+      {/* Header */}
+
+      <SafeAreaView style={styles.qrCodeBackground}>
+        <View style={styles.qrCodeContainer}>
+          <QRCode
+            value={userUID}
+            size={200}
+            color="black"
+            backgroundColor="white"
+          />
+        </View>
+      </SafeAreaView>
+      <View style={styles.rewardsPointsContainer}>
+        <View style={styles.rewardsPointsSubContainer}>
+          <View style={styles.rewardsPointsSubSubContainer}>
+            <Text style={styles.rewardPoints}>{rewardPoints}</Text>
+            <FontAwesome
+              name="star"
+              size={35}
+              color="#FFD700"
+              style={{ marginLeft: 5 }}
+            />
+          </View>
+          <Text style={styles.rewardPointsSubtitle}>Reward Points</Text>
+        </View>
+      </View>
 
       {/* Confetti animation */}
       {confettiVisible && (
@@ -87,10 +112,20 @@ export default function UserRewardsScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: "center",
+    backgroundColor: "#fff",
+  },
+  header: {
+    flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#f0f0f0",
-    padding: 20,
+    height: 100,
+    paddingHorizontal: 20,
+    borderBottomWidth: 1,
+    borderBottomColor: "#ddd",
+  },
+  headerText: {
+    fontSize: 40,
+    fontWeight: "bold",
+    color: "#000",
   },
   title: {
     fontSize: 24,
@@ -105,9 +140,52 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   rewardPoints: {
-    fontSize: 20,
+    fontSize: 40,
     fontWeight: "bold",
-    marginTop: 20,
     color: "#4CAF50",
+  },
+  rewardPointsSubtitle: {
+    fontSize: 18,
+    color: "#888",
+  },
+  qrCodeContainer: {
+    alignItems: "center",
+    justifyContent: "center",
+    height: 300,
+    width: 300,
+    backgroundColor: "#f0f0f0",
+    borderRadius: munchStyles.cardRadius,
+    elevation: 10,
+    shadowColor: "#000",
+    marginHorizontal: "auto",
+    marginTop: 20,
+    marginBottom: 175,
+  },
+  rewardsPointsContainer: {
+    alignItems: "center",
+    justifyContent: "center",
+    height: 150,
+    width: 360,
+    backgroundColor: "#f0f0f0",
+    borderRadius: munchStyles.smallRadius,
+    elevation: 10,
+    shadowColor: "#000",
+    marginHorizontal: "auto",
+    marginTop: -90,
+  },
+  rewardsPointsSubContainer: {
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  rewardsPointsSubSubContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  qrCodeBackground: {
+    alignItems: "center",
+    justifyContent: "center",
+    width: "100%",
+    backgroundColor: munchColors.primary,
   },
 });
