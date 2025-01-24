@@ -17,7 +17,8 @@ import { Coupon } from "@/constants/types"; // Update the path as needed
 
 const CouponManager: React.FC = () => {
   const user = useSelector(selectUser);
-  const vendorUid = user?.uid;
+  const vendorUid = user?.uid || null; // Ensure vendorUid is `null` if user is logged out
+
   const [isCouponModalVisible, setCouponModalVisible] = useState(false);
   const [newCoupon, setNewCoupon] = useState<Coupon>({
     id: "", // Placeholder for the ID
@@ -33,8 +34,7 @@ const CouponManager: React.FC = () => {
   useEffect(() => {
     const fetchCoupons = async () => {
       if (!vendorUid) {
-        console.error("Vendor UID is undefined. Cannot fetch coupons.");
-        return;
+        return; // Exit the function if vendorUid is undefined
       }
 
       try {
@@ -60,33 +60,6 @@ const CouponManager: React.FC = () => {
 
     fetchCoupons();
   }, [vendorUid]);
-
-  const fetchCoupons = async () => {
-    if (!vendorUid) {
-      console.error("Vendor UID is undefined. Cannot fetch coupons.");
-      return;
-    }
-
-    try {
-      const couponsCollectionRef = collection(
-        db,
-        `vendors/${vendorUid}/coupons`
-      );
-      const snapshot = await getDocs(couponsCollectionRef);
-
-      const fetchedCoupons: Coupon[] = snapshot.docs.map((doc) => {
-        const data = doc.data() as Omit<Coupon, "id">; // Exclude the `id` from Firestore data
-        return {
-          ...data,
-          id: doc.id, // Explicitly use Firestore's document ID
-        };
-      });
-
-      setCoupons(fetchedCoupons);
-    } catch (error) {
-      console.error("Failed to fetch coupons:", error);
-    }
-  };
 
   const handleAddCoupon = async () => {
     try {
