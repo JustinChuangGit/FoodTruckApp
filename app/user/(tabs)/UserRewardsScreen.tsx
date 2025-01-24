@@ -6,6 +6,7 @@ import {
   Alert,
   Vibration,
   SafeAreaView,
+  Image,
 } from "react-native";
 import { useSelector } from "react-redux";
 import QRCode from "react-native-qrcode-svg";
@@ -78,7 +79,7 @@ export default function UserRewardsScreen() {
             backgroundColor="white"
           />
         </View>
-        <Text style={styles.title}>Scan to Earn Rewards</Text>
+        {/* <Text style={styles.title}>Scan to Earn Rewards</Text> */}
       </SafeAreaView>
       <View style={styles.rewardsPointsContainer}>
         <View style={styles.rewardsPointsSubContainer}>
@@ -92,6 +93,15 @@ export default function UserRewardsScreen() {
             />
           </View>
           <Text style={styles.rewardPointsSubtitle}>Reward Points</Text>
+        </View>
+        <View>
+          <Image
+            source={require("@/assets/images/paypal.png")}
+            style={styles.paypalImage}
+          />
+          <View style={styles.paypalInnerContainer}>
+            {/* <Text style={styles.rewardPointsSubtitle}>Redeem For Cash</Text> */}
+          </View>
         </View>
       </View>
 
@@ -136,7 +146,7 @@ const styles = StyleSheet.create({
     color: "#FFF",
   },
   subtitle: {
-    fontSize: 16,
+    fontSize: 24,
     color: "#555",
     textAlign: "center",
     marginBottom: 20,
@@ -161,11 +171,10 @@ const styles = StyleSheet.create({
     shadowColor: "#000",
     marginHorizontal: "auto",
     marginTop: 20,
+    marginBottom: 100,
   },
   rewardsPointsContainer: {
-    alignItems: "center",
-    justifyContent: "center",
-    height: 150,
+    height: 125,
     width: 360,
     backgroundColor: "#f0f0f0",
     borderRadius: munchStyles.smallRadius,
@@ -173,20 +182,41 @@ const styles = StyleSheet.create({
     shadowColor: "#000",
     marginHorizontal: "auto",
     marginTop: -90,
+    display: "flex",
+    flexDirection: "row",
   },
   rewardsPointsSubContainer: {
-    alignItems: "center",
+    height: "100%",
     justifyContent: "center",
+    paddingHorizontal: 20,
   },
   rewardsPointsSubSubContainer: {
     flexDirection: "row",
     alignItems: "center",
-    justifyContent: "center",
+    // justifyContent: "center",
   },
   qrCodeBackground: {
     alignItems: "center",
     justifyContent: "center",
     width: "100%",
     backgroundColor: munchColors.primary,
+  },
+  paypalContainer: {
+    height: 150,
+    justifyContent: "center",
+    width: "100%",
+    flexDirection: "row",
+    paddingVertical: 20,
+    alignContent: "space-between",
+  },
+  paypalImage: {
+    width: 100,
+    height: 100,
+    marginHorizontal: 20,
+    marginVertical: "auto",
+  },
+  paypalInnerContainer: {
+    justifyContent: "center",
+    alignItems: "center",
   },
 });
