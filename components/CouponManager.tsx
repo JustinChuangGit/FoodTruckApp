@@ -8,6 +8,7 @@ import {
   TextInput,
 } from "react-native";
 import { BottomSheetFlatList } from "@gorhom/bottom-sheet";
+import { FontAwesome } from "@expo/vector-icons";
 
 type Coupon = {
   headline: string;
@@ -39,6 +40,13 @@ const CouponManager: React.FC = () => {
     });
     setCouponModalVisible(false);
   };
+  const handleDeleteCoupon = (index: number) => {
+    console.log(`Deleting coupon at index: ${index}`);
+    setCoupons((prev) => {
+      console.log("Current Coupons:", prev);
+      return prev.filter((_, i) => i !== index);
+    });
+  };
 
   return (
     <View>
@@ -49,7 +57,7 @@ const CouponManager: React.FC = () => {
         keyExtractor={(item, index) =>
           "isAddButton" in item ? `addButton-${index}` : `${index}`
         }
-        renderItem={({ item }) =>
+        renderItem={({ item, index }) =>
           "isAddButton" in item ? (
             <TouchableOpacity
               style={styles.addCouponCard}
@@ -65,6 +73,12 @@ const CouponManager: React.FC = () => {
                 Uses: {item.uses} | Valid Until: {item.validUntil}
               </Text>
               <Text style={styles.couponValue}>Value: {item.value}</Text>
+              <TouchableOpacity
+                style={styles.deleteIcon}
+                onPress={() => handleDeleteCoupon(index - 1)} // Adjust index for "Add Coupon" button
+              >
+                <FontAwesome name="trash" size={24} color="red" />
+              </TouchableOpacity>
             </View>
           )
         }
@@ -237,6 +251,11 @@ const styles = StyleSheet.create({
     color: "#fff",
     fontSize: 16,
     fontWeight: "bold",
+  },
+  deleteIcon: {
+    position: "absolute",
+    top: 8,
+    right: 8,
   },
 });
 
