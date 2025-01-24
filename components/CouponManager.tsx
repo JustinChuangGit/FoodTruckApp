@@ -9,15 +9,25 @@ import {
 } from "react-native";
 import { BottomSheetFlatList } from "@gorhom/bottom-sheet";
 import { FontAwesome } from "@expo/vector-icons";
-import { selectUser } from "@/redux/authSlice"; // Update the path as needed
-import { useSelector } from "react-redux";
-import { collection, getDocs, doc, deleteDoc } from "firebase/firestore";
+import { selectUser, deleteCoupon, addCoupon } from "@/redux/authSlice"; // Update the path as needed
+import { useSelector, useDispatch } from "react-redux";
+import {
+  collection,
+  getDocs,
+  doc,
+  deleteDoc,
+  getDoc,
+  updateDoc,
+  arrayUnion,
+  arrayRemove,
+} from "firebase/firestore";
 import { db, saveCoupon } from "@/services/firestore"; // Update the path as needed
 import { Coupon } from "@/constants/types"; // Update the path as needed
 
 const CouponManager: React.FC = () => {
   const user = useSelector(selectUser);
   const vendorUid = user?.uid || null; // Ensure vendorUid is `null` if user is logged out
+  const dispatch = useDispatch();
 
   const [isCouponModalVisible, setCouponModalVisible] = useState(false);
   const [newCoupon, setNewCoupon] = useState<Coupon>({
@@ -68,21 +78,37 @@ const CouponManager: React.FC = () => {
         return;
       }
 
-      // Generate a timestamp
-      const timestamp = Date.now(); // Current time in milliseconds
+      // Generate a unique ID and timestamp for the coupon
+      const couponId = `${vendorUid}_${Date.now()}`;
+      const couponWithTimestamp = {
+        ...newCoupon,
+        id: couponId,
+        createdOn: Date.now(), // Add timestamp
+      };
 
-      // Add createdAt to the coupon object
-      const couponWithTimestamp = { ...newCoupon, createdAt: timestamp };
-
-      // Save the coupon to Firestore
+      // Save the coupon to `vendors/{vendorUid}/coupons`
       await saveCoupon(vendorUid, couponWithTimestamp);
+
+      // If the vendor is active, add the coupon to the `coupons` array in `activeVendors`
+      const activeVendorDoc = doc(db, `activeVendors/${vendorUid}`);
+      const activeVendorSnapshot = await getDoc(activeVendorDoc);
+
+      if (activeVendorSnapshot.exists()) {
+        // Use Firestore's `arrayUnion` to add the coupon to the existing array
+        await updateDoc(activeVendorDoc, {
+          coupons: arrayUnion(couponWithTimestamp),
+        });
+        console.log("Coupon added to active vendor.");
+      }
 
       // Add the coupon locally for immediate UI feedback
       setCoupons((prev) => [...prev, couponWithTimestamp]);
 
+      dispatch(addCoupon(couponWithTimestamp)); // Dispatch Redux action to add coupon
+
       // Reset form and close modal
       setNewCoupon({
-        id: "", // Reset or assign a temporary value for the ID
+        id: "",
         headline: "",
         description: "",
         uses: "",
@@ -105,13 +131,39 @@ const CouponManager: React.FC = () => {
 
       const coupon = coupons[index];
 
-      const couponRef = doc(db, "vendors", vendorUid, "coupons", coupon.id);
-      await deleteDoc(couponRef);
+      if (!coupon.id) {
+        console.error("Coupon does not have an ID. Cannot delete.");
+        return;
+      }
 
-      console.log("Coupon deleted:", coupon.id);
+      // Delete coupon from `vendors/{vendorUid}/coupons/{couponId}`
+      const couponRef = doc(db, `vendors/${vendorUid}/coupons`, coupon.id);
+      await deleteDoc(couponRef);
+      console.log(
+        "Coupon deleted from vendor's coupons collection:",
+        coupon.id
+      );
+
+      // If vendor is active, remove the coupon from `activeVendors/{vendorUid}`
+      const activeVendorDoc = doc(db, `activeVendors/${vendorUid}`);
+      const activeVendorSnapshot = await getDoc(activeVendorDoc);
+
+      if (activeVendorSnapshot.exists()) {
+        // Use Firestore's `arrayRemove` to remove the coupon from the array
+        await updateDoc(activeVendorDoc, {
+          coupons: arrayRemove(coupon),
+        });
+        console.log(
+          "Coupon removed from active vendor's coupons array:",
+          coupon.id
+        );
+      }
 
       // Update local state
       setCoupons((prev) => prev.filter((_, i) => i !== index));
+
+      // Dispatch Redux action to update coupons in the Redux state
+      dispatch(deleteCoupon(coupon.id));
     } catch (error) {
       console.error("Failed to delete coupon:", error);
     }

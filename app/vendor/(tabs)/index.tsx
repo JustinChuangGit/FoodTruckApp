@@ -113,28 +113,33 @@ export default function Index() {
       (snapshot) => {
         const updatedVendors = snapshot.docs.map((doc) => {
           const data = doc.data();
+          const vendorCoupons = doc.id === user?.uid ? user?.coupons : []; // Use coupons from Redux for the current vendor
+
           return {
             uid: doc.id,
             latitude: data.location?.latitude,
             longitude: data.location?.longitude,
-            price: data.price || "$$", // Default price if not provided
+            price: data.price || "$$",
             name: data.name || "Unknown Vendor",
-            rating: data.rating || 0, // Default rating if not provided
+            rating: data.rating || 0,
             description: data.description || "No description available",
-            image: data.image || "https://via.placeholder.com/150", // Default image
-            menu: data.menu || [], // Include menu field, default to an empty array
-            vendorType: data.vendorType || "Other", // Default vendor type
-            truckImage: data.truckImage || "https://via.placeholder.com/150", // Default truck image
+            image: data.image || "https://via.placeholder.com/150",
+            menu: data.menu || [],
+            vendorType: data.vendorType || "Other",
+            truckImage: data.truckImage || "https://via.placeholder.com/150",
+            coupons: vendorCoupons, // Attach coupons for the current vendor
           };
         });
+
         setVendors(updatedVendors);
       },
       (error) => {
-        console.error("Error fetching active vendors:", error); // Log errors
+        console.error("Error fetching active vendors:", error);
       }
     );
+
     return () => unsubscribe();
-  }, []);
+  }, [user?.uid, user?.coupons]);
 
   useEffect(() => {
     if (selectedVendor && mapRef.current) {
@@ -227,8 +232,8 @@ export default function Index() {
           return;
         }
 
-        // Add the vendor to the activeVendors collection with menu and details
-        await setDoc(doc(db, "activeVendors", uid), {
+        // Include coupons directly in the vendor data
+        const vendorData = {
           uid,
           timestamp: new Date().toISOString(),
           location: {
@@ -240,16 +245,21 @@ export default function Index() {
           vendorType: user.vendorType, // Include vendor's type
           price: user.price, // Include vendor's price range
           description: user.description, // Include vendor's description
-          image: user.image || null, // Include vendor's
+          image: user.image || null, // Include vendor's logo image
           truckImage: user.truckImage || null, // Include vendor's truck image
-        });
+          coupons: user.coupons || [], // Include coupons directly
+        };
+
+        // Add the vendor to the `activeVendors` collection
+        await setDoc(doc(db, "activeVendors", uid), vendorData);
 
         console.log(
-          "User added to activeVendors collection with location and menu"
+          "User added to activeVendors collection with location, menu, and coupons"
         );
       } else {
-        // Remove the vendor from the activeVendors collection
+        // Remove the vendor from the `activeVendors` collection
         await deleteDoc(doc(db, "activeVendors", uid));
+
         console.log("User removed from activeVendors collection");
       }
 
