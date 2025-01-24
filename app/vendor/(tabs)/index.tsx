@@ -31,6 +31,7 @@ import { selectUser } from "../../../redux/authSlice"; // Update the path as nee
 import { doc, setDoc, deleteDoc } from "firebase/firestore";
 import { useDispatch } from "react-redux";
 import { updateLocation } from "@/redux/authSlice"; // Adjust the path
+import CouponManager from "@/components/CouponManager";
 
 const { width } = Dimensions.get("window");
 
@@ -81,7 +82,7 @@ export default function Index() {
   const mapRef = useRef<MapView>(null);
   const bottomSheetRef = useRef<BottomSheet>(null);
   const SECTIONDATA = formatSections([getNearbyVendors(vendors, location)]);
-  const snapPoints = useMemo(() => ["15%", "50%", "60%"], []);
+  const snapPoints = useMemo(() => ["15%", "50%", "100%"], []);
   const scaleAnim = useRef(new Animated.Value(0)).current; // Initial scale value
   const [isVendorActive, setVendorActive] = useState(false);
   const [buttonColorAnim] = useState(new Animated.Value(0));
@@ -344,26 +345,29 @@ export default function Index() {
           <Text style={styles.dragSectionHeader}>{userName}</Text>{" "}
           <Text style={styles.dragSectionSubheader}>Manage your store</Text>
           <HorizontalLine />{" "}
-          <TouchableOpacity
-            onPress={() => user && toggleVendorActive(user.uid)}
-          >
-            <Animated.View
-              style={[
-                styles.toggleButton,
-                { backgroundColor: buttonBackgroundColor },
-              ]}
-            >
-              <Text style={styles.toggleButtonText}>
-                {isVendorActive ? "Close Up Shop" : "Go Live"}
-              </Text>
-            </Animated.View>
-          </TouchableOpacity>
           <BottomSheetFlatList
             data={SECTIONDATA}
             showsVerticalScrollIndicator={false}
             keyExtractor={(item) => item.id}
             renderItem={({ item }) => (
-              <MyRow section={item} onCardPress={handleCardPress} />
+              <BottomSheetView>
+                <TouchableOpacity
+                  onPress={() => user && toggleVendorActive(user.uid)}
+                >
+                  <Animated.View
+                    style={[
+                      styles.toggleButton,
+                      { backgroundColor: buttonBackgroundColor },
+                    ]}
+                  >
+                    <Text style={styles.toggleButtonText}>
+                      {isVendorActive ? "Close Up Shop" : "Go Live"}
+                    </Text>
+                  </Animated.View>
+                </TouchableOpacity>
+                <MyRow section={item} onCardPress={handleCardPress} />
+                <CouponManager />
+              </BottomSheetView>
             )}
             contentContainerStyle={{
               paddingHorizontal: 0, // Remove extra padding here
