@@ -2,6 +2,7 @@ import { getFirestore, doc, setDoc, getDoc, updateDoc, collection, getDocs, dele
 import { app } from "../firebaseConfig"; // Import the initialized Firebase app
 import { Alert } from "react-native"; // For React Native prompts (adjust for web if needed)
 import { MenuItem } from "@/constants/types"; // Import the MenuItem type
+import { Timestamp } from "firebase/firestore";
 
 // Initialize Firestore
 export const db = getFirestore(app);
@@ -241,6 +242,39 @@ export const saveTermsAcceptance = async (uid: string): Promise<void> => {
     console.log("Terms acceptance saved successfully.");
   } catch (error) {
     console.error("Error saving terms acceptance:", error);
+    throw error;
+  }
+};
+
+
+
+export const saveCoupon = async (
+  vendorUid: string | undefined,
+  coupon: {
+    headline: string;
+    description: string;
+    uses: string;
+    validUntil: string;
+    value: string;
+  }
+): Promise<void> => {
+  try {
+    if (!vendorUid) {
+      throw new Error("Vendor UID is undefined. Please log in again.");
+    }
+
+    const timestamp = Timestamp.now().toMillis();
+    const couponUid = `${vendorUid}_${timestamp}`;
+
+    const couponRef = doc(db, "vendors", vendorUid, "coupons", couponUid);
+    await setDoc(couponRef, {
+      ...coupon,
+      createdAt: timestamp,
+    });
+
+    console.log("Coupon saved successfully:", couponUid);
+  } catch (error) {
+    console.error("Error saving coupon:", error);
     throw error;
   }
 };

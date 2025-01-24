@@ -9,16 +9,22 @@ import {
 } from "react-native";
 import { BottomSheetFlatList } from "@gorhom/bottom-sheet";
 import { FontAwesome } from "@expo/vector-icons";
-
+import { selectUser } from "@/redux/authSlice"; // Update the path as needed
+import { useSelector } from "react-redux";
+import { doc, deleteDoc } from "firebase/firestore";
+import { db, saveCoupon } from "@/services/firestore"; // Update the path as needed
 type Coupon = {
   headline: string;
   description: string;
   uses: string;
   validUntil: string;
   value: string;
+  createdAt?: number; // Optional because it will only be added when saved to Firestore
 };
 
 const CouponManager: React.FC = () => {
+  const user = useSelector(selectUser);
+  const vendorUid = user?.uid;
   const [isCouponModalVisible, setCouponModalVisible] = useState(false);
   const [newCoupon, setNewCoupon] = useState<Coupon>({
     headline: "",
@@ -29,23 +35,66 @@ const CouponManager: React.FC = () => {
   });
   const [coupons, setCoupons] = useState<Coupon[]>([]);
 
-  const handleAddCoupon = () => {
-    setCoupons((prev) => [...prev, newCoupon]);
-    setNewCoupon({
-      headline: "",
-      description: "",
-      uses: "",
-      validUntil: "",
-      value: "",
-    });
-    setCouponModalVisible(false);
+  const handleAddCoupon = async () => {
+    try {
+      if (!vendorUid) {
+        console.error("Vendor UID is undefined. Cannot save coupon.");
+        return;
+      }
+
+      // Generate a timestamp
+      const timestamp = Date.now(); // Current time in milliseconds
+
+      // Add createdAt to the coupon object
+      const couponWithTimestamp = { ...newCoupon, createdAt: timestamp };
+
+      // Save the coupon to Firestore
+      await saveCoupon(vendorUid, couponWithTimestamp);
+
+      // Add the coupon locally for immediate UI feedback
+      setCoupons((prev) => [...prev, couponWithTimestamp]);
+
+      // Reset form and close modal
+      setNewCoupon({
+        headline: "",
+        description: "",
+        uses: "",
+        validUntil: "",
+        value: "",
+      });
+      setCouponModalVisible(false);
+    } catch (error) {
+      console.error("Failed to add coupon:", error);
+    }
   };
-  const handleDeleteCoupon = (index: number) => {
-    console.log(`Deleting coupon at index: ${index}`);
-    setCoupons((prev) => {
-      console.log("Current Coupons:", prev);
-      return prev.filter((_, i) => i !== index);
-    });
+
+  const handleDeleteCoupon = async (index: number) => {
+    try {
+      if (!vendorUid) {
+        console.error("Vendor UID is undefined. Cannot delete coupon.");
+        return;
+      }
+
+      const coupon = coupons[index];
+      if (!coupon.createdAt) {
+        console.error(
+          "Coupon does not have a 'createdAt' property. Cannot delete."
+        );
+        return;
+      }
+
+      const couponUid = `${vendorUid}_${coupon.createdAt}`; // Use vendorUid and createdAt for unique ID
+
+      const couponRef = doc(db, "vendors", vendorUid, "coupons", couponUid);
+      await deleteDoc(couponRef);
+
+      console.log("Coupon deleted:", couponUid);
+
+      // Update local state
+      setCoupons((prev) => prev.filter((_, i) => i !== index));
+    } catch (error) {
+      console.error("Failed to delete coupon:", error);
+    }
   };
 
   return (

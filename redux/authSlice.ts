@@ -1,24 +1,10 @@
 // store/authSlice.ts
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { MenuItem } from "@/constants/types";
+import { User } from "@/constants/types";
 
 // Define the User interface
-export interface User {
-  uid: string;
-  email: string;
-  name: string;
-  isVendor: boolean;
-  image?: string;
-  truckImage?: string;
-  price?: string;
-  vendorType?: string;
-  description?: string;
-  menu?: MenuItem[];
-  acceptedTerms?: string;
-  latitude?: number; // Add latitude
-  longitude?: number;  // Add longitude
-  rewardPoints?: number; // Add reward points
-}
+
 
 // Define the initial state
 interface AuthState {

@@ -34,6 +34,23 @@ export interface MenuItem {
   category: string;
 }
 
+export interface User {
+  uid: string;
+  email: string;
+  name: string;
+  isVendor: boolean;
+  image?: string;
+  truckImage?: string;
+  price?: string;
+  vendorType?: string;
+  description?: string;
+  menu?: MenuItem[];
+  acceptedTerms?: string;
+  latitude?: number; // Add latitude
+  longitude?: number; // Add longitude
+  rewardPoints?: number; // Add reward points
+}
+
 export interface Section {
   id: string;
   title: string;
@@ -54,3 +71,11 @@ export interface ActiveVendor {
   description: string; // Vendor's description
   image: string | null; // Vendor's image URL or null if not provided
 }
+
+export type Coupon = {
+  headline: string;
+  description: string;
+  uses: string;
+  validUntil: string;
+  value: string;
+};
