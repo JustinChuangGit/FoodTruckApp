@@ -3,7 +3,7 @@ import { app } from "../firebaseConfig"; // Import the initialized Firebase app
 import { Alert } from "react-native"; // For React Native prompts (adjust for web if needed)
 import { MenuItem } from "@/constants/types"; // Import the MenuItem type
 import { Timestamp } from "firebase/firestore";
-
+import { Coupon } from "@/constants/types"; // Import the Coupon type
 // Initialize Firestore
 export const db = getFirestore(app);
 
@@ -276,5 +276,27 @@ export const saveCoupon = async (
   } catch (error) {
     console.error("Error saving coupon:", error);
     throw error;
+  }
+};
+
+export const fetchCoupons = async (vendorUid: string): Promise<Coupon[]> => {
+  try {
+    const couponsCollectionRef = collection(db, "vendors", vendorUid, "coupons");
+    const snapshot = await getDocs(couponsCollectionRef);
+
+    const coupons: Coupon[] = snapshot.docs.map((doc) => {
+      const data = doc.data() as Coupon;
+
+      // Explicitly use Firestore document ID as the `id`, overriding if necessary
+      return {
+        ...data,
+        id: doc.id, // Firestore's document ID takes precedence
+      };
+    });
+
+    return coupons;
+  } catch (error) {
+    console.error("Error fetching coupons:", error);
+    return [];
   }
 };

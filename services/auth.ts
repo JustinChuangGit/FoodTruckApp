@@ -86,11 +86,20 @@ export const signIn = async (dispatch: AppDispatch, email: string, password: str
           ...doc.data(),
         }));
 
+        // Fetch coupons for vendors
+        const couponsCollectionRef = collection(db, `vendors/${user.uid}/coupons`);
+        const couponsSnapshot = await getDocs(couponsCollectionRef);
+        const coupons = couponsSnapshot.docs.map((doc) => ({
+          id: doc.id,
+          ...doc.data(),
+        }));
+
         fullUserData = {
           uid: user.uid,
           email: user.email || "",
           ...vendorData, // Include vendor-specific fields
           menu,          // Add menu field
+          coupons,       // Add coupons field
         };
       } else {
         // If not found in both collections

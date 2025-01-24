@@ -49,6 +49,7 @@ export interface User {
   latitude?: number; // Add latitude
   longitude?: number; // Add longitude
   rewardPoints?: number; // Add reward points
+  coupons?: Coupon[]; // Add coupons
 }
 
 export interface Section {
@@ -73,9 +74,11 @@ export interface ActiveVendor {
 }
 
 export type Coupon = {
+  id: string;
   headline: string;
   description: string;
   uses: string;
   validUntil: string;
   value: string;
+  createdOn?: number; // Timestamp of when the coupon was created
 };

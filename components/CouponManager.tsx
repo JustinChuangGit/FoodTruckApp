@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
@@ -11,29 +11,82 @@ import { BottomSheetFlatList } from "@gorhom/bottom-sheet";
 import { FontAwesome } from "@expo/vector-icons";
 import { selectUser } from "@/redux/authSlice"; // Update the path as needed
 import { useSelector } from "react-redux";
-import { doc, deleteDoc } from "firebase/firestore";
+import { collection, getDocs, doc, deleteDoc } from "firebase/firestore";
 import { db, saveCoupon } from "@/services/firestore"; // Update the path as needed
-type Coupon = {
-  headline: string;
-  description: string;
-  uses: string;
-  validUntil: string;
-  value: string;
-  createdAt?: number; // Optional because it will only be added when saved to Firestore
-};
+import { Coupon } from "@/constants/types"; // Update the path as needed
 
 const CouponManager: React.FC = () => {
   const user = useSelector(selectUser);
   const vendorUid = user?.uid;
   const [isCouponModalVisible, setCouponModalVisible] = useState(false);
   const [newCoupon, setNewCoupon] = useState<Coupon>({
+    id: "", // Placeholder for the ID
     headline: "",
     description: "",
     uses: "",
     validUntil: "",
     value: "",
   });
+
   const [coupons, setCoupons] = useState<Coupon[]>([]);
+
+  useEffect(() => {
+    const fetchCoupons = async () => {
+      if (!vendorUid) {
+        console.error("Vendor UID is undefined. Cannot fetch coupons.");
+        return;
+      }
+
+      try {
+        const couponsCollectionRef = collection(
+          db,
+          `vendors/${vendorUid}/coupons`
+        );
+        const snapshot = await getDocs(couponsCollectionRef);
+
+        const fetchedCoupons: Coupon[] = snapshot.docs.map((doc) => {
+          const data = doc.data() as Omit<Coupon, "id">; // Exclude the `id` from Firestore data
+          return {
+            ...data,
+            id: doc.id, // Explicitly use Firestore's document ID
+          };
+        });
+
+        setCoupons(fetchedCoupons);
+      } catch (error) {
+        console.error("Failed to fetch coupons:", error);
+      }
+    };
+
+    fetchCoupons();
+  }, [vendorUid]);
+
+  const fetchCoupons = async () => {
+    if (!vendorUid) {
+      console.error("Vendor UID is undefined. Cannot fetch coupons.");
+      return;
+    }
+
+    try {
+      const couponsCollectionRef = collection(
+        db,
+        `vendors/${vendorUid}/coupons`
+      );
+      const snapshot = await getDocs(couponsCollectionRef);
+
+      const fetchedCoupons: Coupon[] = snapshot.docs.map((doc) => {
+        const data = doc.data() as Omit<Coupon, "id">; // Exclude the `id` from Firestore data
+        return {
+          ...data,
+          id: doc.id, // Explicitly use Firestore's document ID
+        };
+      });
+
+      setCoupons(fetchedCoupons);
+    } catch (error) {
+      console.error("Failed to fetch coupons:", error);
+    }
+  };
 
   const handleAddCoupon = async () => {
     try {
@@ -56,12 +109,14 @@ const CouponManager: React.FC = () => {
 
       // Reset form and close modal
       setNewCoupon({
+        id: "", // Reset or assign a temporary value for the ID
         headline: "",
         description: "",
         uses: "",
         validUntil: "",
         value: "",
       });
+
       setCouponModalVisible(false);
     } catch (error) {
       console.error("Failed to add coupon:", error);
@@ -76,19 +131,11 @@ const CouponManager: React.FC = () => {
       }
 
       const coupon = coupons[index];
-      if (!coupon.createdAt) {
-        console.error(
-          "Coupon does not have a 'createdAt' property. Cannot delete."
-        );
-        return;
-      }
 
-      const couponUid = `${vendorUid}_${coupon.createdAt}`; // Use vendorUid and createdAt for unique ID
-
-      const couponRef = doc(db, "vendors", vendorUid, "coupons", couponUid);
+      const couponRef = doc(db, "vendors", vendorUid, "coupons", coupon.id);
       await deleteDoc(couponRef);
 
-      console.log("Coupon deleted:", couponUid);
+      console.log("Coupon deleted:", coupon.id);
 
       // Update local state
       setCoupons((prev) => prev.filter((_, i) => i !== index));
@@ -104,7 +151,7 @@ const CouponManager: React.FC = () => {
         horizontal
         data={[{ isAddButton: true } as any, ...coupons]}
         keyExtractor={(item, index) =>
-          "isAddButton" in item ? `addButton-${index}` : `${index}`
+          "isAddButton" in item ? `addButton-${index}` : item.id
         }
         renderItem={({ item, index }) =>
           "isAddButton" in item ? (
@@ -124,7 +171,7 @@ const CouponManager: React.FC = () => {
               <Text style={styles.couponValue}>Value: {item.value}</Text>
               <TouchableOpacity
                 style={styles.deleteIcon}
-                onPress={() => handleDeleteCoupon(index - 1)} // Adjust index for "Add Coupon" button
+                onPress={() => handleDeleteCoupon(index - 1)}
               >
                 <FontAwesome name="trash" size={24} color="red" />
               </TouchableOpacity>

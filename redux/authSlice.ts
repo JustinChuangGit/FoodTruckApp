@@ -1,7 +1,7 @@
 // store/authSlice.ts
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { MenuItem } from "@/constants/types";
-import { User } from "@/constants/types";
+import { User, Coupon } from "@/constants/types";
 
 // Define the User interface
 
@@ -51,11 +51,34 @@ const authSlice = createSlice({
         console.log("Redux State after updateMenu:", JSON.stringify(state, null, 2));
       }
     },
+    addCoupon: (state, action: PayloadAction<Coupon>) => {
+      if (state.user) {
+        if (!state.user.coupons) {
+          state.user.coupons = []; // Initialize coupons if they don't exist
+        }
+        state.user.coupons.push(action.payload); // Add the coupon to the array
+        console.log("Redux State after addCoupon:", JSON.stringify(state, null, 2));
+      }
+    },
+    deleteCoupon: (state, action: PayloadAction<string>) => {
+      if (state.user && state.user.coupons) {
+        state.user.coupons = state.user.coupons.filter(
+          (coupon) => coupon.id !== action.payload // Use `action.payload` as the coupon ID
+        );
+        console.log("Redux State after deleteCoupon:", JSON.stringify(state, null, 2));
+      }
+    },
   },
 });
 
-// Export actions
-export const { setUser, clearUser, updateLocation, updateMenu } = authSlice.actions;
+export const {
+  setUser,
+  clearUser,
+  updateLocation,
+  updateMenu,
+  addCoupon,
+  deleteCoupon,
+} = authSlice.actions;
 
 // Export selectors
 export const selectUser = (state: { auth: AuthState }) =>
