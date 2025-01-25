@@ -107,6 +107,7 @@ const CouponManager: React.FC = () => {
         ...newCoupon,
         id: couponId,
         createdOn: Date.now(), // Add timestamp
+        createdOnReadable: new Date().toLocaleString(), // Add readable timestamp
       };
 
       // Save the coupon to `vendors/{vendorUid}/coupons`

@@ -250,29 +250,20 @@ export const saveTermsAcceptance = async (uid: string): Promise<void> => {
 
 export const saveCoupon = async (
   vendorUid: string | undefined,
-  coupon: {
-    headline: string;
-    description: string;
-    uses: string;
-    validUntil: string;
-    value: string;
-  }
+  coupon: Coupon
 ): Promise<void> => {
   try {
     if (!vendorUid) {
       throw new Error("Vendor UID is undefined. Please log in again.");
     }
 
-    const timestamp = Timestamp.now().toMillis();
-    const couponUid = `${vendorUid}_${timestamp}`;
-
-    const couponRef = doc(db, "vendors", vendorUid, "coupons", couponUid);
+    const couponRef = doc(db, "vendors", vendorUid, "coupons", coupon.id);
+    
     await setDoc(couponRef, {
       ...coupon,
-      createdAt: timestamp,
     });
 
-    console.log("Coupon saved successfully:", couponUid);
+    console.log("Coupon saved successfully:", coupon.id);
   } catch (error) {
     console.error("Error saving coupon:", error);
     throw error;

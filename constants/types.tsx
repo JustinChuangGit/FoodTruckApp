@@ -81,4 +81,5 @@ export type Coupon = {
   validUntil: string;
   value: string;
   createdOn?: number; // Timestamp of when the coupon was created
+  createdOnReadable?: string; // Readable date of when the coupon was created
 };
