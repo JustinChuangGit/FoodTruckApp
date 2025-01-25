@@ -78,6 +78,20 @@ const CouponManager: React.FC = () => {
   }, [vendorUid]);
 
   const handleAddCoupon = async () => {
+    // Validate required fields
+    if (!newCoupon.headline.trim()) {
+      alert("Headline is required.");
+      return;
+    }
+    if (!newCoupon.description.trim()) {
+      alert("Description is required.");
+      return;
+    }
+    if (!newCoupon.value.trim()) {
+      alert("Coupon Value is required.");
+      return;
+    }
+
     try {
       if (!vendorUid) {
         console.error("Vendor UID is undefined. Cannot save coupon.");
