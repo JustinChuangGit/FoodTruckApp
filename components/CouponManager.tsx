@@ -245,7 +245,7 @@ const CouponManager: React.FC = () => {
         transparent
         animationType="slide"
         visible={isCouponModalVisible}
-        onRequestClose={() => setCouponModalVisible(false)}
+        onRequestClose={() => closeModal()}
       >
         <View style={styles.modalOverlay}>
           <View style={styles.modalContent}>
