@@ -236,21 +236,34 @@ const CouponManager: React.FC = () => {
             </TouchableOpacity>
           ) : (
             <View style={styles.couponCard}>
-              <Text style={styles.couponHeadline}>{item.headline}</Text>
-              <Text style={styles.couponDescription}>{item.description}</Text>
-              <Text style={styles.couponDetails}>
-                Remaining Uses: {item.uses}
-              </Text>
-              <Text style={styles.couponDetails}>
-                Valid Until: {item.validUntil}
-              </Text>
-              <Text style={styles.couponValue}>Value: {item.value}</Text>
-              <TouchableOpacity
-                style={styles.deleteButton}
-                onPress={() => handleDeleteCoupon(index - 1)}
-              >
-                <Text style={{ color: "#fff" }}>Delete </Text>
-              </TouchableOpacity>
+              <View>
+                <Text style={styles.couponHeadline}>{item.headline}</Text>
+                <Text style={styles.couponDescription}>{item.description}</Text>
+              </View>
+              <View>
+                <Text style={styles.couponValue}>Value: ${item.value}</Text>
+                <Text style={styles.couponDetails}>
+                  Remaining Uses: {item.uses}
+                </Text>
+                <Text style={styles.couponDetails}>
+                  Valid Until:{" "}
+                  {new Date(item.validUntil).toLocaleString("en-US", {
+                    weekday: "short", // 'short' for abbreviated weekday (e.g., 'Fri')
+                    month: "short", // 'short' for abbreviated month (e.g., 'Jan')
+                    day: "numeric",
+                    year: "numeric",
+                    hour: "numeric",
+                    minute: "2-digit",
+                    hour12: true, // Use 12-hour clock
+                  })}
+                </Text>
+                <TouchableOpacity
+                  style={styles.deleteButton}
+                  onPress={() => handleDeleteCoupon(index - 1)}
+                >
+                  <Text style={{ color: "#fff" }}>Delete </Text>
+                </TouchableOpacity>
+              </View>
             </View>
           )
         }
@@ -376,7 +389,7 @@ const styles = StyleSheet.create({
   },
   addCouponCard: {
     width: 120,
-    height: 150,
+    height: 225,
     justifyContent: "center",
     alignItems: "center",
     backgroundColor: "#f0f0f0",
@@ -390,24 +403,27 @@ const styles = StyleSheet.create({
   },
   addCouponText: {
     fontSize: 16,
-    color: "#007bff",
+    color: munchColors.primary,
     textAlign: "center",
     fontWeight: "bold",
   },
   couponCard: {
-    width: 150,
-    padding: 10,
+    width: 175,
+    height: 225,
+    paddingHorizontal: 10,
+    paddingVertical: 15,
     backgroundColor: "#fff",
-    borderRadius: 10,
+    borderRadius: munchStyles.smallRadius,
     marginHorizontal: 8,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.2,
     shadowRadius: 4,
     elevation: 3,
+    justifyContent: "space-between",
   },
   couponHeadline: {
-    fontSize: 16,
+    fontSize: 20,
     fontWeight: "bold",
     marginBottom: 4,
   },
@@ -415,16 +431,15 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: "#555",
     marginBottom: 8,
+    overflow: "hidden",
   },
   couponDetails: {
     fontSize: 12,
     color: "#777",
-    marginBottom: 4,
   },
   couponValue: {
-    fontSize: 14,
-    color: "#007bff",
-    fontWeight: "bold",
+    fontSize: 12,
+    color: "#777",
   },
   modalOverlay: {
     flex: 1,
