@@ -23,11 +23,15 @@ import {
 } from "firebase/firestore";
 import { db, saveCoupon } from "@/services/firestore"; // Update the path as needed
 import { Coupon } from "@/constants/types"; // Update the path as needed
+import { munchColors } from "@/constants/Colors";
+import { munchStyles } from "@/constants/styles";
+import DateTimePicker from "@react-native-community/datetimepicker";
 
 const CouponManager: React.FC = () => {
   const user = useSelector(selectUser);
   const vendorUid = user?.uid || null; // Ensure vendorUid is `null` if user is logged out
   const dispatch = useDispatch();
+  const [showDatePicker, setShowDatePicker] = useState(false);
 
   const [isCouponModalVisible, setCouponModalVisible] = useState(false);
   const [newCoupon, setNewCoupon] = useState<Coupon>({
@@ -169,6 +173,15 @@ const CouponManager: React.FC = () => {
     }
   };
 
+  const handleDateChange = (event: any, selectedDate: Date | undefined) => {
+    const currentDate = selectedDate || new Date();
+    setShowDatePicker(false); // Hide the picker
+
+    // Format the date as needed (e.g., "YYYY-MM-DD HH:mm")
+    const formattedDate = currentDate.toISOString(); // Use a custom format if preferred
+    setNewCoupon((prev) => ({ ...prev, validUntil: formattedDate }));
+  };
+
   return (
     <View>
       <Text style={styles.sectionHeader}>Active Coupons</Text>
@@ -191,14 +204,17 @@ const CouponManager: React.FC = () => {
               <Text style={styles.couponHeadline}>{item.headline}</Text>
               <Text style={styles.couponDescription}>{item.description}</Text>
               <Text style={styles.couponDetails}>
-                Uses: {item.uses} | Valid Until: {item.validUntil}
+                Remaining Uses: {item.uses}
+              </Text>
+              <Text style={styles.couponDetails}>
+                Valid Until: {item.validUntil}
               </Text>
               <Text style={styles.couponValue}>Value: {item.value}</Text>
               <TouchableOpacity
-                style={styles.deleteIcon}
+                style={styles.deleteButton}
                 onPress={() => handleDeleteCoupon(index - 1)}
               >
-                <FontAwesome name="trash" size={24} color="red" />
+                <Text style={{ color: "#fff" }}>Delete </Text>
               </TouchableOpacity>
             </View>
           )
@@ -216,6 +232,12 @@ const CouponManager: React.FC = () => {
       >
         <View style={styles.modalOverlay}>
           <View style={styles.modalContent}>
+            <TouchableOpacity
+              style={styles.closeModalButton}
+              onPress={() => setCouponModalVisible(false)}
+            >
+              <FontAwesome name="times" size={24} color="black" />
+            </TouchableOpacity>
             <Text style={styles.modalTitle}>Add Coupon</Text>
             <TextInput
               style={styles.input}
@@ -242,14 +264,28 @@ const CouponManager: React.FC = () => {
                 setNewCoupon((prev) => ({ ...prev, uses: text }))
               }
             />
-            <TextInput
-              style={styles.input}
-              placeholder="Valid Until"
-              value={newCoupon.validUntil}
-              onChangeText={(text) =>
-                setNewCoupon((prev) => ({ ...prev, validUntil: text }))
-              }
-            />
+            <TouchableOpacity
+              style={[styles.input, { justifyContent: "center" }]}
+              onPress={() => setShowDatePicker(true)}
+            >
+              <Text style={{ color: "#A9A9A9" }}>
+                {newCoupon.validUntil
+                  ? new Date(newCoupon.validUntil).toLocaleString()
+                  : "Select Valid Until"}
+              </Text>
+            </TouchableOpacity>
+            {showDatePicker && (
+              <DateTimePicker
+                value={
+                  newCoupon.validUntil
+                    ? new Date(newCoupon.validUntil)
+                    : new Date()
+                }
+                mode="datetime"
+                display="default"
+                onChange={handleDateChange}
+              />
+            )}
             <TextInput
               style={styles.input}
               placeholder="Coupon Value"
@@ -373,10 +409,19 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "bold",
   },
-  deleteIcon: {
+  deleteButton: {
+    width: "100%",
+    height: 30,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "red",
+    borderRadius: munchStyles.smallRadius,
+    marginTop: 8,
+  },
+  closeModalButton: {
     position: "absolute",
-    top: 8,
-    right: 8,
+    top: 10,
+    right: 10,
   },
 });
 
