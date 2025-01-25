@@ -7,6 +7,9 @@ import {
   Modal,
   TextInput,
   Pressable,
+  KeyboardAvoidingViewComponent,
+  KeyboardAvoidingView,
+  Platform,
 } from "react-native";
 import { BottomSheetFlatList } from "@gorhom/bottom-sheet";
 import { FontAwesome } from "@expo/vector-icons";
@@ -261,7 +264,11 @@ const CouponManager: React.FC = () => {
         visible={isCouponModalVisible}
         onRequestClose={() => closeModal()}
       >
-        <View style={styles.modalOverlay}>
+        <KeyboardAvoidingView
+          style={styles.modalOverlay}
+          behavior={Platform.OS === "ios" ? "padding" : "height"} // Adjust behavior for iOS and Android
+          keyboardVerticalOffset={Platform.OS === "ios" ? 50 : 0} // Adjust offset for iOS
+        >
           <View style={styles.modalContent}>
             <Pressable
               style={styles.closeModalButton}
@@ -353,7 +360,7 @@ const CouponManager: React.FC = () => {
               <Text style={styles.modalButtonText}>Save Coupon</Text>
             </TouchableOpacity>
           </View>
-        </View>
+        </KeyboardAvoidingView>
       </Modal>
     </View>
   );
@@ -494,6 +501,11 @@ const styles = StyleSheet.create({
   },
   datePicker: {
     height: 50,
+  },
+  scrollViewContent: {
+    flexGrow: 1, // Ensure content grows to fit
+    justifyContent: "center", // Center the content
+    paddingHorizontal: 16, // Optional horizontal padding
   },
 });
 
