@@ -6,6 +6,7 @@ import {
   TouchableOpacity,
   Modal,
   TextInput,
+  Pressable,
 } from "react-native";
 import { BottomSheetFlatList } from "@gorhom/bottom-sheet";
 import { FontAwesome } from "@expo/vector-icons";
@@ -184,6 +185,7 @@ const CouponManager: React.FC = () => {
   };
 
   const closeModal = () => {
+    console.log("Closing modal...");
     setCouponModalVisible(false);
     setShowDatePicker(false);
 
@@ -247,18 +249,19 @@ const CouponManager: React.FC = () => {
       >
         <View style={styles.modalOverlay}>
           <View style={styles.modalContent}>
-            <TouchableOpacity
+            <Pressable
               style={styles.closeModalButton}
               onPress={() => closeModal()}
             >
               <FontAwesome name="times" size={24} color="black" />
-            </TouchableOpacity>
+            </Pressable>
+
             <Text style={styles.modalTitle}>Add Coupon</Text>
             <HorizontalLine />
             <Text style={styles.addCouponHeader}>Headline</Text>
             <TextInput
               style={styles.input}
-              placeholder="Headline"
+              placeholder="Ex: Free Drink"
               value={newCoupon.headline}
               onChangeText={(text) =>
                 setNewCoupon((prev) => ({ ...prev, headline: text }))
@@ -266,8 +269,9 @@ const CouponManager: React.FC = () => {
             />
             <Text style={styles.addCouponHeader}>Description</Text>
             <TextInput
-              style={styles.input}
-              placeholder="Description"
+              style={[styles.input, { height: 100, textAlignVertical: "top" }]}
+              placeholder="Ex: Get a free drink with the purchase of a burger..."
+              multiline={true}
               value={newCoupon.description}
               onChangeText={(text) =>
                 setNewCoupon((prev) => ({ ...prev, description: text }))
@@ -276,7 +280,7 @@ const CouponManager: React.FC = () => {
             <Text style={styles.addCouponHeader}>Number of Uses</Text>
             <TextInput
               style={styles.input}
-              placeholder="Number of Uses"
+              placeholder="How many times this coupon be used"
               keyboardType="numeric"
               value={newCoupon.uses}
               onChangeText={(text) =>
@@ -291,30 +295,43 @@ const CouponManager: React.FC = () => {
               <Text style={{ color: "#A9A9A9" }}>
                 {newCoupon.validUntil
                   ? new Date(newCoupon.validUntil).toLocaleString()
-                  : "Select Valid Until"}
+                  : "Expiry Date"}
               </Text>
             </TouchableOpacity>
             {showDatePicker && (
-              <DateTimePicker
-                value={
-                  newCoupon.validUntil
-                    ? new Date(newCoupon.validUntil)
-                    : new Date()
-                }
-                mode="datetime"
-                display="default"
-                onChange={handleDateChange}
-              />
+              <View style={styles.datePicker}>
+                <DateTimePicker
+                  value={
+                    newCoupon.validUntil
+                      ? new Date(newCoupon.validUntil)
+                      : new Date()
+                  }
+                  mode="datetime"
+                  display="default"
+                  onChange={handleDateChange}
+                  style={styles.datePicker}
+                />
+              </View>
             )}
             <Text style={styles.addCouponHeader}>Coupon Value</Text>
-            <TextInput
-              style={styles.input}
-              placeholder="Coupon Value"
-              value={newCoupon.value}
-              onChangeText={(text) =>
-                setNewCoupon((prev) => ({ ...prev, value: text }))
-              }
-            />
+            <View style={{ flexDirection: "row", alignItems: "center" }}>
+              <FontAwesome
+                name="dollar"
+                size={24}
+                color="black"
+                style={styles.dollarSign}
+              />
+              <TextInput
+                style={[styles.input, { flex: 1 }]} // Add flex: 1 to stretch the input
+                placeholder="Ex: $2.50"
+                keyboardType="decimal-pad"
+                value={newCoupon.value}
+                onChangeText={(text) =>
+                  setNewCoupon((prev) => ({ ...prev, value: text }))
+                }
+              />
+            </View>
+
             <TouchableOpacity
               style={styles.modalButton}
               onPress={handleAddCoupon}
@@ -392,12 +409,13 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     backgroundColor: "rgba(0, 0, 0, 0.5)",
+    padding: 10,
   },
   modalContent: {
     width: "90%",
     padding: 20,
     backgroundColor: "#fff",
-    borderRadius: 10,
+    borderRadius: munchStyles.smallRadius,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.3,
@@ -413,7 +431,7 @@ const styles = StyleSheet.create({
   input: {
     borderWidth: 1,
     borderColor: "#ccc",
-    borderRadius: 5,
+    borderRadius: munchStyles.smallRadius,
     padding: 10,
     marginBottom: 12,
     fontSize: 16,
@@ -441,13 +459,27 @@ const styles = StyleSheet.create({
   },
   closeModalButton: {
     position: "absolute",
-    top: 10,
-    right: 10,
+    top: 20, // Adjust for proper placement
+    right: 15, // Adjust for proper placement
+    justifyContent: "center",
+    alignItems: "center",
+    height: 40, // Increase size for touchable area
+    width: 40, // Increase size for touchable area
+    borderRadius: 20, // Optional: Circular button
   },
+
   addCouponHeader: {
     fontSize: 16,
     fontWeight: "bold",
     marginBottom: 4,
+  },
+  dollarSign: {
+    paddingHorizontal: 10,
+    paddingBottom: 10,
+    alignSelf: "center",
+  },
+  datePicker: {
+    height: 50,
   },
 });
 
