@@ -26,6 +26,7 @@ import { Coupon } from "@/constants/types"; // Update the path as needed
 import { munchColors } from "@/constants/Colors";
 import { munchStyles } from "@/constants/styles";
 import DateTimePicker from "@react-native-community/datetimepicker";
+import HorizontalLine from "./default/HorizontalLine";
 
 const CouponManager: React.FC = () => {
   const user = useSelector(selectUser);
@@ -182,6 +183,20 @@ const CouponManager: React.FC = () => {
     setNewCoupon((prev) => ({ ...prev, validUntil: formattedDate }));
   };
 
+  const closeModal = () => {
+    setCouponModalVisible(false);
+    setShowDatePicker(false);
+
+    setNewCoupon({
+      id: "", // Reset the ID or keep it as a placeholder
+      headline: "",
+      description: "",
+      uses: "",
+      validUntil: "", // Clear the date field
+      value: "",
+    });
+  };
+
   return (
     <View>
       <Text style={styles.sectionHeader}>Active Coupons</Text>
@@ -234,11 +249,13 @@ const CouponManager: React.FC = () => {
           <View style={styles.modalContent}>
             <TouchableOpacity
               style={styles.closeModalButton}
-              onPress={() => setCouponModalVisible(false)}
+              onPress={() => closeModal()}
             >
               <FontAwesome name="times" size={24} color="black" />
             </TouchableOpacity>
             <Text style={styles.modalTitle}>Add Coupon</Text>
+            <HorizontalLine />
+            <Text style={styles.addCouponHeader}>Headline</Text>
             <TextInput
               style={styles.input}
               placeholder="Headline"
@@ -247,6 +264,7 @@ const CouponManager: React.FC = () => {
                 setNewCoupon((prev) => ({ ...prev, headline: text }))
               }
             />
+            <Text style={styles.addCouponHeader}>Description</Text>
             <TextInput
               style={styles.input}
               placeholder="Description"
@@ -255,6 +273,7 @@ const CouponManager: React.FC = () => {
                 setNewCoupon((prev) => ({ ...prev, description: text }))
               }
             />
+            <Text style={styles.addCouponHeader}>Number of Uses</Text>
             <TextInput
               style={styles.input}
               placeholder="Number of Uses"
@@ -264,6 +283,7 @@ const CouponManager: React.FC = () => {
                 setNewCoupon((prev) => ({ ...prev, uses: text }))
               }
             />
+            <Text style={styles.addCouponHeader}>Valid Until</Text>
             <TouchableOpacity
               style={[styles.input, { justifyContent: "center" }]}
               onPress={() => setShowDatePicker(true)}
@@ -286,6 +306,7 @@ const CouponManager: React.FC = () => {
                 onChange={handleDateChange}
               />
             )}
+            <Text style={styles.addCouponHeader}>Coupon Value</Text>
             <TextInput
               style={styles.input}
               placeholder="Coupon Value"
@@ -399,9 +420,9 @@ const styles = StyleSheet.create({
     backgroundColor: "#f9f9f9",
   },
   modalButton: {
-    backgroundColor: "#007bff",
+    backgroundColor: munchColors.primary,
     paddingVertical: 12,
-    borderRadius: 5,
+    borderRadius: munchStyles.smallRadius,
     alignItems: "center",
   },
   modalButtonText: {
@@ -422,6 +443,11 @@ const styles = StyleSheet.create({
     position: "absolute",
     top: 10,
     right: 10,
+  },
+  addCouponHeader: {
+    fontSize: 16,
+    fontWeight: "bold",
+    marginBottom: 4,
   },
 });
 
