@@ -381,22 +381,21 @@ export const logTransaction = async ({
   }
 };
 
-
 export const getMatchingCouponsForVendor = async ({
   userId,
   vendorUid,
 }: {
   userId: string;
   vendorUid: string;
-}): Promise<string[]> => {
+}): Promise<Coupon[]> => {
   try {
     // Validate input
-    if (!userId || typeof userId !== "string" || !vendorUid || typeof vendorUid !== "string") {
+    if (!userId || !vendorUid) {
       console.error("Invalid userId or vendorUid provided.");
       return [];
     }
 
-    // Fetch user's added coupons (only the 'addedCoupons' field)
+    // Fetch user's added coupons
     const userDocRef = doc(db, "users", userId);
     const userDoc = await getDoc(userDocRef);
 
@@ -406,13 +405,18 @@ export const getMatchingCouponsForVendor = async ({
     }
 
     const userCoupons = userDoc.data()?.addedCoupons || [];
-    if (!Array.isArray(userCoupons) || !userCoupons.length) {
+    if (!Array.isArray(userCoupons) || userCoupons.length === 0) {
       console.log(`No coupons found for user ${userId}.`);
       return [];
     }
 
     // Fetch vendor's coupons
-    const vendorCouponsCollectionRef = collection(db, "vendors", vendorUid, "coupons");
+    const vendorCouponsCollectionRef = collection(
+      db,
+      "vendors",
+      vendorUid,
+      "coupons"
+    );
     const vendorCouponsSnapshot = await getDocs(vendorCouponsCollectionRef);
 
     if (vendorCouponsSnapshot.empty) {
@@ -420,19 +424,33 @@ export const getMatchingCouponsForVendor = async ({
       return [];
     }
 
-    // Create a set of vendor coupon IDs for fast lookups
-    const vendorCouponIds = new Set<string>();
+    // Map vendor coupon documents to their full details
+    const vendorCouponsMap = new Map<string, Coupon>();
     vendorCouponsSnapshot.forEach((doc) => {
-      vendorCouponIds.add(doc.id);
+      const couponData = doc.data();
+      if (
+        couponData.headline &&
+        couponData.description &&
+        couponData.uses &&
+        couponData.validUntil &&
+        couponData.value
+      ) {
+        vendorCouponsMap.set(doc.id, { id: doc.id, ...couponData } as Coupon);
+      } else {
+        console.warn(`Coupon with ID ${doc.id} has missing fields.`);
+      }
     });
 
-    // Find matching coupons
-    const matchingCoupons = userCoupons.filter((couponId) => vendorCouponIds.has(couponId));
+    // Match user's coupons with vendor's coupons
+    const matchingCoupons = userCoupons
+      .filter((couponId: string) => vendorCouponsMap.has(couponId))
+      .map((couponId: string) => vendorCouponsMap.get(couponId));
 
-    return matchingCoupons;
+    // Filter out undefined results
+    return matchingCoupons.filter((coupon): coupon is Coupon => coupon !== undefined);
   } catch (error) {
     console.error("Error fetching matching coupons:", error);
-    return []; // Return empty array to avoid breaking the flow
+    return [];
   }
 };
 

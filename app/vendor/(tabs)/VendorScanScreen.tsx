@@ -92,17 +92,14 @@ export default function VendorScanScreen() {
         vendorUid,
       });
 
-      console.log(`Matching Coupons: ${matchingCoupons}`);
+      console.log("Matching Coupons:", matchingCoupons);
 
-      console.log(`Added 10 points to user: ${data}`);
-
-      // Redirect to the success screen
-      // router.replace("/vendor/otherScreens/vendorScanSuccessScreen");
+      // Redirect to the success screen with serialized coupons
       router.replace({
         pathname: "/vendor/otherScreens/vendorScanSuccessScreen",
         params: {
           userId: data,
-          matchingCoupons: matchingCoupons,
+          matchingCoupons: JSON.stringify(matchingCoupons), // Serialize coupons
         },
       });
     } catch (error) {
