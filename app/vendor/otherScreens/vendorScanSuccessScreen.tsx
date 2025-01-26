@@ -107,9 +107,24 @@ export default function VendorScanSuccessScreen() {
                 <Text style={styles.couponDescription}>
                   {coupon.description}
                 </Text>
+                <View style={styles.couponDetailsRow}>
+                  <Text style={styles.couponDetails}>Uses: {coupon.uses}</Text>
+                  <Text style={styles.couponDetails}>
+                    {" "}
+                    | Value: ${coupon.value}
+                  </Text>
+                </View>
                 <Text style={styles.couponDetails}>
-                  Uses: {coupon.uses} | Value: {coupon.value} | Valid Until:{" "}
-                  {coupon.validUntil}
+                  Valid Until:{" "}
+                  {new Date(coupon.validUntil).toLocaleString("en-US", {
+                    weekday: "short", // 'short' for abbreviated weekday (e.g., 'Fri')
+                    month: "short", // 'short' for abbreviated month (e.g., 'Jan')
+                    day: "numeric",
+                    year: "numeric",
+                    hour: "numeric",
+                    minute: "2-digit",
+                    hour12: true, // Use 12-hour clock
+                  })}
                 </Text>
               </View>
             </View>
@@ -177,10 +192,10 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     backgroundColor: "white",
-    padding: 10,
+    padding: 15,
     borderRadius: 10,
     marginBottom: 10,
-    width: 325,
+    width: 350,
   },
   couponTextContainer: {
     flex: 1,
@@ -240,5 +255,8 @@ const styles = StyleSheet.create({
     color: "white",
     fontWeight: "bold",
     paddingBottom: 20,
+  },
+  couponDetailsRow: {
+    flexDirection: "row", // Arrange items horizontally
   },
 });
