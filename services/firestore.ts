@@ -380,6 +380,8 @@ export const logTransaction = async ({
     throw error;
   }
 };
+
+
 export const getMatchingCouponsForVendor = async ({
   userId,
   vendorUid,
