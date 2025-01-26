@@ -7,6 +7,7 @@ import {
   TouchableOpacity,
 } from "react-native";
 import { MenuItem } from "@/constants/types";
+import { munchColors } from "@/constants/Colors";
 
 type RenderMenuProps = {
   menu: MenuItem[];
@@ -30,7 +31,7 @@ export const RenderMenu: React.FC<RenderMenuProps> = ({
 
   return (
     <View style={styles.menuContainer}>
-      <FlatList
+      {/* <FlatList
         data={categories}
         keyExtractor={(item, index) => `horizontal-${index}`}
         horizontal
@@ -44,7 +45,7 @@ export const RenderMenu: React.FC<RenderMenuProps> = ({
         )}
         contentContainerStyle={styles.horizontalList}
         showsHorizontalScrollIndicator={false}
-      />
+      /> */}
       <FlatList
         data={categories}
         keyExtractor={(item) => `category-${item}`}
@@ -110,7 +111,7 @@ const styles = StyleSheet.create({
   },
   menuItemPrice: {
     fontSize: 14,
-    color: "#007bff",
+    color: munchColors.primary,
   },
   menuContainer: {
     backgroundColor: "white",

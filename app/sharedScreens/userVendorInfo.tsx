@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import {
   View,
   Text,
@@ -44,6 +44,7 @@ export default function UserVendorInfo() {
 
   const [activeTab, setActiveTab] = useState("items");
   const [imageLoading, setImageLoading] = useState(true);
+  const flatListRef = useRef<FlatList>(null); // Reference to FlatList
 
   const parsedMenu: MenuItem[] = JSON.parse(menu);
   const parsedCoupons: Coupon[] = JSON.parse(coupons).filter(
@@ -62,9 +63,21 @@ export default function UserVendorInfo() {
     setImageLoading(true);
   }, [image]);
 
+  const handleScroll = (category: string) => {
+    console.log("Scrolling to category:", category);
+    const index = parsedMenu.findIndex((item) => item.category === category);
+    if (index !== -1 && flatListRef.current) {
+      flatListRef.current.scrollToIndex({
+        index,
+        animated: true,
+        viewOffset: 50, // Adjust offset to account for header or padding
+      });
+    }
+  };
   return (
     <FlatList
       data={[1]}
+      ref={flatListRef}
       renderItem={({ item }) => (
         <View>
           <View style={{ flex: 1 }}>
@@ -166,7 +179,7 @@ export default function UserVendorInfo() {
               <HorizontalLine />
             </View>
             {activeTab === "items" ? (
-              <RenderMenu menu={parsedMenu} scrollToCategory={() => {}} />
+              <RenderMenu menu={parsedMenu} scrollToCategory={handleScroll} />
             ) : (
               <RenderCoupons coupons={parsedCoupons} vendorImage={image} />
             )}
