@@ -97,21 +97,24 @@ const authSlice = createSlice({
     },
     decrementCouponUsesState: (
       state,
-      action: PayloadAction<{ couponIds: string[] }>
+      action: PayloadAction<{ coupons: Coupon[] }>
     ) => {
-      const { couponIds } = action.payload;
+      const { coupons } = action.payload;
     
       if (state.user && state.user.coupons) {
-        couponIds.forEach((couponId) => {
-          const coupon = state.user?.coupons?.find((c) => c.id === couponId);
+        coupons.forEach((updatedCoupon) => {
+          const coupon = state.user?.coupons?.find((c) => c.id === updatedCoupon.id);
           if (coupon) {
-            coupon.uses = Math.max(Number(coupon.uses) - 1, 0); // Ensure uses doesn't go below 0
+            // Use 0 as the default value if `uses` is null
+            const currentUses = coupon.uses ?? 0;
+            coupon.uses = Math.max(currentUses - 1, 0); // Ensure `uses` doesn't go below 0
           } else {
-            console.warn(`Coupon with ID ${couponId} not found in state.`);
+            console.warn(`Coupon with ID ${updatedCoupon.id} not found in state.`);
           }
         });
       }
-    }
+    },
+    
     
     
   },

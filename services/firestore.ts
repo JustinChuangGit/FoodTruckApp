@@ -478,24 +478,21 @@ export const addToCouponSavings = async (
 
 export const decrementCouponUses = async (
   vendorUid: string,
-  couponIds: string[] | string
+  coupons: Coupon[]
 ): Promise<void> => {
   try {
-    const ids = Array.isArray(couponIds) ? couponIds : [couponIds];
-
     await Promise.all(
-      ids.map(async (couponId) => {
-        const couponRef = doc(db, "vendors", vendorUid, "coupons", couponId);
-
+      coupons.map(async (coupon) => {
+        const currentUses = coupon.uses ?? 0; // Default to 0 if `uses` is null
+        const couponRef = doc(db, "vendors", vendorUid, "coupons", coupon.id);
         await updateDoc(couponRef, {
-          uses: increment(-1),
+          uses: Math.max(currentUses - 1, 0), // Ensure Firestore reflects the change
         });
-
-        console.log(`Decremented uses for coupon ${couponId}.`);
       })
     );
+    console.log("Updated coupons in Firestore:", coupons.map((c) => c.id));
   } catch (error) {
-    console.error("Error decrementing coupon uses:", error);
+    console.error("Error updating coupons in Firestore:", error);
     throw error;
   }
 };

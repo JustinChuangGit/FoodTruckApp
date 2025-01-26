@@ -86,13 +86,16 @@ export default function VendorScanSuccessScreen() {
       (id) => selectedCoupons[id]
     );
 
+    const selectedCouponsArray = parsedCoupons.filter((coupon: Coupon) =>
+      selectedCouponIds.includes(coupon.id)
+    );
+
     try {
-      // 1. Update Firestore for selected coupons
-      dispatch(decrementCouponUsesState({ couponIds: selectedCouponIds }));
+      // Update Redux state
+      dispatch(decrementCouponUsesState({ coupons: selectedCouponsArray }));
 
-      await decrementCouponUses(user?.uid ?? "", selectedCouponIds);
-
-      // 2. Dispatch Redux action to update state
+      // Update Firestore
+      await decrementCouponUses(user?.uid ?? "", selectedCouponsArray);
 
       // Redirect after applying coupons
       router.replace("/vendor/(tabs)/VendorScanScreen");
