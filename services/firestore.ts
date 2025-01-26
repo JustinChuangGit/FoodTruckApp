@@ -380,4 +380,58 @@ export const logTransaction = async ({
     throw error;
   }
 };
+export const getMatchingCouponsForVendor = async ({
+  userId,
+  vendorUid,
+}: {
+  userId: string;
+  vendorUid: string;
+}): Promise<string[]> => {
+  try {
+    // Validate input
+    if (!userId || typeof userId !== "string" || !vendorUid || typeof vendorUid !== "string") {
+      console.error("Invalid userId or vendorUid provided.");
+      return [];
+    }
+
+    // Fetch user's added coupons (only the 'addedCoupons' field)
+    const userDocRef = doc(db, "users", userId);
+    const userDoc = await getDoc(userDocRef);
+
+    if (!userDoc.exists()) {
+      console.warn(`User with ID ${userId} not found.`);
+      return [];
+    }
+
+    const userCoupons = userDoc.data()?.addedCoupons || [];
+    if (!Array.isArray(userCoupons) || !userCoupons.length) {
+      console.log(`No coupons found for user ${userId}.`);
+      return [];
+    }
+
+    // Fetch vendor's coupons
+    const vendorCouponsCollectionRef = collection(db, "vendors", vendorUid, "coupons");
+    const vendorCouponsSnapshot = await getDocs(vendorCouponsCollectionRef);
+
+    if (vendorCouponsSnapshot.empty) {
+      console.log(`No coupons found for vendor ${vendorUid}.`);
+      return [];
+    }
+
+    // Create a set of vendor coupon IDs for fast lookups
+    const vendorCouponIds = new Set<string>();
+    vendorCouponsSnapshot.forEach((doc) => {
+      vendorCouponIds.add(doc.id);
+    });
+
+    // Find matching coupons
+    const matchingCoupons = userCoupons.filter((couponId) => vendorCouponIds.has(couponId));
+
+    return matchingCoupons;
+  } catch (error) {
+    console.error("Error fetching matching coupons:", error);
+    return []; // Return empty array to avoid breaking the flow
+  }
+};
+
 

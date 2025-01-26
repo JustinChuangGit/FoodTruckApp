@@ -9,7 +9,7 @@ import {
 } from "react-native";
 import { CameraView, useCameraPermissions } from "expo-camera";
 import { useRouter } from "expo-router";
-import { db } from "@/services/firestore";
+import { db, getMatchingCouponsForVendor } from "@/services/firestore";
 import { doc, getDoc, setDoc, updateDoc, increment } from "firebase/firestore";
 import { useDispatch } from "react-redux";
 import { selectUser } from "@/redux/authSlice"; // Update the path as needed
@@ -86,6 +86,12 @@ export default function VendorScanScreen() {
         latitude,
         longitude,
       });
+
+      const matchingCoupons = await getMatchingCouponsForVendor({
+        userId: data,
+        vendorUid,
+      });
+      console.log(`Matching Coupons: ${matchingCoupons}`);
 
       console.log(`Added 10 points to user: ${data}`);
 
