@@ -182,6 +182,7 @@ export default function UserVendorInfo() {
               <RenderMenu menu={parsedMenu} scrollToCategory={handleScroll} />
             ) : (
               <RenderCoupons coupons={parsedCoupons} vendorImage={image} />
+              // <RenderCoupons coupons={parsedCoupons} />
             )}
           </View>
         </View>

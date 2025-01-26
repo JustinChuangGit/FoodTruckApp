@@ -5,7 +5,7 @@ import CouponCard from "@/components/CouponCard";
 
 type RenderCouponsProps = {
   coupons: Coupon[];
-  vendorImage: string;
+  vendorImage?: string;
 };
 
 export const RenderCoupons: React.FC<RenderCouponsProps> = ({
