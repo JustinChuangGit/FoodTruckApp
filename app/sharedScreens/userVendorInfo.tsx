@@ -14,6 +14,7 @@ import { Coupon, MenuItem } from "@/constants/types";
 import { FontAwesome } from "@expo/vector-icons";
 import HorizontalLine from "@/components/default/HorizontalLine";
 import { munchColors } from "@/constants/Colors";
+import CouponCard from "@/components/CouponCard";
 
 const screenWidth = Dimensions.get("window").width;
 
@@ -276,13 +277,8 @@ export default function UserVendorInfo() {
     } else if (item.type === "coupon") {
       // Added: Render coupon data
       return (
-        <View style={styles.couponItem}>
-          <Text style={styles.couponHeadline}>{item.headline}</Text>
-          <Text style={styles.couponDescription}>{item.description}</Text>
-          <Text style={styles.couponDetails}>Value: ${item.value}</Text>
-          <Text style={styles.couponDetails}>
-            Valid Until: {item.validUntil}
-          </Text>
+        <View style={styles.couponContainer}>
+          <CouponCard coupon={item} vendorImage={image} />
         </View>
       );
     }
@@ -494,5 +490,9 @@ const styles = StyleSheet.create({
   couponDetails: {
     fontSize: 14,
     color: "#777",
+  },
+  couponContainer: {
+    display: "flex",
+    flexDirection: "row",
   },
 });
