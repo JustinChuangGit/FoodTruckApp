@@ -455,3 +455,49 @@ export const getMatchingCouponsForVendor = async ({
 };
 
 
+export const addToCouponSavings = async (
+  userId: string,
+  couponValue: number
+): Promise<void> => {
+  try {
+    const userDocRef = doc(db, "users", userId);
+
+    // Increment the couponSavings field by the couponValue
+    await updateDoc(userDocRef, {
+      couponSavings: increment(couponValue),
+    });
+
+    console.log(
+      `Coupon value of $${couponValue} added to user ${userId}'s couponSavings.`
+    );
+  } catch (error) {
+    console.error("Error adding to coupon savings:", error);
+    throw error;
+  }
+};
+
+export const decrementCouponUses = async (
+  vendorUid: string,
+  couponIds: string[] | string
+): Promise<void> => {
+  try {
+    const ids = Array.isArray(couponIds) ? couponIds : [couponIds];
+
+    await Promise.all(
+      ids.map(async (couponId) => {
+        const couponRef = doc(db, "vendors", vendorUid, "coupons", couponId);
+
+        await updateDoc(couponRef, {
+          uses: increment(-1),
+        });
+
+        console.log(`Decremented uses for coupon ${couponId}.`);
+      })
+    );
+  } catch (error) {
+    console.error("Error decrementing coupon uses:", error);
+    throw error;
+  }
+};
+
+

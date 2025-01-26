@@ -95,6 +95,24 @@ const authSlice = createSlice({
         );
       }
     },
+    decrementCouponUsesState: (
+      state,
+      action: PayloadAction<{ couponIds: string[] }>
+    ) => {
+      const { couponIds } = action.payload;
+    
+      if (state.user && state.user.coupons) {
+        couponIds.forEach((couponId) => {
+          const coupon = state.user?.coupons?.find((c) => c.id === couponId);
+          if (coupon) {
+            coupon.uses = Math.max(Number(coupon.uses) - 1, 0); // Ensure uses doesn't go below 0
+          } else {
+            console.warn(`Coupon with ID ${couponId} not found in state.`);
+          }
+        });
+      }
+    }
+    
     
   },
 });
@@ -108,7 +126,7 @@ export const {
   deleteCoupon,
   redeemCoupon,
   removeActiveCoupon,
-
+  decrementCouponUsesState,  
 } = authSlice.actions;
 
 // Export selectors

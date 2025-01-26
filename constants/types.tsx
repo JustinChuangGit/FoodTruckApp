@@ -80,9 +80,9 @@ export type Coupon = {
   id: string;
   headline: string;
   description: string;
-  uses: string;
+  uses: number | null;
   validUntil: string;
-  value: string;
+  value: number | null;
   createdOn?: number; // Timestamp of when the coupon was created
   createdOnReadable?: string; // Readable date of when the coupon was created
 };

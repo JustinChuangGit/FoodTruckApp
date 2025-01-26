@@ -12,6 +12,9 @@ import ConfettiCannon from "react-native-confetti-cannon";
 import { Coupon } from "@/constants/types";
 import CustomCheckbox from "@/components/CustomCheckbox";
 import { Audio } from "expo-av";
+import { decrementCouponUses } from "@/services/firestore";
+import { decrementCouponUsesState, selectUser } from "@/redux/authSlice"; // Update the path as needed
+import { useSelector, useDispatch } from "react-redux";
 
 export default function VendorScanSuccessScreen() {
   const params = useLocalSearchParams<{
@@ -26,6 +29,8 @@ export default function VendorScanSuccessScreen() {
     [key: string]: boolean;
   }>({});
   const [discount, setDiscount] = useState(0);
+  const user = useSelector(selectUser);
+  const dispatch = useDispatch();
   const playSound = async () => {
     const { sound } = await Audio.Sound.createAsync(
       require("@/assets/sounds/scanSuccess.mp3")
@@ -65,7 +70,8 @@ export default function VendorScanSuccessScreen() {
 
       // Calculate the total discount
       const totalDiscount = selectedCoupons.reduce(
-        (acc: number, coupon: Coupon) => acc + parseFloat(coupon.value || "0"),
+        (acc: number, coupon: Coupon) =>
+          acc + (coupon.value ? parseFloat(coupon.value.toString()) : 0),
         0
       );
 
@@ -74,6 +80,25 @@ export default function VendorScanSuccessScreen() {
 
       return updatedSelections; // Return the updated state
     });
+  };
+  const handleApplyCoupons = async () => {
+    const selectedCouponIds = Object.keys(selectedCoupons).filter(
+      (id) => selectedCoupons[id]
+    );
+
+    try {
+      // 1. Update Firestore for selected coupons
+      dispatch(decrementCouponUsesState({ couponIds: selectedCouponIds }));
+
+      await decrementCouponUses(user?.uid ?? "", selectedCouponIds);
+
+      // 2. Dispatch Redux action to update state
+
+      // Redirect after applying coupons
+      router.replace("/vendor/(tabs)/VendorScanScreen");
+    } catch (error) {
+      console.error("Error applying coupons:", error);
+    }
   };
 
   return (
@@ -134,16 +159,7 @@ export default function VendorScanSuccessScreen() {
         )}
       </ScrollView>
       <View style={styles.buttonContainer}>
-        <TouchableOpacity
-          style={styles.button}
-          onPress={() => {
-            const selectedCouponIds = Object.keys(selectedCoupons).filter(
-              (id) => selectedCoupons[id]
-            );
-            console.log("Selected Coupons:", selectedCouponIds);
-            router.replace("/vendor/(tabs)/VendorScanScreen");
-          }}
-        >
+        <TouchableOpacity style={styles.button} onPress={handleApplyCoupons}>
           <Text style={styles.buttonText}>Confirm Selection</Text>
         </TouchableOpacity>
         <TouchableOpacity

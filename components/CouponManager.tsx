@@ -43,9 +43,9 @@ const CouponManager: React.FC = () => {
     id: "", // Placeholder for the ID
     headline: "",
     description: "",
-    uses: "",
+    uses: 0,
     validUntil: "",
-    value: "",
+    value: 0,
   });
 
   const [coupons, setCoupons] = useState<Coupon[]>([]);
@@ -90,7 +90,7 @@ const CouponManager: React.FC = () => {
       alert("Description is required.");
       return;
     }
-    if (!newCoupon.value.trim()) {
+    if (!newCoupon.value) {
       alert("Coupon Value is required.");
       return;
     }
@@ -135,9 +135,9 @@ const CouponManager: React.FC = () => {
         id: "",
         headline: "",
         description: "",
-        uses: "",
+        uses: null,
         validUntil: "",
-        value: "",
+        value: null,
       });
 
       setCouponModalVisible(false);
@@ -211,9 +211,9 @@ const CouponManager: React.FC = () => {
       id: "", // Reset the ID or keep it as a placeholder
       headline: "",
       description: "",
-      uses: "",
+      uses: null,
       validUntil: "", // Clear the date field
-      value: "",
+      value: null,
     });
   };
 
@@ -317,10 +317,13 @@ const CouponManager: React.FC = () => {
               style={styles.input}
               placeholder="How many times this coupon be used"
               keyboardType="numeric"
-              value={newCoupon.uses}
-              onChangeText={(text) =>
-                setNewCoupon((prev) => ({ ...prev, uses: text }))
-              }
+              value={newCoupon.uses === null ? "" : newCoupon.uses.toString()} // Display empty string for null
+              onChangeText={(text) => {
+                setNewCoupon((prev) => ({
+                  ...prev,
+                  uses: text === "" ? 0 : parseInt(text, 10), // Handle empty string
+                }));
+              }}
             />
             <Text style={styles.addCouponHeader}>Valid Until</Text>
             <TouchableOpacity
@@ -360,10 +363,15 @@ const CouponManager: React.FC = () => {
                 style={[styles.input, { flex: 1 }]} // Add flex: 1 to stretch the input
                 placeholder="Ex: $2.50"
                 keyboardType="decimal-pad"
-                value={newCoupon.value}
-                onChangeText={(text) =>
-                  setNewCoupon((prev) => ({ ...prev, value: text }))
-                }
+                value={
+                  newCoupon.value === null ? "" : newCoupon.value.toString()
+                } // Display empty string for null
+                onChangeText={(text) => {
+                  setNewCoupon((prev) => ({
+                    ...prev,
+                    value: text === "" ? 0 : parseFloat(text), // Handle empty string
+                  }));
+                }}
               />
             </View>
 
