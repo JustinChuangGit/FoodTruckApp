@@ -45,6 +45,7 @@ export default function UserVendorInfo() {
   const [activeTab, setActiveTab] = useState("items");
   const [imageLoading, setImageLoading] = useState(true);
   const flatListRef = useRef<FlatList>(null); // Reference to FlatList
+  const [truckImageLoading, setTruckImageLoading] = useState(true); // Loading state for truck image
 
   const parsedMenu: MenuItem[] = JSON.parse(menu);
   const parsedCoupons: Coupon[] = JSON.parse(coupons).filter(
@@ -123,7 +124,22 @@ export default function UserVendorInfo() {
             <View style={styles.informationContainer}>
               <Text style={styles.name}>{name}</Text>
               <View style={styles.circleContainer}>
-                <Image source={{ uri: truckImage }} style={styles.circleLogo} />
+                <View style={styles.circle}>
+                  {truckImageLoading && (
+                    <ActivityIndicator
+                      size="small"
+                      color="#007bff"
+                      style={styles.loadingIndicator}
+                    />
+                  )}
+                  <Image
+                    source={{ uri: truckImage }}
+                    style={styles.circleLogo}
+                    onLoad={() => setTruckImageLoading(false)} // Image successfully loaded
+                    onLoadStart={() => setTruckImageLoading(true)} // Start loading
+                    onError={() => setTruckImageLoading(false)} // Stop spinner if image fails to load
+                  />
+                </View>
               </View>
               <View style={styles.informationSubHeaderContainer}>
                 <Text style={styles.vendorPrice}>{vendorType} </Text>
@@ -284,5 +300,16 @@ const styles = StyleSheet.create({
     top: "50%",
     left: "50%",
     transform: [{ translateX: -15 }, { translateY: -15 }],
+  },
+  circle: {
+    width: 125, // Diameter of the circle
+    height: 125,
+    borderRadius: 80, // Makes it a perfect circle
+    backgroundColor: "white",
+    borderWidth: 2,
+    borderColor: "black",
+    justifyContent: "center",
+    alignItems: "center",
+    overflow: "hidden",
   },
 });

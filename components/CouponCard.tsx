@@ -28,7 +28,6 @@ const CouponCard: React.FC<CouponCardProps> = ({ coupon, vendorImage }) => {
 
   // Check if the coupon has already been added
   const isApplied = user?.addedCoupons?.includes(coupon.id) || false;
-  console.log("isApplied:", isApplied);
 
   const handleRedeem = () => {
     if (user?.uid) {
