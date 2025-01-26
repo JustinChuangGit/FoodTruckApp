@@ -93,6 +93,7 @@ const styles = StyleSheet.create({
     elevation: 5,
     width: 175,
     justifyContent: "space-between",
+    marginHorizontal: "auto",
   },
   vendorImage: {
     width: 140,
