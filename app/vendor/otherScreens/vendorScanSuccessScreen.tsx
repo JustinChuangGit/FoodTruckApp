@@ -23,7 +23,7 @@ export default function VendorScanSuccessScreen() {
   }>();
   const router = useRouter();
 
-  const { matchingCoupons } = params;
+  const { matchingCoupons, userId } = params;
   const parsedCoupons = matchingCoupons ? JSON.parse(matchingCoupons) : [];
   const [selectedCoupons, setSelectedCoupons] = useState<{
     [key: string]: boolean;
@@ -95,7 +95,13 @@ export default function VendorScanSuccessScreen() {
       dispatch(decrementCouponUsesState({ coupons: selectedCouponsArray }));
 
       // Update Firestore
-      await decrementCouponUses(user?.uid ?? "", selectedCouponsArray);
+      await decrementCouponUses(
+        user?.uid ?? "",
+        selectedCouponsArray,
+        user?.latitude ?? 0,
+        user?.longitude ?? 0,
+        userId
+      );
 
       // Redirect after applying coupons
       router.replace("/vendor/(tabs)/VendorScanScreen");

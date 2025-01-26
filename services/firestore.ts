@@ -478,23 +478,44 @@ export const addToCouponSavings = async (
 
 export const decrementCouponUses = async (
   vendorUid: string,
-  coupons: Coupon[]
+  coupons: Coupon[],
+  latitude: number,
+  longitude: number,
+  customerUid: string
 ): Promise<void> => {
   try {
-    await Promise.all(
-      coupons.map(async (coupon) => {
+    const totalCouponUsesRef = doc(db, "vendors", vendorUid);
+
+    await Promise.all([
+      // Update each coupon's uses
+      ...coupons.map(async (coupon) => {
         const currentUses = coupon.uses ?? 0; // Default to 0 if `uses` is null
         const couponRef = doc(db, "vendors", vendorUid, "coupons", coupon.id);
         await updateDoc(couponRef, {
-          uses: Math.max(currentUses - 1, 0), // Ensure Firestore reflects the change
+          uses: Math.max(currentUses - 1, 0), // Decrement uses
         });
-      })
-    );
-    console.log("Updated coupons in Firestore:", coupons.map((c) => c.id));
+      }),
+
+      // Add to the totalCouponUses array
+      updateDoc(totalCouponUsesRef, {
+        totalCouponUses: arrayUnion(
+          ...coupons.map((coupon) => ({
+            couponId: coupon.id,
+            timestamp: Date.now(),
+            latitude: latitude,
+            longitude: longitude,
+            customer: customerUid, // Add customer UID
+          }))
+        ),
+      }),
+    ]);
+
+    console.log("Updated coupons and added to totalCouponUses:", coupons.map((c) => c.id));
   } catch (error) {
-    console.error("Error updating coupons in Firestore:", error);
+    console.error("Error updating coupons or adding to totalCouponUses:", error);
     throw error;
   }
 };
+
 
 
