@@ -91,12 +91,20 @@ export default function VendorScanScreen() {
         userId: data,
         vendorUid,
       });
+
       console.log(`Matching Coupons: ${matchingCoupons}`);
 
       console.log(`Added 10 points to user: ${data}`);
 
       // Redirect to the success screen
-      router.replace("/vendor/otherScreens/vendorScanSuccessScreen");
+      // router.replace("/vendor/otherScreens/vendorScanSuccessScreen");
+      router.replace({
+        pathname: "/vendor/otherScreens/vendorScanSuccessScreen",
+        params: {
+          userId: data,
+          matchingCoupons: matchingCoupons,
+        },
+      });
     } catch (error) {
       console.error("Error processing scan:", error);
       Alert.alert(

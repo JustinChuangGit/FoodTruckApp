@@ -6,12 +6,16 @@ import {
   TouchableOpacity,
   Vibration,
 } from "react-native";
-import { useRouter } from "expo-router";
+import { useRouter, useLocalSearchParams } from "expo-router";
 import ConfettiCannon from "react-native-confetti-cannon";
 import { Audio } from "expo-av";
 import { munchStyles } from "@/constants/styles";
 
 export default function VendorScanSuccessScreen() {
+  const params = useLocalSearchParams<{
+    userId: string;
+    matchingCoupons: string[];
+  }>();
   const router = useRouter();
   const confettiRef = useRef(null);
 
