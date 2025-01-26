@@ -15,6 +15,8 @@ import { useDispatch } from "react-redux";
 import { selectUser } from "@/redux/authSlice"; // Update the path as needed
 import { useSelector } from "react-redux";
 import { logTransaction } from "@/services/firestore";
+import { useFocusEffect } from "@react-navigation/native";
+
 const { width } = Dimensions.get("window");
 
 const cornerRadius = 25;
@@ -30,6 +32,19 @@ export default function VendorScanScreen() {
   const vendorType = user?.vendorType;
   const latitude = user?.latitude;
   const longitude = user?.longitude;
+  const [isCameraActive, setIsCameraActive] = useState(false);
+
+  useFocusEffect(
+    React.useCallback(() => {
+      // Activate the camera when the screen is focused
+      setIsCameraActive(true);
+
+      return () => {
+        // Deactivate the camera when the screen is unfocused
+        setIsCameraActive(false);
+      };
+    }, [])
+  );
 
   // Lock to prevent multiple scans
   const isScanning = useRef(false);
@@ -118,13 +133,15 @@ export default function VendorScanScreen() {
 
   return (
     <View style={styles.container}>
-      <CameraView
-        style={styles.camera}
-        barcodeScannerSettings={{
-          barcodeTypes: ["qr"],
-        }}
-        onBarcodeScanned={handleBarcodeScanned}
-      />
+      {isCameraActive && (
+        <CameraView
+          style={styles.camera}
+          barcodeScannerSettings={{
+            barcodeTypes: ["qr"],
+          }}
+          onBarcodeScanned={handleBarcodeScanned}
+        />
+      )}
       <View style={styles.overlay}>
         <Text style={styles.overlayText}>Scan Customer QR Code</Text>
         <View style={styles.boundingBox}>
