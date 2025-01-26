@@ -51,7 +51,7 @@ export interface User {
   longitude?: number; // Add longitude
   rewardPoints?: number; // Add reward points
   coupons?: Coupon[]; // Add coupons
-  userAddedCoupons?: string[]; // Add user-added coupons
+  addedCoupons?: string[]; // Add user-added coupons
 }
 
 export interface Section {

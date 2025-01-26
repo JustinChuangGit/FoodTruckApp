@@ -27,7 +27,8 @@ const CouponCard: React.FC<CouponCardProps> = ({ coupon, vendorImage }) => {
   const [imageLoading, setImageLoading] = useState(true); // State for loading indicator
 
   // Check if the coupon has already been added
-  const isApplied = user?.userAddedCoupons?.includes(coupon.id) || false;
+  const isApplied = user?.addedCoupons?.includes(coupon.id) || false;
+  console.log("isApplied:", isApplied);
 
   const handleRedeem = () => {
     if (user?.uid) {

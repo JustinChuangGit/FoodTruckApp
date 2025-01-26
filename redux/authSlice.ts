@@ -71,11 +71,11 @@ const authSlice = createSlice({
     redeemCoupon: (state, action: PayloadAction<string>) => {
       console.log("Adding to Redux:", action.payload);
       if (state.user) {
-        if (!state.user.userAddedCoupons) {
-          state.user.userAddedCoupons = []; // Initialize if it doesn't exist
+        if (!state.user.addedCoupons) {
+          state.user.addedCoupons = []; // Initialize if it doesn't exist
         }
-        if (!state.user.userAddedCoupons.includes(action.payload)) {
-          state.user.userAddedCoupons.push(action.payload); // Add the coupon UID
+        if (!state.user.addedCoupons.includes(action.payload)) {
+          state.user.addedCoupons.push(action.payload); // Add the coupon UID
           console.log(
             "Redux State after redeemCoupon:",
             JSON.stringify(state, null, 2)
@@ -85,8 +85,8 @@ const authSlice = createSlice({
     },
     removeActiveCoupon: (state, action: PayloadAction<string>) => {
       console.log("Removing from Redux:", action.payload);
-      if (state.user && state.user.userAddedCoupons) {
-        state.user.userAddedCoupons = state.user.userAddedCoupons.filter(
+      if (state.user && state.user.addedCoupons) {
+        state.user.addedCoupons = state.user.addedCoupons.filter(
           (couponId) => couponId !== action.payload
         );
         console.log(
