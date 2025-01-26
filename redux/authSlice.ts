@@ -82,7 +82,20 @@ const authSlice = createSlice({
           );
         }
       }
-    }
+    },
+    removeActiveCoupon: (state, action: PayloadAction<string>) => {
+      console.log("Removing from Redux:", action.payload);
+      if (state.user && state.user.userAddedCoupons) {
+        state.user.userAddedCoupons = state.user.userAddedCoupons.filter(
+          (couponId) => couponId !== action.payload
+        );
+        console.log(
+          "Redux State after removeActiveCoupon:",
+          JSON.stringify(state, null, 2)
+        );
+      }
+    },
+    
   },
 });
 
@@ -94,6 +107,8 @@ export const {
   addCoupon,
   deleteCoupon,
   redeemCoupon,
+  removeActiveCoupon,
+
 } = authSlice.actions;
 
 // Export selectors
