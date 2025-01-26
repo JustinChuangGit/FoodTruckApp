@@ -8,6 +8,7 @@ import {
 } from "react-native";
 import { MenuItem } from "@/constants/types";
 import { munchColors } from "@/constants/Colors";
+import HorizontalLine from "./default/HorizontalLine";
 
 type RenderMenuProps = {
   menu: MenuItem[];
@@ -51,7 +52,10 @@ export const RenderMenu: React.FC<RenderMenuProps> = ({
         keyExtractor={(item) => `category-${item}`}
         renderItem={({ item }) => (
           <View>
-            <Text style={styles.categoryHeader}>{item}</Text>
+            <View style={styles.menuCategoryContainer}>
+              <Text style={styles.categoryHeader}>{item}</Text>
+              <HorizontalLine />
+            </View>
             {menuData[item].map((menuItem) => (
               <View key={menuItem.name} style={styles.menuItem}>
                 <View style={styles.menuItemTextContainer}>
@@ -89,8 +93,6 @@ const styles = StyleSheet.create({
     fontSize: 25,
     fontWeight: "bold",
     marginTop: 20,
-    marginBottom: 8,
-    paddingHorizontal: 16,
   },
   menuItem: {
     flexDirection: "row",
@@ -116,5 +118,8 @@ const styles = StyleSheet.create({
   menuContainer: {
     backgroundColor: "white",
     paddingBottom: 50,
+  },
+  menuCategoryContainer: {
+    paddingHorizontal: 16,
   },
 });
