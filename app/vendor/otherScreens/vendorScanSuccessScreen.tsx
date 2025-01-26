@@ -1,18 +1,18 @@
-import React, { useEffect, useRef } from "react";
+import React, { useState } from "react";
 import {
   View,
   Text,
   StyleSheet,
   TouchableOpacity,
   Vibration,
+  ScrollView,
 } from "react-native";
 import { useRouter, useLocalSearchParams } from "expo-router";
 import ConfettiCannon from "react-native-confetti-cannon";
 import { Audio } from "expo-av";
 import { munchStyles } from "@/constants/styles";
-import { useSelector } from "react-redux";
-import { selectUser } from "@/redux/authSlice"; // Update the path as needed
 import { Coupon } from "@/constants/types";
+import CheckBox from "@react-native-community/checkbox";
 
 export default function VendorScanSuccessScreen() {
   const params = useLocalSearchParams<{
@@ -20,12 +20,20 @@ export default function VendorScanSuccessScreen() {
     matchingCoupons: string; // Serialized JSON string
   }>();
   const router = useRouter();
-  const confettiRef = useRef(null);
 
-  const { userId, matchingCoupons } = params;
+  const { matchingCoupons } = params;
 
-  // Parse the matching coupons back into an array
+  // Parse the coupons into an array
   const parsedCoupons = matchingCoupons ? JSON.parse(matchingCoupons) : [];
+  const [selectedCoupons, setSelectedCoupons] = useState<string[]>([]);
+
+  const toggleCouponSelection = (couponId: string) => {
+    setSelectedCoupons((prev) =>
+      prev.includes(couponId)
+        ? prev.filter((id) => id !== couponId)
+        : [...prev, couponId]
+    );
+  };
 
   const playSound = async () => {
     const { sound } = await Audio.Sound.createAsync(
@@ -34,7 +42,7 @@ export default function VendorScanSuccessScreen() {
     await sound.playAsync();
   };
 
-  useEffect(() => {
+  React.useEffect(() => {
     playSound();
     Vibration.vibrate(250); // Vibrates for 250ms
   }, []);
@@ -48,33 +56,55 @@ export default function VendorScanSuccessScreen() {
         autoStart={true}
       />
       <Text style={styles.successText}>Scan Successful!</Text>
-      <Text style={styles.message}>You gained a new customer!</Text>
+      <Text style={styles.couponsTitle}>Select Matching Coupons:</Text>
 
-      {/* Display Matching Coupons */}
-      <View>
-        <Text style={styles.couponsTitle}>Matching Coupons:</Text>
+      <ScrollView>
         {parsedCoupons.length > 0 ? (
-          parsedCoupons.map((coupon: Coupon, index: number) => (
-            <View key={index} style={styles.couponContainer}>
-              <Text style={styles.couponHeadline}>{coupon.headline}</Text>
-              <Text style={styles.couponDescription}>{coupon.description}</Text>
-              <Text style={styles.couponDetails}>
-                Uses: {coupon.uses} | Value: {coupon.value} | Valid Until:{" "}
-                {coupon.validUntil}
-              </Text>
+          parsedCoupons.map((coupon: Coupon) => (
+            <View key={coupon.id} style={styles.couponContainer}>
+              <TouchableOpacity
+                style={[
+                  styles.checkbox,
+                  selectedCoupons.includes(coupon.id) &&
+                    styles.checkboxSelected,
+                ]}
+                onPress={() => toggleCouponSelection(coupon.id)}
+              />
+              <View style={styles.couponTextContainer}>
+                <Text style={styles.couponHeadline}>{coupon.headline}</Text>
+                <Text style={styles.couponDescription}>
+                  {coupon.description}
+                </Text>
+                <Text style={styles.couponDetails}>
+                  Uses: {coupon.uses} | Value: {coupon.value} | Valid Until:{" "}
+                  {coupon.validUntil}
+                </Text>
+              </View>
             </View>
           ))
         ) : (
           <Text style={styles.noCouponsText}>No matching coupons found.</Text>
         )}
+      </ScrollView>
+      <View style={styles.buttonContainer}>
+        <TouchableOpacity
+          style={styles.button}
+          onPress={() => {
+            console.log("Selected Coupons:", selectedCoupons);
+            router.replace("/vendor/(tabs)/VendorScanScreen");
+          }}
+        >
+          <Text style={styles.buttonText}>Confirm Selection</Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={[styles.button, styles.cancelButton]}
+          onPress={() => {
+            router.replace("/vendor/(tabs)/VendorScanScreen");
+          }}
+        >
+          <Text style={[styles.buttonText, { color: "white" }]}>Cancel</Text>
+        </TouchableOpacity>
       </View>
-
-      <TouchableOpacity
-        style={styles.button}
-        onPress={() => router.replace("/vendor/(tabs)/VendorScanScreen")}
-      >
-        <Text style={styles.buttonText}>Go Back</Text>
-      </TouchableOpacity>
     </View>
   );
 }
@@ -84,13 +114,15 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: "#4CAF50", // Green background
+    backgroundColor: "#4CAF50",
+    paddingHorizontal: 20,
   },
   successText: {
     fontSize: 32,
     fontWeight: "bold",
     color: "white",
     marginBottom: 20,
+    marginTop: 300,
   },
   message: {
     fontSize: 18,
@@ -105,10 +137,27 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   couponContainer: {
+    flexDirection: "row",
+    alignItems: "center",
     backgroundColor: "white",
     padding: 10,
     borderRadius: 10,
     marginBottom: 10,
+    width: 300,
+  },
+  checkbox: {
+    width: 24,
+    height: 24,
+    borderRadius: 5,
+    borderWidth: 2,
+    borderColor: "#4CAF50",
+    marginRight: 10,
+  },
+  checkboxSelected: {
+    backgroundColor: "#4CAF50",
+  },
+  couponTextContainer: {
+    flex: 1,
   },
   couponHeadline: {
     fontSize: 18,
@@ -133,15 +182,22 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     paddingHorizontal: 20,
     borderRadius: munchStyles.smallRadius,
-    width: 180,
+    width: 250,
     height: 50,
     justifyContent: "center",
     alignItems: "center",
-    marginTop: 20,
+    marginBottom: 10,
   },
   buttonText: {
     fontSize: 16,
     fontWeight: "bold",
     color: "#4CAF50",
+  },
+  cancelButton: {
+    backgroundColor: "grey",
+  },
+
+  buttonContainer: {
+    marginBottom: 50,
   },
 });
