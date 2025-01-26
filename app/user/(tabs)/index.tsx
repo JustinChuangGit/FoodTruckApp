@@ -204,6 +204,7 @@ export default function Index() {
         image: encodeURIComponent(vendor.image), // Encode the image URL
         rating: vendor.rating,
         coupons: encodeURIComponent(JSON.stringify(vendor.coupons)),
+        truckImage: encodeURIComponent(vendor.truckImage), // Encode the truck
       },
     });
   };

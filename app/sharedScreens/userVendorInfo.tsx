@@ -46,6 +46,8 @@ export default function UserVendorInfo() {
   const [imageLoading, setImageLoading] = useState(true);
   const flatListRef = useRef<FlatList>(null); // Reference to FlatList
   const [truckImageLoading, setTruckImageLoading] = useState(true); // Loading state for truck image
+  console.log("truckImage", truckImage);
+  console.log("image", image);
 
   const parsedMenu: MenuItem[] = JSON.parse(menu);
   const parsedCoupons: Coupon[] = JSON.parse(coupons).filter(
