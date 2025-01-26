@@ -39,11 +39,12 @@ export default function VendorScanSuccessScreen() {
         fadeOut={true}
         autoStart={true}
       />
-      <Text style={styles.successText}>Scan Successful!</Text>
-      <Text style={styles.message}>You gained a new customer!</Text>
+      <View style={styles.successTextContainer}>
+        <Text style={styles.successText}>Scan Successful!</Text>
+        <Text style={styles.couponsTitle}>Select Matching Coupons:</Text>
+      </View>
 
       <ScrollView>
-        <Text style={styles.couponsTitle}>Select Matching Coupons:</Text>
         {parsedCoupons.length > 0 ? (
           parsedCoupons.map((coupon: Coupon) => (
             <View key={coupon.id} style={styles.couponContainer}>
@@ -68,19 +69,31 @@ export default function VendorScanSuccessScreen() {
           <Text style={styles.noCouponsText}>No matching coupons found.</Text>
         )}
       </ScrollView>
-
-      <TouchableOpacity
-        style={styles.button}
-        onPress={() => {
-          const selectedCouponIds = Object.keys(selectedCoupons).filter(
-            (id) => selectedCoupons[id]
-          );
-          console.log("Selected Coupons:", selectedCouponIds);
-          router.replace("/vendor/(tabs)/VendorScanScreen");
-        }}
-      >
-        <Text style={styles.buttonText}>Confirm Selection</Text>
-      </TouchableOpacity>
+      <View style={styles.buttonContainer}>
+        <TouchableOpacity
+          style={styles.button}
+          onPress={() => {
+            const selectedCouponIds = Object.keys(selectedCoupons).filter(
+              (id) => selectedCoupons[id]
+            );
+            console.log("Selected Coupons:", selectedCouponIds);
+            router.replace("/vendor/(tabs)/VendorScanScreen");
+          }}
+        >
+          <Text style={styles.buttonText}>Confirm Selection</Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={[styles.button, { backgroundColor: "grey" }]}
+          onPress={() => {
+            const selectedCouponIds = Object.keys(selectedCoupons).filter(
+              (id) => selectedCoupons[id]
+            );
+            router.replace("/vendor/(tabs)/VendorScanScreen");
+          }}
+        >
+          <Text style={[styles.buttonText, { color: "white" }]}>Cancel</Text>
+        </TouchableOpacity>
+      </View>
     </View>
   );
 }
@@ -118,6 +131,7 @@ const styles = StyleSheet.create({
     padding: 10,
     borderRadius: 10,
     marginBottom: 10,
+    width: 325,
   },
   couponTextContainer: {
     flex: 1,
@@ -146,15 +160,22 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     paddingHorizontal: 20,
     borderRadius: 10,
-    width: 200,
+    width: 250,
     height: 50,
     justifyContent: "center",
     alignItems: "center",
-    marginTop: 20,
+    marginTop: 10,
   },
   buttonText: {
     fontSize: 16,
     fontWeight: "bold",
     color: "#4CAF50",
+  },
+  buttonContainer: {
+    marginBottom: 40,
+  },
+
+  successTextContainer: {
+    marginTop: 275,
   },
 });
