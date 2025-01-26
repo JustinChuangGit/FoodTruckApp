@@ -73,6 +73,7 @@ export interface ActiveVendor {
   price: string; // Price range or pricing information
   description: string; // Vendor's description
   image: string | null; // Vendor's image URL or null if not provided
+  coupons: string[]; // Array of coupons
 }
 
 export type Coupon = {
