@@ -5,7 +5,6 @@ import {
   FlatList,
   StyleSheet,
   TouchableOpacity,
-  Dimensions,
 } from "react-native";
 import { MenuItem } from "@/constants/types";
 
@@ -13,31 +12,25 @@ type RenderMenuProps = {
   menu: MenuItem[];
   scrollToCategory: (category: string) => void;
 };
+
 export const RenderMenu: React.FC<RenderMenuProps> = ({
   menu,
   scrollToCategory,
 }) => {
-  const categories = menu.reduce((acc: string[], item) => {
-    if (!acc.includes(item.category)) {
-      acc.push(item.category);
+  // Group menu items by category
+  const menuData = menu.reduce((acc: { [key: string]: MenuItem[] }, item) => {
+    if (!acc[item.category]) {
+      acc[item.category] = [];
     }
+    acc[item.category].push(item);
     return acc;
-  }, []);
+  }, {});
 
-  const menuData = menu.reduce((acc: any[], item) => {
-    const categoryIndex = acc.findIndex(
-      (data) => data.type === "category" && data.title === item.category
-    );
-    if (categoryIndex === -1) {
-      acc.push({ type: "category", title: item.category });
-    }
-    acc.push({ type: "item", ...item });
-    return acc;
-  }, []);
+  const categories = Object.keys(menuData);
 
   return (
     <View style={styles.menuContainer}>
-      {/* <FlatList
+      <FlatList
         data={categories}
         keyExtractor={(item, index) => `horizontal-${index}`}
         horizontal
@@ -51,34 +44,33 @@ export const RenderMenu: React.FC<RenderMenuProps> = ({
         )}
         contentContainerStyle={styles.horizontalList}
         showsHorizontalScrollIndicator={false}
-      /> */}
+      />
       <FlatList
-        data={menuData}
-        scrollEnabled={false}
-        keyExtractor={(item, index) =>
-          item.type === "category"
-            ? `category-${item.title}-${index}`
-            : `item-${item.name}-${index}`
-        }
-        renderItem={({ item }) =>
-          item.type === "category" ? (
-            <Text style={styles.categoryHeader}>{item.title}</Text>
-          ) : (
-            <View style={styles.menuItem}>
-              <View style={styles.menuItemTextContainer}>
-                <Text style={styles.menuItemName}>{item.name}</Text>
-                <Text style={styles.menuItemDescription}>
-                  {item.description}
+        data={categories}
+        keyExtractor={(item) => `category-${item}`}
+        renderItem={({ item }) => (
+          <View>
+            <Text style={styles.categoryHeader}>{item}</Text>
+            {menuData[item].map((menuItem) => (
+              <View key={menuItem.name} style={styles.menuItem}>
+                <View style={styles.menuItemTextContainer}>
+                  <Text style={styles.menuItemName}>{menuItem.name}</Text>
+                  <Text style={styles.menuItemDescription}>
+                    {menuItem.description}
+                  </Text>
+                </View>
+                <Text style={styles.menuItemPrice}>
+                  ${menuItem.price.toFixed(2)}
                 </Text>
               </View>
-              <Text style={styles.menuItemPrice}>${item.price.toFixed(2)}</Text>
-            </View>
-          )
-        }
+            ))}
+          </View>
+        )}
       />
     </View>
   );
 };
+
 const styles = StyleSheet.create({
   horizontalList: {
     flexDirection: "row",
