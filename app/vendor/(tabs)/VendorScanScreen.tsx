@@ -14,6 +14,7 @@ import { doc, getDoc, setDoc, updateDoc, increment } from "firebase/firestore";
 import { useDispatch } from "react-redux";
 import { selectUser } from "@/redux/authSlice"; // Update the path as needed
 import { useSelector } from "react-redux";
+import { logTransaction } from "@/services/firestore";
 const { width } = Dimensions.get("window");
 
 const cornerRadius = 25;
@@ -77,37 +78,13 @@ export default function VendorScanScreen() {
         return;
       }
 
-      // Log transaction in the user's collection
-      const timestamp = new Date().toISOString();
-      const transactionID = `${vendorUid}_${timestamp}`;
-      const transactionData = {
-        vendorType: vendorType || "Unknown Vendor Type", // Default fallback
-        latitude: latitude || "Unknown Latitude", // Replace with vendor's location dynamically
-        longitude: longitude || "Unknown Longitude", // Replace with vendor's location dynamically
-        date: timestamp,
-      };
-
-      await setDoc(
-        doc(db, "users", data, "transactions", transactionID),
-        transactionData
-      );
-
-      // Log transaction in the vendor's collection
-      const vendorTransactionID = `${data}_${timestamp}`;
-      const vendorTransactionData = {
-        latitude: latitude || "Unknown Latitude", // Replace with vendor's location dynamically
-        longitude: longitude || "Unknown Longitude", // Replace with vendor's location dynamically
-        date: timestamp,
-      };
-
-      await setDoc(
-        doc(db, "vendors", vendorUid, "transactions", vendorTransactionID),
-        vendorTransactionData
-      );
-
-      // Update the user's rewardPoints
-      await updateDoc(userDocRef, {
-        rewardPoints: increment(10), // Increment rewardPoints by 10
+      // Log the transaction using the extracted function
+      await logTransaction({
+        userId: data,
+        vendorUid,
+        vendorType,
+        latitude,
+        longitude,
       });
 
       console.log(`Added 10 points to user: ${data}`);

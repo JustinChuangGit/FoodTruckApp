@@ -1,4 +1,4 @@
-import { getFirestore, doc, setDoc, getDoc, updateDoc, collection, getDocs, deleteField, arrayRemove,arrayUnion, } from "firebase/firestore";
+import { getFirestore, doc, setDoc, getDoc, updateDoc, collection, getDocs, deleteField, arrayRemove,arrayUnion, increment } from "firebase/firestore";
 import { app } from "../firebaseConfig"; // Import the initialized Firebase app
 import { Alert } from "react-native"; // For React Native prompts (adjust for web if needed)
 import { MenuItem } from "@/constants/types"; // Import the MenuItem type
@@ -324,3 +324,60 @@ export const removeCouponFromAccount = async (
     throw error;
   }
 };
+
+export const logTransaction = async ({
+  userId,
+  vendorUid,
+  vendorType,
+  latitude,
+  longitude,
+}: {
+  userId: string;
+  vendorUid: string;
+  vendorType?: string;
+  latitude?: number;
+  longitude?: number;
+}): Promise<void> => {
+  try {
+    const timestamp = new Date().toISOString();
+
+    // Log transaction in the user's collection
+    const transactionID = `${vendorUid}_${timestamp}`;
+    const transactionData = {
+      vendorType,
+      latitude,
+      longitude,
+      date: timestamp,
+    };
+
+    await setDoc(
+      doc(db, "users", userId, "transactions", transactionID),
+      transactionData
+    );
+
+    // Log transaction in the vendor's collection
+    const vendorTransactionID = `${userId}_${timestamp}`;
+    const vendorTransactionData = {
+      latitude,
+      longitude,
+      date: timestamp,
+    };
+
+    await setDoc(
+      doc(db, "vendors", vendorUid, "transactions", vendorTransactionID),
+      vendorTransactionData
+    );
+
+    // Update the user's rewardPoints
+    const userDocRef = doc(db, "users", userId);
+    await updateDoc(userDocRef, {
+      rewardPoints: increment(10), // Increment rewardPoints by 10
+    });
+
+    console.log(`Transaction logged for user: ${userId}`);
+  } catch (error) {
+    console.error("Error logging transaction:", error);
+    throw error;
+  }
+};
+
