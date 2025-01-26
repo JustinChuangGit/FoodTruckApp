@@ -1,22 +1,13 @@
-import React, { useState, useEffect, useRef } from "react";
+import React from "react";
 import {
   View,
   Text,
-  Image,
   FlatList,
   StyleSheet,
   TouchableOpacity,
-  ActivityIndicator,
   Dimensions,
 } from "react-native";
-import { useRouter, useLocalSearchParams } from "expo-router";
-import { Coupon, MenuItem } from "@/constants/types";
-import { FontAwesome } from "@expo/vector-icons";
-import HorizontalLine from "@/components/default/HorizontalLine";
-import { munchColors } from "@/constants/Colors";
-import CouponCard from "@/components/CouponCard";
-
-const screenWidth = Dimensions.get("window").width;
+import { MenuItem } from "@/constants/types";
 
 type RenderMenuProps = {
   menu: MenuItem[];
@@ -45,8 +36,8 @@ export const RenderMenu: React.FC<RenderMenuProps> = ({
   }, []);
 
   return (
-    <>
-      <FlatList
+    <View style={styles.menuContainer}>
+      {/* <FlatList
         data={categories}
         keyExtractor={(item, index) => `horizontal-${index}`}
         horizontal
@@ -60,9 +51,10 @@ export const RenderMenu: React.FC<RenderMenuProps> = ({
         )}
         contentContainerStyle={styles.horizontalList}
         showsHorizontalScrollIndicator={false}
-      />
+      /> */}
       <FlatList
         data={menuData}
+        scrollEnabled={false}
         keyExtractor={(item, index) =>
           item.type === "category"
             ? `category-${item.title}-${index}`
@@ -84,12 +76,13 @@ export const RenderMenu: React.FC<RenderMenuProps> = ({
           )
         }
       />
-    </>
+    </View>
   );
 };
 const styles = StyleSheet.create({
   horizontalList: {
     flexDirection: "row",
+    height: 40,
   },
   horizontalItem: {
     marginRight: 16,
@@ -126,5 +119,8 @@ const styles = StyleSheet.create({
   menuItemPrice: {
     fontSize: 14,
     color: "#007bff",
+  },
+  menuContainer: {
+    backgroundColor: "white",
   },
 });

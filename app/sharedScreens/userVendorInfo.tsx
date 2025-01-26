@@ -3,22 +3,19 @@ import {
   View,
   Text,
   Image,
-  FlatList,
   StyleSheet,
   TouchableOpacity,
   ActivityIndicator,
-  Dimensions,
+  ScrollView,
+  FlatList,
 } from "react-native";
 import { useRouter, useLocalSearchParams } from "expo-router";
-import { Coupon, MenuItem } from "@/constants/types";
 import { FontAwesome } from "@expo/vector-icons";
 import HorizontalLine from "@/components/default/HorizontalLine";
 import { munchColors } from "@/constants/Colors";
-import CouponCard from "@/components/CouponCard";
 import { RenderMenu } from "@/components/renderMenu";
 import { RenderCoupons } from "@/components/renderCoupons";
-
-const screenWidth = Dimensions.get("window").width;
+import { Coupon, MenuItem } from "@/constants/types";
 
 export default function UserVendorInfo() {
   const router = useRouter();
@@ -48,12 +45,11 @@ export default function UserVendorInfo() {
     coupons,
   } = params;
 
-  const [activeTab, setActiveTab] = useState("items");
+  const [activeTab, setActiveTab] = useState<"items" | "coupons">("items");
   const [imageLoading, setImageLoading] = useState(true);
-  const verticalFlatListRef = useRef<FlatList>(null);
-
   const parsedMenu: MenuItem[] = JSON.parse(menu);
   const parsedCoupons: Coupon[] = JSON.parse(coupons || "[]");
+  const verticalFlatListRef = useRef<FlatList<MenuItem>>(null);
 
   useEffect(() => {
     setImageLoading(true);
@@ -67,7 +63,7 @@ export default function UserVendorInfo() {
   };
 
   return (
-    <View style={{ flex: 1 }}>
+    <ScrollView style={styles.container}>
       <View style={styles.logoContainer}>
         <TouchableOpacity
           onPress={() => router.back()}
@@ -152,11 +148,15 @@ export default function UserVendorInfo() {
       ) : (
         <RenderCoupons coupons={parsedCoupons} vendorImage={image} />
       )}
-    </View>
+    </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: "white",
+  },
   logoContainer: {
     alignItems: "center",
     height: 300,
@@ -176,6 +176,7 @@ const styles = StyleSheet.create({
   informationContainer: {
     paddingTop: 16,
     paddingHorizontal: 16,
+    backgroundColor: "white",
   },
   name: {
     fontSize: 30,
@@ -213,7 +214,7 @@ const styles = StyleSheet.create({
     borderColor: "transparent",
   },
   activeTab: {
-    borderColor: "#007bff",
+    borderColor: munchColors.primary,
   },
   tabText: {
     fontSize: 20,
