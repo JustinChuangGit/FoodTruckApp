@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
@@ -6,13 +6,12 @@ import {
   StyleSheet,
   TouchableOpacity,
   ActivityIndicator,
-  ScrollView,
   FlatList,
 } from "react-native";
 import { useRouter, useLocalSearchParams } from "expo-router";
 import { FontAwesome } from "@expo/vector-icons";
-import HorizontalLine from "@/components/default/HorizontalLine";
 import { munchColors } from "@/constants/Colors";
+import HorizontalLine from "@/components/default/HorizontalLine";
 import { RenderMenu } from "@/components/renderMenu";
 import { RenderCoupons } from "@/components/renderCoupons";
 import { Coupon, MenuItem } from "@/constants/types";
@@ -20,8 +19,6 @@ import { Coupon, MenuItem } from "@/constants/types";
 export default function UserVendorInfo() {
   const router = useRouter();
   const params = useLocalSearchParams<{
-    uid: string;
-    location: string;
     menu: string;
     name: string;
     vendorType: string;
@@ -42,121 +39,145 @@ export default function UserVendorInfo() {
     image,
     rating,
     truckImage,
-    coupons,
+    coupons = "[]",
   } = params;
 
-  const [activeTab, setActiveTab] = useState<"items" | "coupons">("items");
+  const [activeTab, setActiveTab] = useState("items");
   const [imageLoading, setImageLoading] = useState(true);
+
   const parsedMenu: MenuItem[] = JSON.parse(menu);
-  const parsedCoupons: Coupon[] = JSON.parse(coupons || "[]");
-  const verticalFlatListRef = useRef<FlatList<MenuItem>>(null);
+  const parsedCoupons: Coupon[] = JSON.parse(coupons).filter(
+    (item: Coupon): item is Coupon =>
+      typeof item === "object" &&
+      item !== null &&
+      "id" in item &&
+      "headline" in item &&
+      "description" in item &&
+      "uses" in item &&
+      "validUntil" in item &&
+      "value" in item
+  );
 
   useEffect(() => {
     setImageLoading(true);
   }, [image]);
 
-  const scrollToCategory = (category: string) => {
-    const index = parsedMenu.findIndex((item) => item.category === category);
-    if (index !== -1 && verticalFlatListRef.current) {
-      verticalFlatListRef.current.scrollToIndex({ index, animated: true });
-    }
-  };
-
   return (
-    <ScrollView style={styles.container}>
-      <View style={styles.logoContainer}>
-        <TouchableOpacity
-          onPress={() => router.back()}
-          style={styles.closeButton}
-        >
-          <FontAwesome name="circle" size={40} color="rgba(0, 0, 0, 0.5)" />
-          <FontAwesome
-            name="chevron-left"
-            size={24}
-            color="white"
-            style={styles.icon}
-          />
-        </TouchableOpacity>
-        {image ? (
-          <>
-            {imageLoading && (
-              <ActivityIndicator
-                size="large"
-                color="#007bff"
-                style={styles.loadingIndicator}
-              />
+    <FlatList
+      data={[1]}
+      renderItem={({ item }) => (
+        <View>
+          <View style={{ flex: 1 }}>
+            <View style={styles.logoContainer}>
+              <TouchableOpacity
+                onPress={() => router.back()}
+                style={styles.closeButton}
+              >
+                <FontAwesome
+                  name="circle"
+                  size={40}
+                  color="rgba(0, 0, 0, 0.5)"
+                />
+                <FontAwesome
+                  name="chevron-left"
+                  size={24}
+                  color="white"
+                  style={styles.icon}
+                />
+              </TouchableOpacity>
+              {image ? (
+                <>
+                  {imageLoading && (
+                    <ActivityIndicator
+                      size="large"
+                      color="#007bff"
+                      style={styles.loadingIndicator}
+                    />
+                  )}
+                  <Image
+                    source={{ uri: image }}
+                    style={styles.logo}
+                    onLoad={() => setImageLoading(false)}
+                    onLoadStart={() => setImageLoading(true)}
+                  />
+                </>
+              ) : (
+                <Text style={styles.imageFallbackText}>
+                  Image not available
+                </Text>
+              )}
+            </View>
+            <View style={styles.informationContainer}>
+              <Text style={styles.name}>{name}</Text>
+              <View style={styles.circleContainer}>
+                <Image source={{ uri: truckImage }} style={styles.circleLogo} />
+              </View>
+              <View style={styles.informationSubHeaderContainer}>
+                <Text style={styles.vendorPrice}>{vendorType} </Text>
+                <FontAwesome name="circle" size={8} color="#888" />
+                <Text style={styles.vendorPrice}> {price} </Text>
+                <FontAwesome name="circle" size={8} color="#888" />
+                <Text style={styles.vendorRating}> {rating}</Text>
+                <FontAwesome name="star" size={12} color="#888" />
+              </View>
+              <Text style={styles.description}>{description}</Text>
+              <View style={styles.tabContainer}>
+                <TouchableOpacity
+                  style={[
+                    styles.tab,
+                    activeTab === "items" && styles.activeTab,
+                  ]}
+                  onPress={() => setActiveTab("items")}
+                >
+                  <Text
+                    style={[
+                      styles.tabText,
+                      {
+                        color:
+                          activeTab === "items" ? munchColors.primary : "#555",
+                      },
+                    ]}
+                  >
+                    Items
+                  </Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={[
+                    styles.tab,
+                    activeTab === "coupons" && styles.activeTab,
+                  ]}
+                  onPress={() => setActiveTab("coupons")}
+                >
+                  <Text
+                    style={[
+                      styles.tabText,
+                      {
+                        color:
+                          activeTab === "coupons"
+                            ? munchColors.primary
+                            : "#555",
+                      },
+                    ]}
+                  >
+                    Coupons
+                  </Text>
+                </TouchableOpacity>
+              </View>
+              <HorizontalLine />
+            </View>
+            {activeTab === "items" ? (
+              <RenderMenu menu={parsedMenu} scrollToCategory={() => {}} />
+            ) : (
+              <RenderCoupons coupons={parsedCoupons} vendorImage={image} />
             )}
-            <Image
-              source={{ uri: image }}
-              style={styles.logo}
-              onLoad={() => setImageLoading(false)}
-              onLoadStart={() => setImageLoading(true)}
-            />
-          </>
-        ) : (
-          <Text style={styles.imageFallbackText}>Image not available</Text>
-        )}
-      </View>
-      <View style={styles.informationContainer}>
-        <Text style={styles.name}>{name}</Text>
-        <View style={styles.circleContainer}>
-          <Image source={{ uri: truckImage }} style={styles.circleLogo} />
+          </View>
         </View>
-        <View style={styles.informationSubHeaderContainer}>
-          <Text style={styles.vendorPrice}>{vendorType} </Text>
-          <FontAwesome name="circle" size={8} color="#888" />
-          <Text style={styles.vendorPrice}> {price} </Text>
-          <FontAwesome name="circle" size={8} color="#888" />
-          <Text style={styles.vendorRating}> {rating}</Text>
-          <FontAwesome name="star" size={12} color="#888" />
-        </View>
-        <Text style={styles.description}>{description}</Text>
-        <View style={styles.tabContainer}>
-          <TouchableOpacity
-            style={[styles.tab, activeTab === "items" && styles.activeTab]}
-            onPress={() => setActiveTab("items")}
-          >
-            <Text
-              style={[
-                styles.tabText,
-                { color: activeTab === "items" ? munchColors.primary : "#555" },
-              ]}
-            >
-              Items
-            </Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={[styles.tab, activeTab === "coupons" && styles.activeTab]}
-            onPress={() => setActiveTab("coupons")}
-          >
-            <Text
-              style={[
-                styles.tabText,
-                {
-                  color: activeTab === "coupons" ? munchColors.primary : "#555",
-                },
-              ]}
-            >
-              Coupons
-            </Text>
-          </TouchableOpacity>
-        </View>
-        <HorizontalLine />
-      </View>
-      {activeTab === "items" ? (
-        <RenderMenu menu={parsedMenu} scrollToCategory={scrollToCategory} />
-      ) : (
-        <RenderCoupons coupons={parsedCoupons} vendorImage={image} />
       )}
-    </ScrollView>
+    />
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "white",
-  },
   logoContainer: {
     alignItems: "center",
     height: 300,
