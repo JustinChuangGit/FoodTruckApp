@@ -68,6 +68,21 @@ const authSlice = createSlice({
         console.log("Redux State after deleteCoupon:", JSON.stringify(state, null, 2));
       }
     },
+    redeemCoupon: (state, action: PayloadAction<string>) => {
+      console.log("Adding to Redux:", action.payload);
+      if (state.user) {
+        if (!state.user.userAddedCoupons) {
+          state.user.userAddedCoupons = []; // Initialize if it doesn't exist
+        }
+        if (!state.user.userAddedCoupons.includes(action.payload)) {
+          state.user.userAddedCoupons.push(action.payload); // Add the coupon UID
+          console.log(
+            "Redux State after redeemCoupon:",
+            JSON.stringify(state, null, 2)
+          );
+        }
+      }
+    }
   },
 });
 
@@ -78,6 +93,7 @@ export const {
   updateMenu,
   addCoupon,
   deleteCoupon,
+  redeemCoupon,
 } = authSlice.actions;
 
 // Export selectors

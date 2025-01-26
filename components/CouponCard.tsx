@@ -1,8 +1,11 @@
 import React from "react";
 import { View, Text, StyleSheet, Image, TouchableOpacity } from "react-native";
+import { useSelector, useDispatch } from "react-redux"; // Import Redux hooks
 import { Coupon } from "@/constants/types";
 import { munchStyles } from "@/constants/styles";
 import { munchColors } from "@/constants/Colors";
+import { redeemCoupon } from "@/redux/authSlice"; // Import the redeem action
+import { selectUser } from "@/redux/authSlice"; // Import the user selector
 
 type CouponCardProps = {
   coupon: Coupon;
@@ -10,6 +13,17 @@ type CouponCardProps = {
 };
 
 const CouponCard: React.FC<CouponCardProps> = ({ coupon, vendorImage }) => {
+  const dispatch = useDispatch();
+  const user = useSelector(selectUser);
+
+  // Check if the coupon has already been added
+  const isApplied = user?.userAddedCoupons?.includes(coupon.id) || false;
+
+  const handleRedeem = () => {
+    console.log("Redeeming coupon:", coupon.id);
+    dispatch(redeemCoupon(coupon.id));
+  };
+
   return (
     <View style={[styles.card, { height: vendorImage ? 275 : 175 }]}>
       <View>
@@ -20,12 +34,21 @@ const CouponCard: React.FC<CouponCardProps> = ({ coupon, vendorImage }) => {
         <Text style={styles.description}>{coupon.description}</Text>
       </View>
       <TouchableOpacity
-        style={styles.addCouponButton}
-        onPress={() => {
-          // Handle coupon redemption
-        }}
+        style={[
+          styles.addCouponButton,
+          isApplied && styles.disabledCouponButton, // Style the button if already redeemed
+        ]}
+        disabled={isApplied} // Disable button if already redeemed
+        onPress={handleRedeem}
       >
-        <Text style={styles.addCouponText}>Redeem</Text>
+        <Text
+          style={[
+            styles.addCouponText,
+            isApplied && styles.disabledCouponText, // Change text style if already redeemed
+          ]}
+        >
+          {isApplied ? "Already Redeemed" : "Redeem"}
+        </Text>
       </TouchableOpacity>
     </View>
   );
@@ -42,56 +65,26 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 4,
     elevation: 5,
-    // alignItems: "center", // Center content for a cleaner layout
     width: 175,
     justifyContent: "space-between",
   },
   vendorImage: {
     width: 140,
     height: 100,
-    borderRadius: munchStyles.smallRadius, // Circular image
+    borderRadius: munchStyles.smallRadius,
     marginBottom: 16,
-    resizeMode: "cover", // Cover the entire image container
-    marginHorizontal: "auto", // Center the image
+    resizeMode: "cover",
   },
   headline: {
     fontSize: 18,
     fontWeight: "bold",
     marginBottom: 4,
     color: "#333",
-    textAlign: "left", // Center text for consistency with the image
   },
   description: {
     fontSize: 14,
     color: "#555",
     marginBottom: 8,
-    textAlign: "left",
-    overflow: "hidden",
-  },
-  value: {
-    fontSize: 14,
-    fontWeight: "bold",
-    color: "#007bff",
-    marginBottom: 4,
-    textAlign: "center",
-  },
-  uses: {
-    fontSize: 14,
-    color: "#555",
-    marginBottom: 4,
-    textAlign: "center",
-  },
-  validUntil: {
-    fontSize: 14,
-    color: "#888",
-    marginBottom: 4,
-    textAlign: "center",
-  },
-  createdOn: {
-    fontSize: 12,
-    color: "#aaa",
-    marginTop: 8,
-    textAlign: "center",
   },
   addCouponButton: {
     backgroundColor: munchColors.primary,
@@ -105,6 +98,12 @@ const styles = StyleSheet.create({
     color: "#fff",
     fontSize: 16,
     fontWeight: "bold",
+  },
+  disabledCouponButton: {
+    backgroundColor: "#ccc", // Gray out the button
+  },
+  disabledCouponText: {
+    color: "#999", // Change text color
   },
 });
 
