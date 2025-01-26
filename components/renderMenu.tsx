@@ -115,5 +115,6 @@ const styles = StyleSheet.create({
   },
   menuContainer: {
     backgroundColor: "white",
+    paddingBottom: 50,
   },
 });
