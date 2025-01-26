@@ -11,6 +11,7 @@ export interface Vendor {
   menu: MenuItem[];
   vendorType: string;
   truckImage: string;
+  coupons: Coupon[];
 }
 
 export interface VendorAccountInfo {

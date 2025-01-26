@@ -37,6 +37,7 @@ import { Section } from "@/constants/types";
 //TODO: Replace with collections from Firestore
 import liveVendors from "../../../dummyVendorMapData.json";
 import { router } from "expo-router";
+import { encode } from "punycode";
 
 const { width } = Dimensions.get("window");
 
@@ -127,6 +128,7 @@ export default function Index() {
             menu: data.menu || [], // Include menu field, default to an empty array
             vendorType: data.vendorType || "Other", // Default vendor type
             truckImage: data.truckImage || "https://via.placeholder.com/150", // Default truck image
+            coupons: data.coupons || [], // Default coupons to an empty array
           };
         });
         setVendors(updatedVendors);
@@ -201,6 +203,7 @@ export default function Index() {
         description: vendor.description,
         image: encodeURIComponent(vendor.image), // Encode the image URL
         rating: vendor.rating,
+        coupons: encodeURIComponent(JSON.stringify(vendor.coupons)),
       },
     });
   };

@@ -10,7 +10,7 @@ import {
   ActivityIndicator,
 } from "react-native";
 import { useRouter, useLocalSearchParams } from "expo-router";
-import { MenuItem } from "@/constants/types";
+import { Coupon, MenuItem } from "@/constants/types";
 import { FontAwesome } from "@expo/vector-icons";
 import HorizontalLine from "@/components/default/HorizontalLine";
 import { munchColors } from "@/constants/Colors";
@@ -30,11 +30,13 @@ export default function UserVendorInfo() {
     image: string;
     rating: string;
     truckImage: string;
+    coupons: string;
   }>();
 
   const [contentWidth, setContentWidth] = useState(0);
   const [imageLoading, setImageLoading] = useState(true);
   const [truckImageLoading, setTruckImageLoading] = useState(true); // Loading state for truck image
+  const [activeTab, setActiveTab] = useState("items"); // Added: State for active tab
 
   const {
     location = "{}",
@@ -46,9 +48,11 @@ export default function UserVendorInfo() {
     image,
     rating,
     truckImage,
+    coupons,
   } = params;
 
   const parsedMenu: MenuItem[] = JSON.parse(menu);
+  const parsedCoupons: Coupon[] = JSON.parse(coupons || "[]"); // Added: Parse coupons
   const verticalFlatListRef = useRef<FlatList>(null);
 
   // Extract categories for the horizontal list
@@ -135,44 +139,96 @@ export default function UserVendorInfo() {
                 <FontAwesome name="star" size={12} color="#888" />
               </View>
               <Text style={styles.description}>{description}</Text>
-
-              {/* Horizontal FlatList for Categories */}
-              <HorizontalLine />
-              <View
-                style={{
-                  alignItems: categories.length <= 3 ? "center" : "flex-start", // Center for 3 or fewer categories
-                }}
-              >
-                <FlatList
-                  data={categories}
-                  keyExtractor={(item, index) => `horizontal-${index}`}
-                  horizontal
-                  renderItem={renderHorizontalItem}
-                  contentContainerStyle={styles.horizontalList}
-                  showsHorizontalScrollIndicator={false} // Allow scrolling for long lists
-                  scrollEnabled={categories.length > 3} // Enable scrolling only if there are more than 3 items
-                />
+              <View style={styles.tabContainer}>
+                <TouchableOpacity
+                  style={[
+                    styles.tab,
+                    activeTab === "items" && styles.activeTab,
+                  ]}
+                  onPress={() => setActiveTab("items")}
+                >
+                  <Text
+                    style={[
+                      styles.tabText,
+                      {
+                        color:
+                          activeTab === "items" ? munchColors.primary : "#555",
+                      },
+                    ]}
+                  >
+                    Items
+                  </Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={[
+                    styles.tab,
+                    activeTab === "coupons" && styles.activeTab,
+                  ]}
+                  onPress={() => setActiveTab("coupons")}
+                >
+                  <Text
+                    style={[
+                      styles.tabText,
+                      {
+                        color:
+                          activeTab === "coupons"
+                            ? munchColors.primary
+                            : "#555",
+                      },
+                    ]}
+                  >
+                    Coupons
+                  </Text>
+                </TouchableOpacity>
               </View>
-
               <HorizontalLine />
+              {activeTab === "items" && (
+                <View
+                  style={{
+                    alignItems:
+                      categories.length <= 3 ? "center" : "flex-start", // Center for 3 or fewer categories
+                  }}
+                >
+                  <FlatList
+                    data={categories}
+                    keyExtractor={(item, index) => `horizontal-${index}`}
+                    horizontal
+                    renderItem={renderHorizontalItem}
+                    contentContainerStyle={styles.horizontalList}
+                    showsHorizontalScrollIndicator={false} // Allow scrolling for long lists
+                    scrollEnabled={categories.length > 3} // Enable scrolling only if there are more than 3 items
+                  />
+                  <HorizontalLine />
+                </View>
+              )}
             </View>
           </>
         ),
       },
     ];
 
-    const menuData = parsedMenu.reduce((acc: any[], item) => {
-      const categoryIndex = acc.findIndex(
-        (data) => data.type === "category" && data.title === item.category
-      );
-      if (categoryIndex === -1) {
-        acc.push({ type: "category", title: item.category });
-      }
-      acc.push({ type: "item", ...item });
-      return acc;
-    }, []);
-
-    return [...headerData, ...menuData];
+    if (activeTab === "items") {
+      // Added: Show items if the active tab is items
+      const menuData = parsedMenu.reduce((acc: any[], item) => {
+        const categoryIndex = acc.findIndex(
+          (data) => data.type === "category" && data.title === item.category
+        );
+        if (categoryIndex === -1) {
+          acc.push({ type: "category", title: item.category });
+        }
+        acc.push({ type: "item", ...item });
+        return acc;
+      }, []);
+      return [...headerData, ...menuData];
+    } else if (activeTab === "coupons") {
+      // Added: Show coupons if the active tab is coupons
+      const couponData = parsedCoupons.map((coupon) => ({
+        type: "coupon",
+        ...coupon,
+      }));
+      return [...headerData, ...couponData];
+    }
+    return headerData;
   };
 
   // Scroll the vertical FlatList to a specific category
@@ -195,7 +251,6 @@ export default function UserVendorInfo() {
     </TouchableOpacity>
   );
 
-  // Render a single item in the vertical FlatList
   const renderItem = ({ item }: { item: any }) => {
     if (item.type === "header") {
       return item.component;
@@ -218,8 +273,18 @@ export default function UserVendorInfo() {
           </View>
         </View>
       );
-    } else if (item.type === "empty") {
-      return <Text style={styles.emptyMenuText}>{item.message}</Text>;
+    } else if (item.type === "coupon") {
+      // Added: Render coupon data
+      return (
+        <View style={styles.couponItem}>
+          <Text style={styles.couponHeadline}>{item.headline}</Text>
+          <Text style={styles.couponDescription}>{item.description}</Text>
+          <Text style={styles.couponDetails}>Value: ${item.value}</Text>
+          <Text style={styles.couponDetails}>
+            Valid Until: {item.validUntil}
+          </Text>
+        </View>
+      );
     }
     return null;
   };
@@ -262,7 +327,7 @@ const styles = StyleSheet.create({
   },
   horizontalItemText: {
     color: "black",
-    fontSize: 25,
+    fontSize: 20,
     fontWeight: "bold",
   },
   logoContainer: {
@@ -386,5 +451,48 @@ const styles = StyleSheet.create({
     width: "100%", // Adjust the logo size within the circle
     height: "100%",
     resizeMode: "contain",
+  },
+  tabContainer: {
+    // Added: Styles for tab container
+    flexDirection: "row",
+    justifyContent: "space-evenly",
+    marginVertical: 5,
+  },
+  tab: {
+    // Added: Styles for individual tab
+    padding: 10,
+    borderBottomWidth: 2,
+    borderColor: "transparent",
+  },
+  activeTab: {
+    // Added: Styles for active tab
+    borderColor: munchColors.primary,
+  },
+  tabText: {
+    // Added: Styles for tab text
+    fontSize: 20,
+    fontWeight: "bold",
+    color: "#555",
+  },
+  couponItem: {
+    // Added: Styles for coupon items
+    padding: 16,
+    backgroundColor: "#f9f9f9",
+    marginVertical: 8,
+    borderRadius: 8,
+  },
+  couponHeadline: {
+    fontSize: 18,
+    fontWeight: "bold",
+    marginBottom: 4,
+  },
+  couponDescription: {
+    fontSize: 14,
+    color: "#555",
+    marginBottom: 4,
+  },
+  couponDetails: {
+    fontSize: 14,
+    color: "#777",
   },
 });
