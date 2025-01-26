@@ -181,7 +181,7 @@ export default function UserVendorInfo() {
             {activeTab === "items" ? (
               <RenderMenu menu={parsedMenu} scrollToCategory={handleScroll} />
             ) : (
-              <RenderCoupons coupons={parsedCoupons} vendorImage={image} />
+              <RenderCoupons coupons={parsedCoupons} />
               // <RenderCoupons coupons={parsedCoupons} />
             )}
           </View>

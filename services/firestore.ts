@@ -1,4 +1,4 @@
-import { getFirestore, doc, setDoc, getDoc, updateDoc, collection, getDocs, deleteField } from "firebase/firestore";
+import { getFirestore, doc, setDoc, getDoc, updateDoc, collection, getDocs, deleteField, arrayRemove,arrayUnion, } from "firebase/firestore";
 import { app } from "../firebaseConfig"; // Import the initialized Firebase app
 import { Alert } from "react-native"; // For React Native prompts (adjust for web if needed)
 import { MenuItem } from "@/constants/types"; // Import the MenuItem type
@@ -289,5 +289,38 @@ export const fetchCoupons = async (vendorUid: string): Promise<Coupon[]> => {
   } catch (error) {
     console.error("Error fetching coupons:", error);
     return [];
+  }
+};
+
+
+export const addCouponToAccount = async (
+  userId: string,
+  couponId: string
+): Promise<void> => {
+  try {
+    const userDocRef = doc(db, "users", userId);
+    await updateDoc(userDocRef, {
+      addedCoupons: arrayUnion(couponId), // Add coupon ID to the array
+    });
+    console.log(`Coupon ${couponId} added to user ${userId}'s account.`);
+  } catch (error) {
+    console.error("Error adding coupon to account:", error);
+    throw error;
+  }
+};
+
+export const removeCouponFromAccount = async (
+  userId: string,
+  couponId: string
+): Promise<void> => {
+  try {
+    const userDocRef = doc(db, "users", userId);
+    await updateDoc(userDocRef, {
+      addedCoupons: arrayRemove(couponId), // Remove coupon ID from the array
+    });
+    console.log(`Coupon ${couponId} removed from user ${userId}'s account.`);
+  } catch (error) {
+    console.error("Error removing coupon from account:", error);
+    throw error;
   }
 };
