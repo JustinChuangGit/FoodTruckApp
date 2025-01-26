@@ -1,15 +1,17 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
   StyleSheet,
   ScrollView,
   TouchableOpacity,
+  Vibration,
 } from "react-native";
 import { useRouter, useLocalSearchParams } from "expo-router";
 import ConfettiCannon from "react-native-confetti-cannon";
 import { Coupon } from "@/constants/types";
 import CustomCheckbox from "@/components/CustomCheckbox";
+import { Audio } from "expo-av";
 
 export default function VendorScanSuccessScreen() {
   const params = useLocalSearchParams<{
@@ -23,12 +25,55 @@ export default function VendorScanSuccessScreen() {
   const [selectedCoupons, setSelectedCoupons] = useState<{
     [key: string]: boolean;
   }>({});
+  const [discount, setDiscount] = useState(0);
+  const playSound = async () => {
+    const { sound } = await Audio.Sound.createAsync(
+      require("@/assets/sounds/scanSuccess.mp3")
+    );
+    await sound.playAsync();
+  };
+
+  useEffect(() => {
+    playSound();
+    Vibration.vibrate(250); // Vibrates for 500ms
+  }, []);
 
   const toggleCouponSelection = (couponId: string) => {
     setSelectedCoupons((prev) => ({
       ...prev,
       [couponId]: !prev[couponId],
     }));
+  };
+
+  const addCouponToCheckout = (couponId: string) => {
+    // Toggle the selection and calculate the discount in a single operation
+    setSelectedCoupons((prev) => {
+      const updatedSelections = {
+        ...prev,
+        [couponId]: !prev[couponId],
+      };
+
+      // Get the IDs of selected coupons
+      const selectedCouponIds = Object.keys(updatedSelections).filter(
+        (id) => updatedSelections[id]
+      );
+
+      // Filter the parsed coupons based on selected IDs
+      const selectedCoupons = parsedCoupons.filter((coupon: Coupon) =>
+        selectedCouponIds.includes(coupon.id)
+      );
+
+      // Calculate the total discount
+      const totalDiscount = selectedCoupons.reduce(
+        (acc: number, coupon: Coupon) => acc + parseFloat(coupon.value || "0"),
+        0
+      );
+
+      // Update the discount state
+      setDiscount(totalDiscount);
+
+      return updatedSelections; // Return the updated state
+    });
   };
 
   return (
@@ -41,8 +86,12 @@ export default function VendorScanSuccessScreen() {
       />
       <View style={styles.successTextContainer}>
         <Text style={styles.successText}>Scan Successful!</Text>
-        <Text style={styles.couponsTitle}>Select Matching Coupons:</Text>
       </View>
+      <View style={styles.discountContainer}>
+        <Text style={styles.discountHeaderText}>Apply Discount: </Text>
+        <Text style={styles.discountText}>${discount}</Text>
+      </View>
+      <Text style={styles.couponsTitle}>Select Matching Coupons:</Text>
 
       <ScrollView>
         {parsedCoupons.length > 0 ? (
@@ -50,7 +99,7 @@ export default function VendorScanSuccessScreen() {
             <View key={coupon.id} style={styles.couponContainer}>
               <CustomCheckbox
                 value={selectedCoupons[coupon.id] || false}
-                onValueChange={() => toggleCouponSelection(coupon.id)}
+                onValueChange={() => addCouponToCheckout(coupon.id)}
               />
 
               <View style={styles.couponTextContainer}>
@@ -176,6 +225,20 @@ const styles = StyleSheet.create({
   },
 
   successTextContainer: {
-    marginTop: 275,
+    marginTop: 70,
+  },
+  discountContainer: {
+    alignItems: "center",
+  },
+  discountHeaderText: {
+    fontSize: 20,
+    color: "white",
+    marginRight: 10,
+  },
+  discountText: {
+    fontSize: 125,
+    color: "white",
+    fontWeight: "bold",
+    paddingBottom: 20,
   },
 });
