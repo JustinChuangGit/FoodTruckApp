@@ -149,6 +149,20 @@ export default function Index() {
   }, [user?.uid, user?.coupons]);
 
   useEffect(() => {
+    if (
+      selectedVendor &&
+      !vendors.some((vendor) => vendor.uid === selectedVendor.uid)
+    ) {
+      setSelectedVendor(null);
+      setCarouselIndex(0); // Reset carouselIndex to a valid value
+      Alert.alert(
+        "Vendor Unavailable",
+        "The selected vendor is no longer active."
+      );
+    }
+  }, [vendors, selectedVendor]);
+
+  useEffect(() => {
     if (selectedVendor && mapRef.current) {
       mapRef.current.animateToRegion(
         {
