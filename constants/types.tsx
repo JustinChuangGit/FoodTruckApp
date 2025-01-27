@@ -12,6 +12,7 @@ export interface Vendor {
   vendorType: string;
   truckImage: string;
   coupons: Coupon[];
+  moneySavedFromCoupons?: number;
 }
 
 export interface VendorAccountInfo {
@@ -52,6 +53,7 @@ export interface User {
   rewardPoints?: number; // Add reward points
   coupons?: Coupon[]; // Add coupons
   addedCoupons?: string[]; // Add user-added coupons
+  moneySavedFromCoupons?: number; // Add money saved from coupons
 }
 
 export interface Section {

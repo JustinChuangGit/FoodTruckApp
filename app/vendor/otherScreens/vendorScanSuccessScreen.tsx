@@ -12,7 +12,11 @@ import ConfettiCannon from "react-native-confetti-cannon";
 import { Coupon } from "@/constants/types";
 import CustomCheckbox from "@/components/CustomCheckbox";
 import { Audio } from "expo-av";
-import { decrementCouponUses } from "@/services/firestore";
+import {
+  decrementCouponUses,
+  removeCouponsFromAccount,
+  updateMoneySaved,
+} from "@/services/firestore";
 import { decrementCouponUsesState, selectUser } from "@/redux/authSlice"; // Update the path as needed
 import { useSelector, useDispatch } from "react-redux";
 
@@ -102,6 +106,9 @@ export default function VendorScanSuccessScreen() {
         user?.longitude ?? 0,
         userId
       );
+
+      await removeCouponsFromAccount(userId, selectedCouponsArray);
+      await updateMoneySaved(userId, selectedCouponsArray);
 
       // Redirect after applying coupons
       router.replace("/vendor/(tabs)/VendorScanScreen");

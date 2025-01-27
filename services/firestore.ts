@@ -309,21 +309,34 @@ export const addCouponToAccount = async (
   }
 };
 
-export const removeCouponFromAccount = async (
+export const removeCouponsFromAccount = async (
   userId: string,
-  couponId: string
+  coupons: Coupon[]
 ): Promise<void> => {
   try {
+    if (!userId || coupons.length === 0) {
+      console.warn("No userId or coupons provided.");
+      return;
+    }
+
     const userDocRef = doc(db, "users", userId);
+
+    // Use a batch operation to remove all coupon IDs from the user's account
+    const couponIds = coupons.map((coupon) => coupon.id); // Extract IDs from the Coupon array
+
     await updateDoc(userDocRef, {
-      addedCoupons: arrayRemove(couponId), // Remove coupon ID from the array
+      addedCoupons: arrayRemove(...couponIds), // Use spread to remove multiple IDs
     });
-    console.log(`Coupon ${couponId} removed from user ${userId}'s account.`);
+
+    console.log(
+      `Coupons ${couponIds.join(", ")} removed from user ${userId}'s account.`
+    );
   } catch (error) {
-    console.error("Error removing coupon from account:", error);
+    console.error("Error removing coupons from account:", error);
     throw error;
   }
 };
+
 
 export const logTransaction = async ({
   userId,
@@ -519,3 +532,31 @@ export const decrementCouponUses = async (
 
 
 
+export const updateMoneySaved = async (
+  userId: string,
+  coupons: Coupon[]
+): Promise<void> => {
+  try {
+    if (!userId || coupons.length === 0) {
+      console.warn("No userId or coupons provided.");
+      return;
+    }
+
+    // Calculate the total value of the redeemed coupons
+    const totalSavings = coupons.reduce((sum, coupon) => {
+      return sum + (coupon.value ?? 0); // Add coupon value, defaulting to 0 if null
+    }, 0);
+
+    const userDocRef = doc(db, "users", userId);
+
+    // Increment the moneySaved field by the totalSavings value
+    await updateDoc(userDocRef, {
+      moneySaved: increment(totalSavings),
+    });
+
+    console.log(`Updated moneySaved for user ${userId} by $${totalSavings}.`);
+  } catch (error) {
+    console.error("Error updating moneySaved field:", error);
+    throw error;
+  }
+};
