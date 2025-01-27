@@ -23,7 +23,15 @@ export default function VendorSignupTriageScreen() {
             router.push("/vendor/otherScreens/vendorEditAccountScreen")
           }
         >
-          <Text style={styles.rowText}>Add Account Details</Text>
+          <View style={styles.rowCompletedBox} />
+
+          <View style={styles.rowTextContainer}>
+            <Text style={styles.rowText}>Add Account Details</Text>
+            <Text style={styles.rowSubText}>
+              Tell your customers more about you! Add your logo, description,
+              and more
+            </Text>
+          </View>
         </TouchableOpacity>
         <TouchableOpacity
           style={styles.row}
@@ -31,14 +39,27 @@ export default function VendorSignupTriageScreen() {
             router.push("/vendor/otherScreens/vendorEditMenuScreen")
           }
         >
-          <Text style={styles.rowText}>Add Menu Items</Text>
+          <View style={styles.rowCompletedBox} />
+
+          <View style={styles.rowTextContainer}>
+            <Text style={styles.rowText}>Add Menu Items</Text>
+            <Text style={styles.rowSubText}>
+              Give your customers a taste of what you have to offer!
+            </Text>
+          </View>
         </TouchableOpacity>
 
         <TouchableOpacity
           style={styles.row}
           onPress={() => router.push("/sharedScreens/termsAndServiceScreen")}
         >
-          <Text style={styles.rowText}>Terms and Conditions</Text>
+          <View style={styles.rowCompletedBox} />
+          <View style={styles.rowTextContainer}>
+            <Text style={styles.rowText}>Terms and Conditions</Text>
+            <Text style={styles.rowSubText}>
+              Read our terms and conditions before you start selling
+            </Text>
+          </View>
         </TouchableOpacity>
 
         {/* Sign Up Button */}
@@ -69,7 +90,7 @@ const styles = StyleSheet.create({
   row: {
     backgroundColor: "#ffffff",
     padding: 16,
-    borderRadius: 8,
+    borderRadius: munchStyles.smallRadius,
     marginBottom: 16,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
@@ -77,6 +98,9 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
     elevation: 2,
     height: 100,
+    flexDirection: "row",
+    justifyContent: "center",
+    alignItems: "center",
   },
   rowText: {
     fontSize: 18,
@@ -87,7 +111,7 @@ const styles = StyleSheet.create({
     marginTop: 32,
     alignItems: "center",
     backgroundColor: "white",
-    height: 48,
+    height: 50,
     borderRadius: munchStyles.smallRadius,
     elevation: 5,
     shadowColor: "#000",
@@ -108,4 +132,20 @@ const styles = StyleSheet.create({
     height: 200,
   },
   triageContainer: {},
+  rowSubText: {
+    color: "#666",
+    fontSize: 12,
+  },
+  rowCompletedBox: {
+    width: 40,
+    height: 40,
+    borderRadius: 10,
+    backgroundColor: munchColors.primary,
+    marginRight: 16,
+    borderColor: "black",
+    borderWidth: 2,
+  },
+  rowTextContainer: {
+    flex: 1,
+  },
 });
