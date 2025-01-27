@@ -27,6 +27,14 @@ export default function VendorSignupTriageScreen() {
         setCompletedAccountInfo(true);
         console.log("Completed Account Info");
       }
+      if (user?.menu && user.menu.length > 0) {
+        setCompletedMenu(true);
+        console.log("Completed Menu");
+      }
+      if (user?.acceptedTerms) {
+        setCompletedTerms(true);
+        console.log("Completed Terms");
+      }
     }, [user])
   );
 

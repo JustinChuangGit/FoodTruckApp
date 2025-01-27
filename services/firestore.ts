@@ -52,13 +52,39 @@ export const getUserData = async (uid: string): Promise<any> => {
 // Function to update user data
 export const updateUserData = async (
   uid: string,
-  updates: Partial<{ email: string; name: string; isVendor: boolean; acceptedTerms: string }>
+  updates: Partial<{
+    email: string;
+    name: string;
+    acceptedTerms: string;
+  }>
 ): Promise<void> => {
   try {
-    await updateDoc(doc(db, "users", uid), updates);
-    console.log("User data updated successfully");
+    // Check the 'users' collection first
+    const userDocRef = doc(db, "users", uid);
+    const userDocSnapshot = await getDoc(userDocRef);
+
+    if (userDocSnapshot.exists()) {
+      // Document exists in the 'users' collection
+      await updateDoc(userDocRef, updates);
+      console.log("User data updated successfully");
+      return;
+    }
+
+    // If not in 'users', check the 'vendors' collection
+    const vendorDocRef = doc(db, "vendors", uid);
+    const vendorDocSnapshot = await getDoc(vendorDocRef);
+
+    if (vendorDocSnapshot.exists()) {
+      // Document exists in the 'vendors' collection
+      await updateDoc(vendorDocRef, updates);
+      console.log("Vendor data updated successfully");
+      return;
+    }
+
+    // If neither exists, throw an error
+    throw new Error(`Document with uid ${uid} not found in 'users' or 'vendors' collections.`);
   } catch (error) {
-    console.error("Error updating user data:", error);
+    console.error("Error updating data:", error);
     throw error;
   }
 };
