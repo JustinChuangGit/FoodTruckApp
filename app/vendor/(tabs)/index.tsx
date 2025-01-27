@@ -132,6 +132,8 @@ export default function Index() {
         });
 
         setVendors(updatedVendors);
+        const isActive = snapshot.docs.some((doc) => doc.id === user?.uid);
+        setVendorActive(isActive); // Update the toggle state
       },
       (error) => {
         console.error("Error fetching active vendors:", error);
@@ -220,12 +222,6 @@ export default function Index() {
     }
 
     try {
-      Animated.timing(buttonColorAnim, {
-        toValue: isVendorActive ? 0 : 1,
-        duration: 500,
-        useNativeDriver: false,
-      }).start();
-
       if (!isVendorActive) {
         if (!user || !user.isVendor) {
           console.error("User is not a vendor or not logged in.");
@@ -272,8 +268,15 @@ export default function Index() {
 
   const buttonBackgroundColor = buttonColorAnim.interpolate({
     inputRange: [0, 1],
-    outputRange: ["#90EE90", "#FF7F7F"], // Blue to light green
+    outputRange: ["#90EE90", "#FF7F7F"], // Green for inactive, red for active
   });
+  useEffect(() => {
+    Animated.timing(buttonColorAnim, {
+      toValue: isVendorActive ? 1 : 0, // 1 for active, 0 for inactive
+      duration: 500, // Animation duration
+      useNativeDriver: false, // Required for color interpolation
+    }).start();
+  }, [isVendorActive]);
 
   return (
     <SafeAreaView style={styles.container}>
