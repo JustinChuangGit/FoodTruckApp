@@ -43,9 +43,9 @@ const CouponManager: React.FC = () => {
     id: "", // Placeholder for the ID
     headline: "",
     description: "",
-    uses: 0,
+    uses: null, // Allow null initially
     validUntil: "",
-    value: 0,
+    value: null, // Allow null initially
   });
 
   const [coupons, setCoupons] = useState<Coupon[]>([]);
