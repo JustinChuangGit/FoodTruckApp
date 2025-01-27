@@ -1,11 +1,34 @@
-import React from "react";
+import React, { useState } from "react";
 import { View, Text, TouchableOpacity, StyleSheet, Image } from "react-native";
-import { useRouter } from "expo-router";
+import { useFocusEffect, useRouter } from "expo-router";
 import { munchColors } from "@/constants/Colors";
 import { munchStyles } from "@/constants/styles";
-
+import { useSelector, useDispatch } from "react-redux";
+import { selectUser } from "@/redux/authSlice";
+import { FontAwesome } from "@expo/vector-icons";
 export default function VendorSignupTriageScreen() {
   const router = useRouter();
+  const user = useSelector(selectUser);
+  const [completedAccountInfo, setCompletedAccountInfo] = useState(false);
+  const [completedMenu, setCompletedMenu] = useState(false);
+  const [completedTerms, setCompletedTerms] = useState(false);
+
+  useFocusEffect(
+    React.useCallback(() => {
+      console.log("User:", user);
+      if (
+        user?.image &&
+        user?.description &&
+        user?.vendorType &&
+        user?.price &&
+        user?.name &&
+        user?.truckImage
+      ) {
+        setCompletedAccountInfo(true);
+        console.log("Completed Account Info");
+      }
+    }, [user])
+  );
 
   return (
     <View style={styles.container}>
@@ -17,13 +40,23 @@ export default function VendorSignupTriageScreen() {
         />
       </View>
       <View style={styles.triageContainer}>
+        <Text style={styles.header}>Easy as 1-2-3!</Text>
         <TouchableOpacity
           style={styles.row}
           onPress={() =>
             router.push("/vendor/otherScreens/vendorEditAccountScreen")
           }
         >
-          <View style={styles.rowCompletedBox} />
+          <View
+            style={[
+              styles.rowCompletedBox,
+              { backgroundColor: completedAccountInfo ? "#4CAF50" : "white" },
+            ]}
+          >
+            {completedAccountInfo && (
+              <FontAwesome name="check" size={24} color="white" />
+            )}
+          </View>
 
           <View style={styles.rowTextContainer}>
             <Text style={styles.rowText}>Add Account Details</Text>
@@ -39,8 +72,16 @@ export default function VendorSignupTriageScreen() {
             router.push("/vendor/otherScreens/vendorEditMenuScreen")
           }
         >
-          <View style={styles.rowCompletedBox} />
-
+          <View
+            style={[
+              styles.rowCompletedBox,
+              { backgroundColor: completedMenu ? "#4CAF50" : "white" },
+            ]}
+          >
+            {completedMenu && (
+              <FontAwesome name="check" size={24} color="white" />
+            )}
+          </View>
           <View style={styles.rowTextContainer}>
             <Text style={styles.rowText}>Add Menu Items</Text>
             <Text style={styles.rowSubText}>
@@ -53,7 +94,16 @@ export default function VendorSignupTriageScreen() {
           style={styles.row}
           onPress={() => router.push("/sharedScreens/termsAndServiceScreen")}
         >
-          <View style={styles.rowCompletedBox} />
+          <View
+            style={[
+              styles.rowCompletedBox,
+              { backgroundColor: completedTerms ? "#4CAF50" : "white" },
+            ]}
+          >
+            {completedTerms && (
+              <FontAwesome name="check" size={24} color="white" />
+            )}
+          </View>{" "}
           <View style={styles.rowTextContainer}>
             <Text style={styles.rowText}>Terms and Conditions</Text>
             <Text style={styles.rowSubText}>
@@ -82,10 +132,11 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   header: {
-    fontSize: 24,
+    fontSize: 30,
     fontWeight: "bold",
     textAlign: "center",
-    marginBottom: 32,
+    marginBottom: 20,
+    color: "white",
   },
   row: {
     backgroundColor: "#ffffff",
@@ -125,11 +176,11 @@ const styles = StyleSheet.create({
   },
   logoContainer: {
     alignItems: "center",
-    marginBottom: 50,
+    marginBottom: 10,
   },
   logo: {
-    width: 200,
-    height: 200,
+    width: 250,
+    height: 250,
   },
   triageContainer: {},
   rowSubText: {
@@ -144,6 +195,8 @@ const styles = StyleSheet.create({
     marginRight: 16,
     borderColor: "black",
     borderWidth: 2,
+    justifyContent: "center",
+    alignItems: "center",
   },
   rowTextContainer: {
     flex: 1,
