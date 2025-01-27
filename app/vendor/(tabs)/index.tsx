@@ -88,7 +88,7 @@ export default function Index() {
   const [buttonColorAnim] = useState(new Animated.Value(0));
   const user = useSelector(selectUser);
   const userName = user?.name || "Vendor Name";
-
+  const hasRunOnce = useRef(false); // Track if the logic has run
   const dispatch = useDispatch();
 
   useEffect(() => {
@@ -132,8 +132,13 @@ export default function Index() {
         });
 
         setVendors(updatedVendors);
-        const isActive = snapshot.docs.some((doc) => doc.id === user?.uid);
-        // setVendorActive(isActive); // Update the toggle state
+
+        // Run setVendorActive only once
+        if (!hasRunOnce.current) {
+          const isActive = snapshot.docs.some((doc) => doc.id === user?.uid);
+          setVendorActive(isActive);
+          hasRunOnce.current = true; // Mark as executed
+        }
       },
       (error) => {
         console.error("Error fetching active vendors:", error);
