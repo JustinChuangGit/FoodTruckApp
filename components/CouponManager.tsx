@@ -11,7 +11,7 @@ import {
   KeyboardAvoidingView,
   Platform,
 } from "react-native";
-import { BottomSheetFlatList } from "@gorhom/bottom-sheet";
+import { BottomSheetFlatList, BottomSheetView } from "@gorhom/bottom-sheet";
 import { FontAwesome } from "@expo/vector-icons";
 import { selectUser, deleteCoupon, addCoupon } from "@/redux/authSlice"; // Update the path as needed
 import { useSelector, useDispatch } from "react-redux";
@@ -236,17 +236,30 @@ const CouponManager: React.FC = () => {
               <Text style={styles.addCouponText}>+ Add Coupon</Text>
             </TouchableOpacity>
           ) : (
-            <View style={styles.couponCard}>
+            <BottomSheetView style={styles.couponCard}>
               <View>
                 <Text style={styles.couponHeadline}>{item.headline}</Text>
                 <Text style={styles.couponDescription}>{item.description}</Text>
               </View>
               <View>
                 <Text style={styles.couponValue}>Value: ${item.value}</Text>
-                <Text style={styles.couponDetails}>
+                <Text
+                  style={[
+                    styles.couponDetails,
+                    (item.uses === 0 ||
+                      new Date(item.validUntil) < new Date()) && {
+                      color: "red",
+                    },
+                  ]}
+                >
                   Remaining Uses: {item.uses}
                 </Text>
-                <Text style={styles.couponDetails}>
+                <Text
+                  style={[
+                    styles.couponDetails,
+                    new Date(item.validUntil) < new Date() && { color: "red" },
+                  ]}
+                >
                   Valid Until:{" "}
                   {new Date(item.validUntil).toLocaleString("en-US", {
                     weekday: "short", // 'short' for abbreviated weekday (e.g., 'Fri')
@@ -258,6 +271,7 @@ const CouponManager: React.FC = () => {
                     hour12: true, // Use 12-hour clock
                   })}
                 </Text>
+
                 <TouchableOpacity
                   style={styles.deleteButton}
                   onPress={() => handleDeleteCoupon(index - 1)}
@@ -265,7 +279,7 @@ const CouponManager: React.FC = () => {
                   <Text style={{ color: "#fff" }}>Delete </Text>
                 </TouchableOpacity>
               </View>
-            </View>
+            </BottomSheetView>
           )
         }
         showsHorizontalScrollIndicator={false}
