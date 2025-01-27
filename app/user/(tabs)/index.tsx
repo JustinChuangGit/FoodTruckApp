@@ -141,6 +141,26 @@ export default function Index() {
   }, []);
 
   useEffect(() => {
+    if (
+      selectedVendor &&
+      !vendors.some((vendor) => vendor.uid === selectedVendor.uid)
+    ) {
+      setSelectedVendor(null);
+      setCarouselIndex(0); // Reset carouselIndex to a valid value
+      Alert.alert(
+        "Vendor Unavailable",
+        "The selected vendor is no longer active."
+      );
+    }
+  }, [vendors, selectedVendor]);
+
+  useEffect(() => {
+    if (carouselIndex >= vendors.length) {
+      setCarouselIndex(vendors.length - 1); // Adjust to the last valid index
+    }
+  }, [vendors, carouselIndex]);
+
+  useEffect(() => {
     if (selectedVendor && mapRef.current) {
       mapRef.current.animateToRegion(
         {
@@ -272,7 +292,7 @@ export default function Index() {
               setCarouselIndex(index);
               handleMarkerPress(vendors[index]);
             }}
-            defaultIndex={carouselIndex}
+            defaultIndex={Math.min(carouselIndex, vendors.length - 1)} // Ensure index is within bounds
           />
         </View>
       )}

@@ -133,7 +133,7 @@ export default function Index() {
 
         setVendors(updatedVendors);
         const isActive = snapshot.docs.some((doc) => doc.id === user?.uid);
-        setVendorActive(isActive); // Update the toggle state
+        // setVendorActive(isActive); // Update the toggle state
       },
       (error) => {
         console.error("Error fetching active vendors:", error);
