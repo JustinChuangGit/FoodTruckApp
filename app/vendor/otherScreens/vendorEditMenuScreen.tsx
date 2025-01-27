@@ -8,6 +8,10 @@ import {
   TextInput,
   TouchableOpacity,
   Alert,
+  Keyboard,
+  KeyboardAvoidingView,
+  ScrollView,
+  Platform,
 } from "react-native";
 import { useRouter } from "expo-router"; // Import useRouter
 import { FontAwesome } from "@expo/vector-icons"; // Import FontAwesome
@@ -232,35 +236,68 @@ export default function EditMenuItemsScreen() {
 
       <Modal visible={isModalVisible} animationType="slide" transparent={true}>
         <View style={styles.modalOverlay}>
-          <View style={styles.modalContainer}>
+          <KeyboardAvoidingView
+            style={styles.modalContainer}
+            behavior={Platform.OS === "ios" ? "padding" : "height"} // Adjust based on platform
+            keyboardVerticalOffset={20} // Tweak for your layout
+          >
             <Text style={styles.modalHeader}>Add New Menu Item</Text>
 
+            {/* Content that doesn't need scrolling */}
+            <Text style={styles.modalSubHeader}>Item Name</Text>
             <TextInput
               style={styles.input}
               placeholder="Item Name"
               value={newItemName}
               onChangeText={setNewItemName}
+              placeholderTextColor={"#bbb"}
             />
+
+            <Text style={styles.modalSubHeader}>Price</Text>
+            <View
+              style={{
+                flexDirection: "row",
+                alignItems: "center",
+                marginBottom: 16,
+                justifyContent: "center",
+              }}
+            >
+              <FontAwesome
+                name="dollar"
+                size={24}
+                color="black"
+                style={{ marginRight: 8 }}
+              />
+              <TextInput
+                style={[styles.input, { flex: 1 }]} // Flex 1 to fill remaining space
+                placeholder="Price"
+                value={newItemPrice}
+                onChangeText={setNewItemPrice}
+                keyboardType="numeric"
+                placeholderTextColor={"#bbb"}
+              />
+            </View>
+
+            <Text style={styles.modalSubHeader}>Description</Text>
             <TextInput
-              style={styles.input}
-              placeholder="Price"
-              value={newItemPrice}
-              onChangeText={setNewItemPrice}
-              keyboardType="numeric"
-            />
-            <TextInput
-              style={styles.input}
+              style={[styles.input, { height: 100, textAlignVertical: "top" }]}
               placeholder="Description"
               value={newItemDescription}
               onChangeText={setNewItemDescription}
+              multiline={true}
+              placeholderTextColor={"#bbb"}
             />
+
+            <Text style={styles.modalSubHeader}>Category</Text>
             <TextInput
               style={styles.input}
               placeholder="Category"
               value={newItemCategory}
               onChangeText={setNewItemCategory}
+              placeholderTextColor={"#bbb"}
             />
 
+            {/* Footer */}
             <View style={styles.modalButtonContainer}>
               <TouchableOpacity
                 style={styles.modalButton}
@@ -275,7 +312,7 @@ export default function EditMenuItemsScreen() {
                 <Text style={styles.modalButtonText}>Cancel</Text>
               </TouchableOpacity>
             </View>
-          </View>
+          </KeyboardAvoidingView>
         </View>
       </Modal>
     </View>
@@ -351,17 +388,17 @@ const styles = StyleSheet.create({
     backgroundColor: "#fff",
     padding: 16,
     margin: 16,
-    borderRadius: 8,
+    borderRadius: munchStyles.smallRadius,
   },
   modalHeader: {
-    fontSize: 20,
+    fontSize: 24,
     fontWeight: "bold",
     marginBottom: 16,
   },
   input: {
     borderWidth: 1,
     borderColor: "#ddd",
-    borderRadius: 8,
+    borderRadius: munchStyles.smallRadius,
     padding: 8,
     marginBottom: 16,
   },
@@ -373,7 +410,7 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: munchColors.primary,
     padding: 12,
-    borderRadius: 8,
+    borderRadius: munchStyles.smallRadius,
     alignItems: "center",
     marginHorizontal: 4,
   },
@@ -398,7 +435,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   headerText: {
-    fontSize: 20,
+    fontSize: 4,
     fontWeight: "bold",
     color: "#000",
     flex: 1, // Push the text to the center within the row layout
@@ -410,5 +447,10 @@ const styles = StyleSheet.create({
   itemDeleteButton: {
     justifyContent: "center",
     alignItems: "center",
+  },
+  modalSubHeader: {
+    fontSize: 16,
+    fontWeight: "bold",
+    marginBottom: 8,
   },
 });
