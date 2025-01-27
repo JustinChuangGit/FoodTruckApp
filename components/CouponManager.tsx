@@ -37,6 +37,7 @@ const CouponManager: React.FC = () => {
   const vendorUid = user?.uid || null; // Ensure vendorUid is `null` if user is logged out
   const dispatch = useDispatch();
   const [showDatePicker, setShowDatePicker] = useState(false);
+  const [rawValue, setRawValue] = useState(""); // Temporary state for raw input
 
   const [isCouponModalVisible, setCouponModalVisible] = useState(false);
   const [newCoupon, setNewCoupon] = useState<Coupon>({
@@ -363,13 +364,15 @@ const CouponManager: React.FC = () => {
                 style={[styles.input, { flex: 1 }]} // Add flex: 1 to stretch the input
                 placeholder="Ex: $2.50"
                 keyboardType="decimal-pad"
-                value={
-                  newCoupon.value === null ? "" : newCoupon.value.toString()
-                } // Display empty string for null
+                value={rawValue} // Use rawValue as the input value
                 onChangeText={(text) => {
+                  setRawValue(text); // Update rawValue as the user types
+                }}
+                onBlur={() => {
+                  // Convert rawValue to a number or null when input loses focus
                   setNewCoupon((prev) => ({
                     ...prev,
-                    value: text === "" ? 0 : parseFloat(text), // Handle empty string
+                    value: rawValue ? parseFloat(rawValue) : null, // Convert only on blur
                   }));
                 }}
               />
