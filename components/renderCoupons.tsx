@@ -12,10 +12,20 @@ export const RenderCoupons: React.FC<RenderCouponsProps> = ({
   coupons,
   vendorImage,
 }) => {
+  const currentDate = new Date();
+
+  // Filter valid coupons
+  const validCoupons = coupons.filter(
+    (coupon) =>
+      coupon.uses !== null &&
+      coupon.uses > 0 &&
+      new Date(coupon.validUntil) > currentDate // Check if not expired
+  );
+
   return (
     <View style={styles.couponContainer}>
       <FlatList
-        data={coupons}
+        data={validCoupons}
         keyExtractor={(item) => `coupon-${item.id}`}
         renderItem={({ item }) => (
           <View style={styles.couponGridItem}>
