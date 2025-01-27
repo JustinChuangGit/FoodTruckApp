@@ -47,7 +47,9 @@ export default function SignupScreen() {
         phone
       );
       console.log("User signed up:", user);
-      router.replace(isVendor ? "/vendor" : "/user");
+      router.replace(
+        isVendor ? "/vendor/otherScreens/vendorSignupTriageScreen" : "/user"
+      );
     } catch (error) {
       Alert.alert("Sign Up Failed", (error as Error).message);
     }

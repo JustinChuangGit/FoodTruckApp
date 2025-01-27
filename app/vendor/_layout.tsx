@@ -21,6 +21,10 @@ export default function VendorLayout() {
           name="otherScreens/vendorScanSuccessScreen"
           options={{ headerShown: false }}
         />
+        <Stack.Screen
+          name="otherScreens/vendorSignupTriageScreen"
+          options={{ headerShown: false }}
+        />
       </Stack>
     </Provider>
   );
