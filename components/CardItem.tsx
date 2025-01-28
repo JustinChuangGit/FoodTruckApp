@@ -9,6 +9,7 @@ import {
 } from "react-native";
 import { Vendor } from "@/constants/types";
 import { FontAwesome } from "@expo/vector-icons";
+import { munchStyles } from "@/constants/styles";
 
 interface CardItemProps {
   vendor: Vendor;
@@ -75,7 +76,7 @@ const CardItem: React.FC<CardItemProps> = ({ vendor, onPress }) => {
 
 const styles = StyleSheet.create({
   cardItem: {
-    borderRadius: 8,
+    borderRadius: munchStyles.smallRadius,
     width: 250,
     height: "auto",
     marginLeft: 10,
@@ -87,7 +88,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     marginBottom: 10,
-    borderRadius: 8,
+    borderRadius: munchStyles.smallRadius,
     overflow: "hidden", // Ensure the loader stays within the image bounds
     backgroundColor: "#e0e0e0", // Placeholder background while loading
     marginHorizontal: "auto",
