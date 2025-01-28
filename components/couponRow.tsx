@@ -1,7 +1,7 @@
 import React from "react";
 import { View, Text, StyleSheet, FlatList } from "react-native";
-import CardItem from "./CardItem";
-import { Vendor } from "@/constants/types";
+import { Vendor, Coupon } from "@/constants/types";
+import CouponCard from "./CouponCard";
 
 interface Section {
   id: string;
@@ -11,28 +11,44 @@ interface Section {
 
 interface CouponRowProps {
   section: Section;
-  onCardPress: (vendor: Vendor) => void; // Add this prop
+  onCardPress: (vendor: Vendor) => void;
 }
 
-const CouponRow: React.FC<CouponRowProps> = ({ section, onCardPress }) => (
-  <View style={styles.mainSection}>
-    <View
-      style={styles.sectionTitleContainer}
-      onStartShouldSetResponder={() => true}
-    >
-      <Text style={styles.sectionTitle}>Coupons Based On Your Location</Text>
+const CouponRow: React.FC<CouponRowProps> = ({ section, onCardPress }) => {
+  // Extract and flatten coupons from the vendors
+  const coupons = section.vendors.flatMap((vendor) =>
+    (vendor.coupons || []).map((coupon) => ({
+      ...coupon,
+      vendor, // Include vendor info for each coupon
+    }))
+  );
+
+  console.log("Coupons:", coupons);
+
+  return (
+    <View style={styles.mainSection}>
+      <View
+        style={styles.sectionTitleContainer}
+        onStartShouldSetResponder={() => true}
+      >
+        <Text style={styles.sectionTitle}>Coupons Based On Your Location</Text>
+      </View>
+      <FlatList
+        data={coupons}
+        keyExtractor={(coupon) => coupon.id}
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        renderItem={({ item }) => (
+          <CouponCard
+            coupon={item}
+            vendor={item.vendor}
+            onPress={() => onCardPress(item.vendor)}
+          />
+        )}
+      />
     </View>
-    <FlatList
-      data={section.vendors}
-      keyExtractor={(vendor) => vendor.uid}
-      horizontal
-      showsHorizontalScrollIndicator={false}
-      renderItem={({ item }) => (
-        <CardItem vendor={item} onPress={() => onCardPress(item)} />
-      )}
-    />
-  </View>
-);
+  );
+};
 
 const styles = StyleSheet.create({
   mainSection: { marginVertical: 16 },

@@ -132,10 +132,19 @@ export default function Index() {
     getNearbyVendors(vendors, location),
     getNearbyVendors(vendors, location),
   ]);
+
   const snapPoints = useMemo(() => ["15%", "50%", "90%"], []);
   const scaleAnim = useRef(new Animated.Value(0)).current; // Initial scale value
   const nearbyVendors = getNearbyVendors(vendors, location);
-
+  const combinedData = [
+    { type: "myRow", section: nearbyVendors, key: "myRow1" }, // First row
+    { type: "couponRow", section: nearbyVendors, key: "couponRow" }, // Second row
+    ...SECTIONDATA.map((item, index) => ({
+      type: "myRow",
+      section: item,
+      key: `myRow${index + 2}`, // Unique keys for subsequent rows
+    })),
+  ];
   console.log("Vendors:", getNearbyCoupons(vendors, location));
 
   useEffect(() => {
@@ -352,20 +361,31 @@ export default function Index() {
             </Text>
             <HorizontalLine />
           </View>
-          <MyRow section={nearbyVendors} onCardPress={handleCardPress} />
-          <CouponRow section={nearbyVendors} onCardPress={handleCardPress} />
-          {/* <BottomSheetFlatList
-            data={SECTIONDATA}
+          <BottomSheetFlatList
+            data={combinedData}
             showsVerticalScrollIndicator={false}
-            keyExtractor={(item) => item.id}
-            renderItem={({ item }) => (
-              <MyRow section={item} onCardPress={handleCardPress} />
-            )}
-            contentContainerStyle={{
-              paddingHorizontal: 0, // Remove extra padding here
-              paddingBottom: 16, // Optional for spacing at the bottom
+            keyExtractor={(item) => item.key}
+            renderItem={({ item }) => {
+              if (item.type === "myRow") {
+                return (
+                  <MyRow section={item.section} onCardPress={handleCardPress} />
+                );
+              }
+              if (item.type === "couponRow") {
+                return (
+                  <CouponRow
+                    section={item.section}
+                    onCardPress={handleCardPress}
+                  />
+                );
+              }
+              return null; // Default case (optional)
             }}
-          /> */}
+            contentContainerStyle={{
+              paddingHorizontal: 0,
+              paddingBottom: 16,
+            }}
+          />
         </BottomSheetView>
       </BottomSheet>
     </SafeAreaView>
