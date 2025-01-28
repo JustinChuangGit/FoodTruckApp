@@ -90,6 +90,7 @@ export default function Index() {
   const userName = user?.name || "Vendor Name";
   const hasRunOnce = useRef(false); // Track if the logic has run
   const dispatch = useDispatch();
+  const vendorPaid = user?.vendorPaid || false;
 
   useEffect(() => {
     (async () => {
@@ -384,20 +385,35 @@ export default function Index() {
             keyExtractor={(item) => item.id}
             renderItem={({ item }) => (
               <BottomSheetView>
-                <TouchableOpacity
-                  onPress={() => user && toggleVendorActive(user.uid)}
-                >
-                  <Animated.View
-                    style={[
-                      styles.toggleButton,
-                      { backgroundColor: buttonBackgroundColor },
-                    ]}
+                {vendorPaid ? (
+                  <TouchableOpacity
+                    onPress={() => user && toggleVendorActive(user.uid)}
+                  >
+                    <Animated.View
+                      style={[
+                        styles.toggleButton,
+                        { backgroundColor: buttonBackgroundColor },
+                      ]}
+                    >
+                      <Text style={styles.toggleButtonText}>
+                        {isVendorActive ? "Close Up Shop" : "Go Live"}
+                      </Text>
+                    </Animated.View>
+                  </TouchableOpacity>
+                ) : (
+                  <TouchableOpacity
+                    onPress={() => {
+                      Alert.alert(
+                        "Please allow up to 24 hours for your account to be approved \n\n If you believe this is an error, please contact support."
+                      );
+                    }}
+                    style={[styles.toggleButton, { backgroundColor: "grey" }]}
                   >
                     <Text style={styles.toggleButtonText}>
-                      {isVendorActive ? "Close Up Shop" : "Go Live"}
+                      Your Account Status Is Pending
                     </Text>
-                  </Animated.View>
-                </TouchableOpacity>
+                  </TouchableOpacity>
+                )}
                 <MyRow section={item} onCardPress={handleCardPress} />
                 <CouponManager />
               </BottomSheetView>

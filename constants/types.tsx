@@ -56,6 +56,8 @@ export interface User {
   addedCoupons?: string[]; // Add user-added coupons
   moneySavedFromCoupons?: number; // Add money saved from coupons
   vendorName?: string; // Add vendor name
+  vendorPaid?: boolean; // Add vendor paid status
+  accountCreated?: Date; // Add account created date
 }
 
 export interface Section {

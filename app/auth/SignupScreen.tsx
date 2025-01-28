@@ -39,6 +39,7 @@ export default function SignupScreen() {
       return;
     }
     try {
+      const accountCreated = new Date().toLocaleString();
       const user = await signUp(
         dispatch,
         email,
@@ -46,7 +47,8 @@ export default function SignupScreen() {
         isVendor,
         name,
         phone,
-        mailingAddress
+        mailingAddress,
+        accountCreated
       );
       console.log("User signed up:", user);
       router.replace(

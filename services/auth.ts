@@ -36,14 +36,15 @@ export const signUp = async (
   isVendor: boolean,
   name: string,
   phone: string,
-  mailingAddress?: string
+  mailingAddress?: string,
+  accountCreated?: string
 ) => {
   try {
     const userCredential = await createUserWithEmailAndPassword(auth, email, password);
     const user = userCredential.user;
 
     // Save additional user data in Firestore
-    await saveUserData(user.uid, { email, name, isVendor,phone,mailingAddress });
+    await saveUserData(user.uid, { email, name, isVendor,phone,mailingAddress, accountCreated });
 
     // Dispatch Redux action to update state
     dispatch(setUser({ uid: user.uid, email, name, isVendor }));
