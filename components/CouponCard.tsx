@@ -44,51 +44,53 @@ const CouponCard: React.FC<CouponCardProps> = ({ coupon, vendor, onPress }) => {
 
   return (
     <View style={[styles.card, { height: vendor ? 265 : 150 }]}>
-      <View>
-        {vendor && (
-          <View style={styles.imageContainer}>
-            {imageLoading && (
-              <View style={styles.loadingContainer}>
-                <ActivityIndicator size="large" color={munchColors.primary} />
-              </View>
-            )}
-            <Image
-              source={{ uri: vendor.image }}
-              style={styles.vendorImage}
-              onLoad={() => setImageLoading(false)}
-              onError={() => setImageLoading(false)}
-            />
-          </View>
-        )}
-        <Text style={styles.headline}>{coupon.headline}</Text>
-        <Text style={styles.description}>{coupon.description}</Text>
-      </View>
-      <>
-        {vendor && (
-          <Text style={styles.vendorDistance}>
-            {vendor?.distance !== undefined
-              ? `${vendor.distance.toFixed(1)} ${units} away`
-              : ""}
-          </Text>
-        )}
-        <TouchableOpacity
-          style={[
-            styles.addCouponButton,
-            isApplied && styles.disabledCouponButton, // Style the button if already redeemed
-          ]}
-          disabled={isApplied} // Disable button if already redeemed
-          onPress={handleRedeem}
-        >
-          <Text
+      <TouchableOpacity onPress={onPress} style={styles.couponContent}>
+        <View>
+          {vendor && (
+            <View style={styles.imageContainer}>
+              {imageLoading && (
+                <View style={styles.loadingContainer}>
+                  <ActivityIndicator size="large" color={munchColors.primary} />
+                </View>
+              )}
+              <Image
+                source={{ uri: vendor.image }}
+                style={styles.vendorImage}
+                onLoad={() => setImageLoading(false)}
+                onError={() => setImageLoading(false)}
+              />
+            </View>
+          )}
+          <Text style={styles.headline}>{coupon.headline}</Text>
+          <Text style={styles.description}>{coupon.description}</Text>
+        </View>
+        <>
+          {vendor && (
+            <Text style={styles.vendorDistance}>
+              {vendor?.distance !== undefined
+                ? `${vendor.distance.toFixed(1)} ${units} away`
+                : ""}
+            </Text>
+          )}
+          <TouchableOpacity
             style={[
-              styles.addCouponText,
-              isApplied && styles.disabledCouponText, // Change text style if already redeemed
+              styles.addCouponButton,
+              isApplied && styles.disabledCouponButton, // Style the button if already redeemed
             ]}
+            disabled={isApplied} // Disable button if already redeemed
+            onPress={handleRedeem}
           >
-            {isApplied ? "Applied" : "Redeem"}
-          </Text>
-        </TouchableOpacity>
-      </>
+            <Text
+              style={[
+                styles.addCouponText,
+                isApplied && styles.disabledCouponText, // Change text style if already redeemed
+              ]}
+            >
+              {isApplied ? "Applied" : "Redeem"}
+            </Text>
+          </TouchableOpacity>
+        </>
+      </TouchableOpacity>
     </View>
   );
 };
@@ -108,6 +110,10 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     marginHorizontal: "auto",
     marginLeft: 20,
+  },
+  couponContent: {
+    flex: 1,
+    justifyContent: "space-between",
   },
   vendorImage: {
     width: 140,
@@ -133,7 +139,7 @@ const styles = StyleSheet.create({
     backgroundColor: munchColors.primary,
     borderRadius: munchStyles.smallRadius,
     padding: 8,
-    marginTop: 8,
+    marginTop: 1,
     alignItems: "center",
     justifyContent: "center",
   },
