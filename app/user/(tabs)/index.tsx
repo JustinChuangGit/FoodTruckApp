@@ -78,6 +78,32 @@ function getNearbyCoupons(
   };
 }
 
+function groupVendorsByType(vendors: Vendor[]): Section[] {
+  // Explicitly type the groupedVendors object
+  const groupedVendors: Record<string, Vendor[]> = vendors.reduce(
+    (groups, vendor) => {
+      const type = vendor.vendorType || "Other"; // Default to "Other" if vendorType is missing
+      if (!groups[type]) {
+        groups[type] = [];
+      }
+      groups[type].push(vendor);
+      return groups;
+    },
+    {} as Record<string, Vendor[]> // Initial value with explicit type
+  );
+
+  // Convert the grouped vendors into sections
+  const sections: Section[] = Object.keys(groupedVendors).map(
+    (type, index) => ({
+      id: `section-${index}`,
+      title: type, // Use the vendorType as the section title
+      vendors: groupedVendors[type],
+    })
+  );
+
+  return sections;
+}
+
 function getNearbyVendors(
   vendors: Vendor[],
   location: LocationCoordinates | null
@@ -124,14 +150,7 @@ export default function Index() {
   const [carouselIndex, setCarouselIndex] = useState(0);
   const mapRef = useRef<MapView>(null);
   const bottomSheetRef = useRef<BottomSheet>(null);
-  const SECTIONDATA = formatSections([
-    getNearbyVendors(vendors, location),
-    getNearbyVendors(vendors, location),
-    getNearbyVendors(vendors, location),
-    getNearbyVendors(vendors, location),
-    getNearbyVendors(vendors, location),
-    getNearbyVendors(vendors, location),
-  ]);
+  const SECTIONDATA = formatSections(groupVendorsByType(vendors));
 
   const snapPoints = useMemo(() => ["15%", "50%", "90%"], []);
   const scaleAnim = useRef(new Animated.Value(0)).current; // Initial scale value
@@ -145,6 +164,7 @@ export default function Index() {
       key: `myRow${index + 2}`, // Unique keys for subsequent rows
     })),
   ];
+
   console.log("Vendors:", getNearbyCoupons(vendors, location));
 
   useEffect(() => {
