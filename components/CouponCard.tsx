@@ -44,7 +44,11 @@ const CouponCard: React.FC<CouponCardProps> = ({ coupon, vendor, onPress }) => {
 
   return (
     <View style={[styles.card, { height: vendor ? 265 : 150 }]}>
-      <TouchableOpacity onPress={onPress} style={styles.couponContent}>
+      <TouchableOpacity
+        onPress={onPress}
+        style={styles.couponContent}
+        disabled={!onPress}
+      >
         <View>
           {vendor && (
             <View style={styles.imageContainer}>
@@ -160,6 +164,7 @@ const styles = StyleSheet.create({
     position: "relative",
     justifyContent: "center",
     alignItems: "center",
+    marginTop: 8,
   },
   loadingContainer: {
     ...StyleSheet.absoluteFillObject,
