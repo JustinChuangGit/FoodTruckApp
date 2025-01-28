@@ -404,7 +404,7 @@ export default function Index() {
                   <TouchableOpacity
                     onPress={() => {
                       Alert.alert(
-                        "Please allow up to 24 hours for your account to be approved \n\n If you believe this is an error, please contact support."
+                        "Please allow up to 24 hours for your account to be approved \n\n If you believe this is an error, please contact support"
                       );
                     }}
                     style={[styles.toggleButton, { backgroundColor: "grey" }]}
