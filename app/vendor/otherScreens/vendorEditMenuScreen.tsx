@@ -258,8 +258,7 @@ export default function EditMenuItemsScreen() {
               style={{
                 flexDirection: "row",
                 alignItems: "center",
-                marginBottom: 16,
-                justifyContent: "center",
+                justifyContent: "flex-start",
               }}
             >
               <FontAwesome
@@ -269,7 +268,7 @@ export default function EditMenuItemsScreen() {
                 style={{ marginRight: 8 }}
               />
               <TextInput
-                style={[styles.input, { flex: 1 }]} // Flex 1 to fill remaining space
+                style={[styles.input, { flex: 1, marginVertical: "auto" }]} // Flex 1 to fill remaining space
                 placeholder="Price"
                 value={newItemPrice}
                 onChangeText={setNewItemPrice}
@@ -405,6 +404,7 @@ const styles = StyleSheet.create({
   modalButtonContainer: {
     flexDirection: "row",
     justifyContent: "space-between",
+    paddingBottom: 16,
   },
   modalButton: {
     flex: 1,
@@ -435,11 +435,12 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   headerText: {
-    fontSize: 4,
+    fontSize: 24,
     fontWeight: "bold",
     color: "#000",
     flex: 1, // Push the text to the center within the row layout
-    textAlign: "center", // Center the text horizontally
+    textAlign: "left", // Center the text horizontally
+    paddingLeft: 10, // Add padding to the left of the text
   },
   itemTextContainer: {
     flex: 1,
