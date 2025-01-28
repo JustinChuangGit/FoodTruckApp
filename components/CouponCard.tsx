@@ -8,7 +8,7 @@ import {
   ActivityIndicator,
 } from "react-native";
 import { useSelector, useDispatch } from "react-redux"; // Import Redux hooks
-import { Coupon } from "@/constants/types";
+import { Coupon, Vendor } from "@/constants/types";
 import { munchStyles } from "@/constants/styles";
 import { munchColors } from "@/constants/Colors";
 import { redeemCoupon } from "@/redux/authSlice"; // Import the redeem action
@@ -17,10 +17,11 @@ import { addCouponToAccount } from "@/services/firestore";
 
 type CouponCardProps = {
   coupon: Coupon;
-  vendorImage?: string; // Optional vendor image URL
+  vendor?: Vendor; // Optional vendor image URL
+  onPress?: () => void; // Optional onPress handler
 };
 
-const CouponCard: React.FC<CouponCardProps> = ({ coupon, vendorImage }) => {
+const CouponCard: React.FC<CouponCardProps> = ({ coupon, vendor, onPress }) => {
   const dispatch = useDispatch();
   const user = useSelector(selectUser);
 
@@ -37,9 +38,9 @@ const CouponCard: React.FC<CouponCardProps> = ({ coupon, vendorImage }) => {
   };
 
   return (
-    <View style={[styles.card, { height: vendorImage ? 250 : 150 }]}>
+    <View style={[styles.card, { height: vendor ? 250 : 150 }]}>
       <View>
-        {vendorImage && (
+        {vendor && (
           <View style={styles.imageContainer}>
             {imageLoading && (
               <View style={styles.loadingContainer}>
@@ -47,7 +48,7 @@ const CouponCard: React.FC<CouponCardProps> = ({ coupon, vendorImage }) => {
               </View>
             )}
             <Image
-              source={{ uri: vendorImage }}
+              source={{ uri: vendor.image }}
               style={styles.vendorImage}
               onLoad={() => setImageLoading(false)}
               onError={() => setImageLoading(false)}

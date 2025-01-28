@@ -34,8 +34,49 @@ import { collection, onSnapshot } from "firebase/firestore";
 import { db, getVendorInfo } from "@/services/firestore";
 import { Section } from "@/constants/types";
 import { router } from "expo-router";
+import CouponRow from "@/components/couponRow";
 
 const { width } = Dimensions.get("window");
+
+function getNearbyCoupons(
+  vendors: Vendor[],
+  location: LocationCoordinates | null
+): {
+  id: string;
+  title: string;
+  coupons: { vendor: Vendor; coupon: any; distance: number }[];
+} {
+  if (!location) {
+    return {
+      id: "nearbyCoupons",
+      title: "Nearby Coupons",
+      coupons: [],
+    };
+  }
+
+  // Collect all coupons from vendors
+  const couponsWithVendor = vendors.flatMap((vendor) =>
+    (vendor.coupons || []).map((coupon) => ({
+      vendor,
+      coupon,
+      distance: haversine(location, {
+        latitude: vendor.latitude,
+        longitude: vendor.longitude,
+      }),
+    }))
+  );
+
+  // Sort by distance
+  const sortedCoupons = couponsWithVendor.sort(
+    (a, b) => a.distance - b.distance
+  );
+
+  return {
+    id: "nearbyCoupons",
+    title: "Nearby Coupons",
+    coupons: sortedCoupons,
+  };
+}
 
 function getNearbyVendors(
   vendors: Vendor[],
@@ -91,8 +132,11 @@ export default function Index() {
     getNearbyVendors(vendors, location),
     getNearbyVendors(vendors, location),
   ]);
-  const snapPoints = useMemo(() => ["15%", "50%", "60%"], []);
+  const snapPoints = useMemo(() => ["15%", "50%", "90%"], []);
   const scaleAnim = useRef(new Animated.Value(0)).current; // Initial scale value
+  const nearbyVendors = getNearbyVendors(vendors, location);
+
+  console.log("Vendors:", getNearbyCoupons(vendors, location));
 
   useEffect(() => {
     (async () => {
@@ -308,7 +352,9 @@ export default function Index() {
             </Text>
             <HorizontalLine />
           </View>
-          <BottomSheetFlatList
+          <MyRow section={nearbyVendors} onCardPress={handleCardPress} />
+          <CouponRow section={nearbyVendors} onCardPress={handleCardPress} />
+          {/* <BottomSheetFlatList
             data={SECTIONDATA}
             showsVerticalScrollIndicator={false}
             keyExtractor={(item) => item.id}
@@ -319,7 +365,7 @@ export default function Index() {
               paddingHorizontal: 0, // Remove extra padding here
               paddingBottom: 16, // Optional for spacing at the bottom
             }}
-          />
+          /> */}
         </BottomSheetView>
       </BottomSheet>
     </SafeAreaView>
