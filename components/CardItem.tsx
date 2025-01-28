@@ -48,7 +48,7 @@ const CardItem: React.FC<CardItemProps> = ({ vendor, onPress }) => {
         />
       </View>
       <View style={styles.vendorInfoContainer}>
-        <Text style={styles.vendorName}>{vendor.name}</Text>
+        <Text style={styles.vendorName}>{vendor.vendorName}</Text>
         <TouchableOpacity style={styles.heartButton} onPress={handleHeartPress}>
           <FontAwesome
             name={isFavorited ? "heart" : "heart-o"}

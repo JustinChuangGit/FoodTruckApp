@@ -118,7 +118,7 @@ const VendorMapInfoCard: React.FC<VendorMapInfoCardProps> = ({
         </View>
 
         <View style={styles.infoContainer}>
-          <Text style={styles.title}>{vendor.name}</Text>
+          <Text style={styles.title}>{vendor.vendorName}</Text>
           <Text style={styles.subtitle}>{vendor.description}</Text>
 
           <View style={styles.footer}>

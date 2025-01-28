@@ -20,7 +20,6 @@ export default function UserVendorInfo() {
   const router = useRouter();
   const params = useLocalSearchParams<{
     menu: string;
-    name: string;
     vendorType: string;
     price: string;
     description: string;
@@ -28,11 +27,12 @@ export default function UserVendorInfo() {
     rating: string;
     truckImage: string;
     coupons: string;
+    vendorName: string;
   }>();
 
   const {
     menu = "[]",
-    name,
+    vendorName,
     vendorType,
     price,
     description,
@@ -122,7 +122,7 @@ export default function UserVendorInfo() {
               )}
             </View>
             <View style={styles.informationContainer}>
-              <Text style={styles.name}>{name}</Text>
+              <Text style={styles.name}>{vendorName}</Text>
               <View style={styles.circleContainer}>
                 <View style={styles.circle}>
                   {truckImageLoading && (

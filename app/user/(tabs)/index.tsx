@@ -4,18 +4,10 @@ import {
   Alert,
   Text,
   StyleSheet,
-  FlatList,
   Dimensions,
-  Modal,
-  Image,
-  TouchableOpacity,
   Animated,
 } from "react-native";
-import MapView, {
-  Marker,
-  PROVIDER_DEFAULT,
-  PROVIDER_GOOGLE,
-} from "react-native-maps";
+import MapView, { Marker, PROVIDER_DEFAULT } from "react-native-maps";
 import * as Location from "expo-location";
 import { SafeAreaView } from "react-native-safe-area-context";
 import BottomSheet, {
@@ -28,10 +20,9 @@ import MyRow from "@/components/MyRow";
 import HorizontalLine from "@/components/default/HorizontalLine";
 import VendorMarker from "../../../components/VendorMarker";
 import VendorMapInfoCard from "../../../components/VendorMapInfoCard";
-import { SECTIONS } from "../../../constants/UserConstants";
 import { Vendor, LocationCoordinates } from "@/constants/types";
 import { collection, onSnapshot } from "firebase/firestore";
-import { db, getVendorInfo } from "@/services/firestore";
+import { db } from "@/services/firestore";
 import { Section } from "@/constants/types";
 import { router } from "expo-router";
 import CouponRow from "@/components/couponRow";
@@ -151,7 +142,6 @@ export default function Index() {
   const mapRef = useRef<MapView>(null);
   const bottomSheetRef = useRef<BottomSheet>(null);
   const SECTIONDATA = formatSections(groupVendorsByType(vendors));
-
   const snapPoints = useMemo(() => ["15%", "50%", "90%"], []);
   const scaleAnim = useRef(new Animated.Value(0)).current; // Initial scale value
   const nearbyVendors = getNearbyVendors(vendors, location);
@@ -164,8 +154,6 @@ export default function Index() {
       key: `myRow${index + 2}`, // Unique keys for subsequent rows
     })),
   ];
-
-  console.log("Vendors:", getNearbyCoupons(vendors, location));
 
   useEffect(() => {
     (async () => {
@@ -190,7 +178,7 @@ export default function Index() {
             latitude: data.location?.latitude,
             longitude: data.location?.longitude,
             price: data.price || "$$", // Default price if not provided
-            name: data.name || "Unknown Vendor",
+            vendorName: data.vendorName || "Unknown Vendor",
             rating: data.rating || 0, // Default rating if not provided
             description: data.description || "No description available",
             image: data.image || "https://via.placeholder.com/150", // Default image
@@ -198,6 +186,7 @@ export default function Index() {
             vendorType: data.vendorType || "Other", // Default vendor type
             truckImage: data.truckImage || "https://via.placeholder.com/150", // Default truck image
             coupons: data.coupons || [], // Default coupons to an empty array
+            name: data.name || "Unknown", // Default name if not provided
           };
         });
         setVendors(updatedVendors);
@@ -294,6 +283,7 @@ export default function Index() {
         rating: vendor.rating,
         coupons: encodeURIComponent(JSON.stringify(vendor.coupons)),
         truckImage: encodeURIComponent(vendor.truckImage), // Encode the truck
+        vendorName: vendor.vendorName, // Add vendorName to params
       },
     });
   };

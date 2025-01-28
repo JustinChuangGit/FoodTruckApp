@@ -128,6 +128,7 @@ export default function Index() {
             vendorType: data.vendorType || "Other",
             truckImage: data.truckImage || "https://via.placeholder.com/150",
             coupons: vendorCoupons || [], // Attach coupons for the current vendor
+            vendorName: data.vendorName || "Unknown Vendor",
           };
         });
 
@@ -219,7 +220,7 @@ export default function Index() {
         uid: vendor.uid,
         location: encodeURIComponent(location),
         menu: encodeURIComponent(menu),
-        name: vendor.name,
+        vendorName: vendor.vendorName,
         vendorType: vendor.vendorType,
         price: vendor.price,
         description: vendor.description,

@@ -13,12 +13,13 @@ export interface Vendor {
   truckImage: string;
   coupons: Coupon[];
   moneySavedFromCoupons?: number;
+  vendorName: string;
 }
 
 export interface VendorAccountInfo {
   price: string; // The price range, e.g., "$", "$$", "$$$"
   vendorType: string; // The type of vendor, e.g., "Food Truck/Trailer", "Produce", "Other"
-  name: string; // The name of the vendor
+  vendorName: string; // The name of the vendor
   description: string; // A description of the vendor's services/products
   image: string | null; // The URL of the vendor's image/logo (nullable if no image is set)
 }
@@ -54,6 +55,7 @@ export interface User {
   coupons?: Coupon[]; // Add coupons
   addedCoupons?: string[]; // Add user-added coupons
   moneySavedFromCoupons?: number; // Add money saved from coupons
+  vendorName?: string; // Add vendor name
 }
 
 export interface Section {
@@ -70,7 +72,7 @@ export interface ActiveVendor {
     longitude: number; // Longitude of the vendor's location
   };
   menu: MenuItem[]; // Array of menu items
-  name: string; // Vendor's name
+  vendorName: string; // Vendor's name
   vendorType: string; // Type of the vendor
   price: string; // Price range or pricing information
   description: string; // Vendor's description

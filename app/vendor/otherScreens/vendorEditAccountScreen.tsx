@@ -87,7 +87,7 @@ export default function VendorEditAccountScreen() {
 
   const [price, setPrice] = useState(user?.price || "");
   const [vendorType, setVendorType] = useState(user?.vendorType || "");
-  const [name, setName] = useState(user?.name || "");
+  const [vendorName, setVendorName] = useState(user?.vendorName || "");
   const [description, setDescription] = useState(user?.description || "");
   const [activeIndex, setActiveIndex] = useState(0); // Track the current active index
 
@@ -144,7 +144,7 @@ export default function VendorEditAccountScreen() {
     }
 
     if (
-      !name.trim() ||
+      !vendorName.trim() ||
       !price.trim() ||
       !vendorType.trim() ||
       !description.trim()
@@ -156,7 +156,7 @@ export default function VendorEditAccountScreen() {
     const vendorData: VendorAccountInfo = {
       price,
       vendorType,
-      name,
+      vendorName,
       description,
       image: images.find((img) => img.id === "logo")?.uri || null, // Save logo image
     };
@@ -246,8 +246,8 @@ export default function VendorEditAccountScreen() {
             <Text style={styles.label}>Name</Text>
             <TextInput
               style={styles.input}
-              value={name}
-              onChangeText={setName}
+              value={vendorName}
+              onChangeText={setVendorName}
               placeholder="Enter name"
             />
             <Text style={styles.label}>Price</Text>
