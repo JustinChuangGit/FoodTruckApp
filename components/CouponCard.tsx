@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import {
   View,
   Text,
@@ -37,8 +37,13 @@ const CouponCard: React.FC<CouponCardProps> = ({ coupon, vendor, onPress }) => {
     }
   };
 
+  const units = useMemo(() => {
+    const locale = Intl.DateTimeFormat().resolvedOptions().locale;
+    return locale.includes("US") ? "miles" : "km";
+  }, []);
+
   return (
-    <View style={[styles.card, { height: vendor ? 250 : 150 }]}>
+    <View style={[styles.card, { height: vendor ? 265 : 150 }]}>
       <View>
         {vendor && (
           <View style={styles.imageContainer}>
@@ -58,24 +63,32 @@ const CouponCard: React.FC<CouponCardProps> = ({ coupon, vendor, onPress }) => {
         <Text style={styles.headline}>{coupon.headline}</Text>
         <Text style={styles.description}>{coupon.description}</Text>
       </View>
-
-      <TouchableOpacity
-        style={[
-          styles.addCouponButton,
-          isApplied && styles.disabledCouponButton, // Style the button if already redeemed
-        ]}
-        disabled={isApplied} // Disable button if already redeemed
-        onPress={handleRedeem}
-      >
-        <Text
+      <>
+        {vendor && (
+          <Text style={styles.vendorDistance}>
+            {vendor?.distance !== undefined
+              ? `${vendor.distance.toFixed(1)} ${units} away`
+              : ""}
+          </Text>
+        )}
+        <TouchableOpacity
           style={[
-            styles.addCouponText,
-            isApplied && styles.disabledCouponText, // Change text style if already redeemed
+            styles.addCouponButton,
+            isApplied && styles.disabledCouponButton, // Style the button if already redeemed
           ]}
+          disabled={isApplied} // Disable button if already redeemed
+          onPress={handleRedeem}
         >
-          {isApplied ? "Applied" : "Redeem"}
-        </Text>
-      </TouchableOpacity>
+          <Text
+            style={[
+              styles.addCouponText,
+              isApplied && styles.disabledCouponText, // Change text style if already redeemed
+            ]}
+          >
+            {isApplied ? "Applied" : "Redeem"}
+          </Text>
+        </TouchableOpacity>
+      </>
     </View>
   );
 };
@@ -90,10 +103,11 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
-    elevation: 5,
+    elevation: 10,
     width: 175,
     justifyContent: "space-between",
     marginHorizontal: "auto",
+    marginLeft: 20,
   },
   vendorImage: {
     width: 140,
@@ -146,6 +160,12 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     zIndex: 1,
+  },
+  vendorDistance: {
+    fontSize: 12,
+    color: "#AAA",
+    marginTop: 8,
+    textAlign: "left", // Ensures left justification
   },
 });
 
