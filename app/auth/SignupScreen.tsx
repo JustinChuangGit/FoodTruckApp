@@ -29,6 +29,7 @@ export default function SignupScreen() {
   const [isVendor, setIsVendor] = useState(false);
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
+  const [mailingAddress, setMailingAddress] = useState("");
 
   const dispatch = useDispatch<AppDispatch>();
 
@@ -44,7 +45,8 @@ export default function SignupScreen() {
         password,
         isVendor,
         name,
-        phone
+        phone,
+        mailingAddress
       );
       console.log("User signed up:", user);
       router.replace(
@@ -129,8 +131,24 @@ export default function SignupScreen() {
               />
             </View>
 
+            {isVendor && (
+              <TextInput
+                style={styles.input}
+                placeholder="Mailing Address"
+                placeholderTextColor="#A9A9A9"
+                value={mailingAddress}
+                onChangeText={setMailingAddress}
+              />
+            )}
+
             {/* Sign Up Button */}
-            <TouchableOpacity style={styles.button} onPress={handleSignUp}>
+            <TouchableOpacity
+              style={[
+                styles.button,
+                { marginTop: isVendor ? 26 : 90 }, // Dynamically set marginTop
+              ]}
+              onPress={handleSignUp}
+            >
               <Text style={styles.buttonText}>Sign Up</Text>
             </TouchableOpacity>
 
@@ -202,7 +220,6 @@ const styles = StyleSheet.create({
     borderRadius: munchStyles.smallRadius,
     alignItems: "center",
     marginBottom: 16,
-    marginTop: 100,
   },
   buttonText: {
     color: "white",
