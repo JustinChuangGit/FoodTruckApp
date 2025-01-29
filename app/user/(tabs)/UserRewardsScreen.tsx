@@ -7,6 +7,8 @@ import {
   Vibration,
   SafeAreaView,
   Image,
+  Touchable,
+  TouchableOpacity,
 } from "react-native";
 import { useSelector } from "react-redux";
 import QRCode from "react-native-qrcode-svg";
@@ -18,6 +20,7 @@ import { Audio } from "expo-av";
 import { munchStyles } from "@/constants/styles";
 import { FontAwesome } from "@expo/vector-icons";
 import { munchColors } from "@/constants/Colors";
+import * as Progress from "react-native-progress";
 
 export default function UserRewardsScreen() {
   const user = useSelector(selectUser);
@@ -66,6 +69,8 @@ export default function UserRewardsScreen() {
     await sound.playAsync();
   };
 
+  const handlePaypalPress = () => {};
+
   return (
     <View style={styles.container}>
       {/* Header */}
@@ -94,15 +99,31 @@ export default function UserRewardsScreen() {
           </View>
           <Text style={styles.rewardPointsSubtitle}>Reward Points</Text>
         </View>
-        <View>
+        <TouchableOpacity
+          onPress={handlePaypalPress}
+          style={styles.paypalContainer}
+        >
           <Image
             source={require("@/assets/images/paypal.png")}
             style={styles.paypalImage}
           />
           <View style={styles.paypalInnerContainer}>
-            {/* <Text style={styles.rewardPointsSubtitle}>Redeem For Cash</Text> */}
+            <View style={styles.progressBarTopPointsContainer}>
+              <Text style={styles.progressBarTopPointsText}>0</Text>
+              <Text style={styles.progressBarTopPointsText}>1k</Text>
+            </View>
+            <Progress.Bar
+              progress={Math.min(rewardPoints / 1000, 1)}
+              width={100} // Adjust width as needed
+              height={10}
+              color={munchColors.primary} // Gold color for rewards
+              borderRadius={5}
+              unfilledColor="#e0e0e0"
+              style={{ marginBottom: 5 }}
+            />
+            <Text style={styles.rewardPointsSubtitle}>Redeem $10</Text>
           </View>
-        </View>
+        </TouchableOpacity>
       </View>
 
       {/* Confetti animation */}
@@ -188,7 +209,7 @@ const styles = StyleSheet.create({
   rewardsPointsSubContainer: {
     height: "100%",
     justifyContent: "center",
-    paddingHorizontal: 20,
+    paddingLeft: 20,
   },
   rewardsPointsSubSubContainer: {
     flexDirection: "row",
@@ -203,20 +224,30 @@ const styles = StyleSheet.create({
   },
   paypalContainer: {
     height: 150,
-    justifyContent: "center",
     width: "100%",
     flexDirection: "row",
     paddingVertical: 20,
-    alignContent: "space-between",
   },
   paypalImage: {
-    width: 100,
-    height: 100,
-    marginHorizontal: 20,
+    width: 80,
+    height: 80,
     marginVertical: "auto",
   },
   paypalInnerContainer: {
     justifyContent: "center",
     alignItems: "center",
+    flexDirection: "column",
+  },
+  progressBarTopPointsText: {
+    color: "#000",
+    fontWeight: "bold",
+    fontSize: 12,
+    paddingBottom: 5,
+  },
+  progressBarTopPointsContainer: {
+    width: 125,
+    flexDirection: "row",
+    justifyContent: "space-between",
+    paddingHorizontal: 10,
   },
 });
