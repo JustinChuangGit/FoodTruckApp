@@ -99,7 +99,7 @@ export default function UserVendorInfo() {
                   style={styles.icon}
                 />
               </TouchableOpacity>
-              {image ? (
+              {truckImage ? (
                 <>
                   {imageLoading && (
                     <ActivityIndicator
@@ -109,7 +109,7 @@ export default function UserVendorInfo() {
                     />
                   )}
                   <Image
-                    source={{ uri: image }}
+                    source={{ uri: truckImage }}
                     style={styles.logo}
                     onLoad={() => setImageLoading(false)}
                     onLoadStart={() => setImageLoading(true)}
@@ -125,7 +125,7 @@ export default function UserVendorInfo() {
               <Text style={styles.name}>{vendorName}</Text>
               <View style={styles.circleContainer}>
                 <View style={styles.circle}>
-                  {truckImageLoading && (
+                  {image && (
                     <ActivityIndicator
                       size="small"
                       color="#007bff"
@@ -133,7 +133,7 @@ export default function UserVendorInfo() {
                     />
                   )}
                   <Image
-                    source={{ uri: truckImage }}
+                    source={{ uri: image }}
                     style={styles.circleLogo}
                     onLoad={() => setTruckImageLoading(false)} // Image successfully loaded
                     onLoadStart={() => setTruckImageLoading(true)} // Start loading
@@ -251,7 +251,7 @@ const styles = StyleSheet.create({
     width: 125,
     height: 125,
     borderRadius: 80,
-    resizeMode: "contain",
+    resizeMode: "cover",
   },
   tabContainer: {
     flexDirection: "row",
