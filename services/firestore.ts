@@ -1,4 +1,4 @@
-import { getFirestore, doc, setDoc, getDoc, updateDoc, collection, getDocs, deleteField, arrayRemove,arrayUnion, increment } from "firebase/firestore";
+import { getFirestore, doc, setDoc, getDoc, updateDoc, collection, getDocs, deleteField, arrayRemove,arrayUnion, increment, addDoc, serverTimestamp } from "firebase/firestore";
 import { app } from "../firebaseConfig"; // Import the initialized Firebase app
 import { Alert } from "react-native"; // For React Native prompts (adjust for web if needed)
 import { MenuItem } from "@/constants/types"; // Import the MenuItem type
@@ -586,3 +586,119 @@ export const updateMoneySaved = async (
     throw error;
   }
 };
+
+export async function logImpression(
+  vendorUid: string,
+  accountUid: string,
+  latitude: number,
+  longitude: number,
+  type: string
+) {
+  if (!vendorUid || !accountUid || latitude === undefined || longitude === undefined || !type) {
+    console.error("Missing required parameters for logClickThrough");
+    return;
+  }
+
+  try {
+    // Reference to the vendor document
+    const vendorRef = doc(db, `vendors/${vendorUid}`);
+
+    // Get current timestamp from the client
+    const timestamp = new Date().toISOString(); // ISO format for consistency
+
+    // Click data to append to the array
+    const clickData = {
+      timestamp, // Use client-side timestamp
+      account: accountUid,
+      latitude: latitude,
+      longitude: longitude,
+      type: type,
+    };
+
+    // Update Firestore document to add to the array
+    await updateDoc(vendorRef, {
+      accountImpression: arrayUnion(clickData), // Append to the array
+    });
+
+    console.log(`Click-through logged for vendor: ${vendorUid}`);
+  } catch (error) {
+    console.error("Error logging click-through:", error);
+  }
+}
+
+export async function logClickThrough(
+  vendorUid: string,
+  accountUid: string,
+  latitude: number,
+  longitude: number,
+  type: string
+) {
+  if (!vendorUid || !accountUid || latitude === undefined || longitude === undefined || !type) {
+    console.error("Missing required parameters for logClickThrough");
+    return;
+  }
+
+  try {
+    // Reference to the vendor document
+    const vendorRef = doc(db, `vendors/${vendorUid}`);
+
+    // Get current timestamp from the client
+    const timestamp = new Date().toISOString(); // ISO format for consistency
+
+    // Click data to append to the array
+    const clickData = {
+      timestamp, // Use client-side timestamp
+      account: accountUid,
+      latitude: latitude,
+      longitude: longitude,
+      type: type,
+    };
+
+    // Update Firestore document to add to the array
+    await updateDoc(vendorRef, {
+      accountClicks: arrayUnion(clickData), // Append to the array
+    });
+
+    console.log(`Click-through logged for vendor: ${vendorUid}`);
+  } catch (error) {
+    console.error("Error logging click-through:", error);
+  }
+}
+export async function logCouponAdd(
+  vendorUid: string,
+  accountUid: string,
+  latitude: number,
+  longitude: number,
+  couponId: string
+) {
+  if (!vendorUid || !accountUid || latitude === undefined || longitude === undefined || !couponId) {
+    console.error("Missing required parameters for logClickThrough");
+    return;
+  }
+
+  try {
+    // Reference to the vendor document
+    const vendorRef = doc(db, `vendors/${vendorUid}`);
+
+    // Get current timestamp from the client
+    const timestamp = new Date().toISOString(); // ISO format for consistency
+
+    // Click data to append to the array
+    const clickData = {
+      timestamp, // Use client-side timestamp
+      account: accountUid,
+      latitude: latitude,
+      longitude: longitude,
+      couponId: couponId,
+    };
+
+    // Update Firestore document to add to the array
+    await updateDoc(vendorRef, {
+      couponAdds: arrayUnion(clickData), // Append to the array
+    });
+
+    console.log(`Click-through logged for vendor: ${vendorUid}`);
+  } catch (error) {
+    console.error("Error logging click-through:", error);
+  }
+}

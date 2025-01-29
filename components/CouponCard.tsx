@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import {
   View,
   Text,
@@ -13,7 +13,11 @@ import { munchStyles } from "@/constants/styles";
 import { munchColors } from "@/constants/Colors";
 import { redeemCoupon } from "@/redux/authSlice"; // Import the redeem action
 import { selectUser } from "@/redux/authSlice"; // Import the user selector
-import { addCouponToAccount } from "@/services/firestore";
+import {
+  addCouponToAccount,
+  logCouponAdd,
+  logImpression,
+} from "@/services/firestore";
 
 type CouponCardProps = {
   coupon: Coupon;
@@ -34,6 +38,13 @@ const CouponCard: React.FC<CouponCardProps> = ({ coupon, vendor, onPress }) => {
     if (user?.uid) {
       dispatch(redeemCoupon(coupon.id));
       addCouponToAccount(user.uid, coupon.id); // Add the coupon to the user's account
+      logCouponAdd(
+        vendor?.uid ?? "unknown_vendor", // Default value for undefined vendor ID
+        user?.uid ?? "unknown_user", // Default value for undefined user ID
+        user?.latitude ?? 0, // Default latitude
+        user?.longitude ?? 0, // Default longitude
+        coupon.id
+      );
     }
   };
 
@@ -41,6 +52,16 @@ const CouponCard: React.FC<CouponCardProps> = ({ coupon, vendor, onPress }) => {
     const locale = Intl.DateTimeFormat().resolvedOptions().locale;
     return locale.includes("US") ? "miles" : "km";
   }, []);
+
+  useEffect(() => {
+    logImpression(
+      vendor?.uid ?? "unknown_vendor", // Default value for undefined vendor ID
+      user?.uid ?? "unknown_user", // Default value for undefined user ID
+      user?.latitude ?? 0, // Default latitude
+      user?.longitude ?? 0, // Default longitude
+      "cardItem"
+    );
+  }, []); // Empty dependency array means it runs only once
 
   return (
     <View style={[styles.card, { height: vendor ? 265 : 150 }]}>

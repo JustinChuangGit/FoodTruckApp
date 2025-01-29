@@ -22,10 +22,12 @@ import VendorMarker from "../../../components/VendorMarker";
 import VendorMapInfoCard from "../../../components/VendorMapInfoCard";
 import { Vendor, LocationCoordinates } from "@/constants/types";
 import { collection, onSnapshot } from "firebase/firestore";
-import { db } from "@/services/firestore";
+import { db, logClickThrough, logImpression } from "@/services/firestore";
 import { Section } from "@/constants/types";
 import { router } from "expo-router";
 import CouponRow from "@/components/couponRow";
+import { useSelector } from "react-redux";
+import { selectUser } from "../../../redux/authSlice"; // Update the path as needed
 
 const { width } = Dimensions.get("window");
 
@@ -145,6 +147,7 @@ export default function Index() {
   const snapPoints = useMemo(() => ["15%", "50%", "90%"], []);
   const scaleAnim = useRef(new Animated.Value(0)).current; // Initial scale value
   const nearbyVendors = getNearbyVendors(vendors, location);
+  const user = useSelector(selectUser);
   const combinedData = [
     { type: "myRow", section: nearbyVendors, key: "myRow1" }, // First row
     { type: "couponRow", section: nearbyVendors, key: "couponRow" }, // Second row
@@ -248,9 +251,17 @@ export default function Index() {
   }, [selectedVendor]);
 
   const handleMarkerPress = (vendor: Vendor) => {
+    console.log("Marker pressed");
     const index = vendors.findIndex((v) => v.uid === vendor.uid);
     setSelectedVendor(vendor);
     setCarouselIndex(index);
+    logImpression(
+      vendor?.uid ?? "unknown_vendor", // Default value for undefined vendor ID
+      user?.uid ?? "unknown_user", // Default value for undefined user ID
+      user?.latitude ?? 0, // Default latitude
+      user?.longitude ?? 0, // Default longitude
+      "carousel"
+    );
   };
 
   const handleCardClose = () => {
@@ -259,9 +270,27 @@ export default function Index() {
   };
 
   const handleCardPress = (vendor: Vendor) => {
+    console.log("Card pressed");
+    handlePress(vendor, "card");
+  };
+
+  const handleCouponPress = (vendor: Vendor) => {
+    console.log("Coupon pressed");
+    handlePress(vendor, "coupon");
+  };
+
+  const handlePress = (vendor: Vendor, pressType: string) => {
+    console.log("HandlePress");
     setSelectedVendor(vendor);
     const index = vendors.findIndex((v) => v.uid === vendor.uid);
     setCarouselIndex(index);
+    logClickThrough(
+      vendor?.uid ?? "unknown_vendor", // Default value for undefined vendor ID
+      user?.uid ?? "unknown_user", // Default value for undefined user ID
+      user?.latitude ?? 0, // Default latitude
+      user?.longitude ?? 0, // Default longitude
+      pressType ?? "unknown_press_type" // Default value for undefined press type
+    );
 
     const location = JSON.stringify({
       latitude: vendor.latitude,
@@ -385,7 +414,7 @@ export default function Index() {
                 return (
                   <CouponRow
                     section={item.section}
-                    onCardPress={handleCardPress}
+                    onCardPress={handleCouponPress}
                   />
                 );
               }

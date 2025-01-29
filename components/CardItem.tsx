@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import {
   View,
   Text,
@@ -10,7 +10,9 @@ import {
 import { Vendor } from "@/constants/types";
 import { FontAwesome } from "@expo/vector-icons";
 import { munchStyles } from "@/constants/styles";
-
+import { logClickThrough, logImpression } from "@/services/firestore";
+import { useSelector } from "react-redux";
+import { selectUser } from "@/redux/authSlice"; // Update the path as needed
 interface CardItemProps {
   vendor: Vendor;
   onPress: () => void; // Add this prop
@@ -19,6 +21,7 @@ interface CardItemProps {
 const CardItem: React.FC<CardItemProps> = ({ vendor, onPress }) => {
   const [loading, setLoading] = useState(true); // Track image loading state
   const [isFavorited, setIsFavorited] = useState(false);
+  const user = useSelector(selectUser);
 
   const handleHeartPress = () => {
     setIsFavorited((prev) => !prev);
@@ -29,6 +32,15 @@ const CardItem: React.FC<CardItemProps> = ({ vendor, onPress }) => {
     return locale.includes("US") ? "miles" : "km";
   }, []);
 
+  useEffect(() => {
+    logImpression(
+      vendor.uid,
+      user?.uid ?? "unknown_user", // Default value for undefined user ID
+      user?.latitude ?? 0, // Default latitude
+      user?.longitude ?? 0, // Default longitude
+      "cardItem"
+    );
+  }, []); // Empty dependency array means it runs only once
   return (
     <TouchableOpacity style={styles.cardItem} onPress={onPress}>
       <View style={styles.imageContainer}>
