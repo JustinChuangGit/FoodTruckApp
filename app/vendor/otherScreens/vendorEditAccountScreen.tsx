@@ -243,7 +243,7 @@ export default function VendorEditAccountScreen() {
               </View>
             </View>
             {/* Form Inputs */}
-            <Text style={styles.label}>Name</Text>
+            <Text style={styles.label}>Vendor Name</Text>
             <TextInput
               style={styles.input}
               value={vendorName}

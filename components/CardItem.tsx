@@ -60,9 +60,13 @@ const CardItem: React.FC<CardItemProps> = ({ vendor, onPress }) => {
           <Text style={styles.vendorPrice}>{vendor.vendorType} </Text>
           <FontAwesome name="circle" size={8} color="#888" />
           <Text style={styles.vendorPrice}> {vendor.price} </Text>
-          <FontAwesome name="circle" size={8} color="#888" />
-          <Text style={styles.vendorRating}> {vendor.rating}</Text>
-          <FontAwesome name="star" size={12} color="#888" />
+          {vendor.rating > 0 && (
+            <View>
+              <FontAwesome name="circle" size={8} color="#888" />
+              <Text style={styles.vendorRating}> {vendor.rating}</Text>
+              <FontAwesome name="star" size={12} color="#888" />
+            </View>
+          )}
         </View>
         <Text style={styles.vendorRating}>
           {vendor.distance !== undefined

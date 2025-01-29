@@ -87,7 +87,7 @@ export default function Index() {
   const [isVendorActive, setVendorActive] = useState(false);
   const [buttonColorAnim] = useState(new Animated.Value(0));
   const user = useSelector(selectUser);
-  const userName = user?.name || "Vendor Name";
+  const userName = user?.vendorName || "Vendor Name";
   const hasRunOnce = useRef(false); // Track if the logic has run
   const dispatch = useDispatch();
   const vendorPaid = user?.vendorPaid || false;
@@ -265,6 +265,7 @@ export default function Index() {
           image: user.image || null, // Include vendor's logo image
           truckImage: user.truckImage || null, // Include vendor's truck image
           coupons: user.coupons || [], // Include coupons directly
+          vendorName: user.vendorName, // Include truck name
         };
 
         // Add the vendor to the `activeVendors` collection
