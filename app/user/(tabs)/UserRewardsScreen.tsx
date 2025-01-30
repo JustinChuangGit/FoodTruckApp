@@ -69,7 +69,21 @@ export default function UserRewardsScreen() {
     await sound.playAsync();
   };
 
-  const handlePaypalPress = () => {};
+  const handlePaypalPress = () => {
+    if ((user?.rewardPoints ?? 0) < 1000) {
+      Alert.alert(
+        "Not enough points",
+        "You need at least 1000 points to redeem."
+      );
+      return;
+    }
+
+    // If the user has 1000+ points, show the "Feature coming soon" message
+    Alert.alert(
+      "Keep earning points!",
+      "This feature is coming soon\ntry again later!"
+    );
+  };
 
   return (
     <View style={styles.container}>
@@ -103,10 +117,10 @@ export default function UserRewardsScreen() {
           onPress={handlePaypalPress}
           style={styles.paypalContainer}
         >
-          <Image
+          {/* <Image
             source={require("@/assets/images/paypal.png")}
             style={styles.paypalImage}
-          />
+          /> */}
           <View style={styles.paypalInnerContainer}>
             <View style={styles.progressBarTopPointsContainer}>
               <Text style={styles.progressBarTopPointsText}>0</Text>
@@ -114,7 +128,7 @@ export default function UserRewardsScreen() {
             </View>
             <Progress.Bar
               progress={Math.min(rewardPoints / 1000, 1)}
-              width={100} // Adjust width as needed
+              width={150} // Adjust width as needed
               height={10}
               color={munchColors.primary} // Gold color for rewards
               borderRadius={5}
@@ -205,11 +219,15 @@ const styles = StyleSheet.create({
     marginTop: -90,
     display: "flex",
     flexDirection: "row",
+    alignItems: "center",
   },
   rewardsPointsSubContainer: {
-    height: "100%",
+    height: 100,
     justifyContent: "center",
     paddingLeft: 20,
+    paddingRight: 20,
+    borderRightWidth: 1, // Adjust thickness
+    borderRightColor: "#e0e0e0", // Gold color for the border
   },
   rewardsPointsSubSubContainer: {
     flexDirection: "row",
@@ -223,10 +241,9 @@ const styles = StyleSheet.create({
     backgroundColor: munchColors.primary,
   },
   paypalContainer: {
-    height: 150,
-    width: "100%",
     flexDirection: "row",
     paddingVertical: 20,
+    flex: 1,
   },
   paypalImage: {
     width: 80,
@@ -237,15 +254,16 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     flexDirection: "column",
+    marginHorizontal: "auto",
   },
   progressBarTopPointsText: {
-    color: "#000",
+    color: "#999",
     fontWeight: "bold",
-    fontSize: 12,
+    fontSize: 15,
     paddingBottom: 5,
   },
   progressBarTopPointsContainer: {
-    width: 125,
+    width: 175,
     flexDirection: "row",
     justifyContent: "space-between",
     paddingHorizontal: 10,
