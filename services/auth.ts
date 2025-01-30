@@ -63,8 +63,8 @@ export const signUp = async (
       phone,
       mailingAddress,
       accountCreated,
-      newReferralCode, // ✅ Save the generated referral code
-      rewardPoints, // ✅ Save reward points correctly
+      newReferralCode,
+      rewardPoints, 
     });
 
     // Dispatch Redux action to update state

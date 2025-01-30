@@ -29,7 +29,7 @@ export const RenderCoupons: React.FC<RenderCouponsProps> = ({
         keyExtractor={(item) => `coupon-${item.id}`}
         renderItem={({ item }) => (
           <View style={styles.couponGridItem}>
-            <CouponCard coupon={item} vendorImage={vendorImage} />
+            <CouponCard coupon={item} />
           </View>
         )}
         numColumns={2}

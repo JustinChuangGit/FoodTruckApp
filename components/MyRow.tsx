@@ -30,6 +30,13 @@ const MyRow: React.FC<MyRowProps> = ({ section, onCardPress }) => (
       renderItem={({ item }) => (
         <CardItem vendor={item} onPress={() => onCardPress(item)} />
       )}
+      ListEmptyComponent={
+        <View style={styles.emptyContainer}>
+          <Text style={styles.emptyText}>
+            No vendors online, please check back soon.
+          </Text>
+        </View>
+      }
     />
   </View>
 );
@@ -46,6 +53,20 @@ const styles = StyleSheet.create({
     fontSize: 22,
     fontWeight: "bold",
     paddingBottom: 8,
+  },
+  emptyContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    width: "100%",
+  },
+
+  emptyText: {
+    fontSize: 16,
+    fontStyle: "italic",
+    color: "gray",
+    textAlign: "center",
+    paddingHorizontal: 30,
   },
 });
 

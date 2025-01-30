@@ -52,8 +52,8 @@ const CardItem: React.FC<CardItemProps> = ({ vendor, onPress }) => {
           />
         )}
         <Image
-          key={vendor.image}
-          source={{ uri: vendor.image }}
+          key={vendor.truckImage}
+          source={{ uri: vendor.truckImage }}
           style={styles.vendorImage}
           onLoadStart={() => setLoading(true)} // Show loader
           onLoad={() => setLoading(false)} // Hide loader once loaded
