@@ -139,6 +139,25 @@ export default function UserRewardsScreen() {
           </View>
         </TouchableOpacity>
       </View>
+      <View style={styles.earnRewardsOtherWaysContainer}>
+        <Text style={styles.subtitle}>Earn More Rewards</Text>
+
+        <TouchableOpacity
+          onPress={() => Alert.alert("Feature coming soon!")}
+          style={styles.earnMoreRewardsItem}
+        >
+          <View>
+            <Text style={styles.earnMoreRewardsItemTitle}>Invite Friends</Text>
+            <Text style={styles.earnMoreRewardsItemSubtitle}>
+              You get points they get points
+            </Text>
+          </View>
+          <View style={styles.earnMoreRewardsItemRewardContainer}>
+            <Text style={styles.earnMoreRewardsItemValue}>50</Text>
+            <Text style={styles.earnMoreRewardsItemPointsText}>Points</Text>
+          </View>
+        </TouchableOpacity>
+      </View>
 
       {/* Confetti animation */}
       {confettiVisible && (
@@ -185,6 +204,7 @@ const styles = StyleSheet.create({
     color: "#555",
     textAlign: "center",
     marginBottom: 20,
+    flexDirection: "row",
   },
   rewardPoints: {
     fontSize: 40,
@@ -267,5 +287,44 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     paddingHorizontal: 10,
+  },
+  earnRewardsOtherWaysContainer: {
+    marginTop: 20,
+    marginBottom: 10,
+    alignItems: "center",
+  },
+  earnMoreRewardsItem: {
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    marginBottom: 10,
+    backgroundColor: "#f0f0f0",
+    width: "90%",
+    borderRadius: munchStyles.smallRadius,
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    height: 100,
+  },
+
+  earnMoreRewardsItemValue: {
+    fontSize: 30,
+    fontWeight: "bold",
+    color: "#4CAF50",
+  },
+  earnMoreRewardsItemPointsText: {
+    fontSize: 20,
+    color: "#888",
+    justifyContent: "center",
+  },
+  earnMoreRewardsItemRewardContainer: {
+    alignItems: "center",
+  },
+  earnMoreRewardsItemTitle: {
+    fontSize: 25,
+    color: "#333",
+  },
+  earnMoreRewardsItemSubtitle: {
+    fontSize: 15,
+    color: "#666",
   },
 });
