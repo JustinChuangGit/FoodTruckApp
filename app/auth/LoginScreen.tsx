@@ -31,7 +31,6 @@ export default function LoginScreen() {
   const handleLogin = async () => {
     try {
       const user = await signIn(dispatch, email, password);
-      console.log("User signed in:", user);
 
       if (user?.isVendor) {
         router.replace("/vendor");

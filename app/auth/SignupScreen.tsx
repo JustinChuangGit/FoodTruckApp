@@ -20,6 +20,7 @@ import { munchColors } from "@/constants/Colors";
 import { munchStyles } from "@/constants/styles";
 import HorizontalLine from "@/components/default/HorizontalLine";
 import { ScrollView } from "react-native-gesture-handler";
+import { ref } from "firebase/storage";
 
 export default function SignupScreen() {
   const router = useRouter();
@@ -30,6 +31,7 @@ export default function SignupScreen() {
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
   const [mailingAddress, setMailingAddress] = useState("");
+  const [referralCode, setReferralCode] = useState("");
 
   const dispatch = useDispatch<AppDispatch>();
 
@@ -48,9 +50,9 @@ export default function SignupScreen() {
         name,
         phone,
         mailingAddress,
-        accountCreated
+        accountCreated,
+        referralCode
       );
-      console.log("User signed up:", user);
       router.replace(
         isVendor ? "/vendor/otherScreens/vendorSignupTriageScreen" : "/user"
       );
@@ -120,6 +122,14 @@ export default function SignupScreen() {
               secureTextEntry
               value={confirmPassword}
               onChangeText={setConfirmPassword}
+            />
+
+            <TextInput
+              style={styles.input}
+              placeholder="Referral Code (Optional)"
+              placeholderTextColor="#A9A9A9"
+              value={referralCode}
+              onChangeText={setReferralCode}
             />
 
             {/* Vendor Toggle */}

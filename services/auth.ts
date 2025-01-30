@@ -16,7 +16,8 @@ import { AppDispatch, persistor } from "../redux/store"; // Adjust the path as n
 import ReactNativeAsyncStorage from "@react-native-async-storage/async-storage";
 import { collection, getDocs, getDoc, doc } from "firebase/firestore"; // Import necessary Firestore methods
 import { db } from "@/services/firestore"; // Import the Firestore instance
-
+import { ref } from "firebase/storage";
+import { checkReferralCode } from "./firestore";
 const auth = initializeAuth(app, {
   persistence: getReactNativePersistence(ReactNativeAsyncStorage),
 });
@@ -37,20 +38,28 @@ export const signUp = async (
   name: string,
   phone: string,
   mailingAddress?: string,
-  accountCreated?: string
+  accountCreated?: string,
+  referralCode?: string
 ) => {
   try {
     const userCredential = await createUserWithEmailAndPassword(auth, email, password);
     const user = userCredential.user;
-    const referralCode = Math.floor(100000 + Math.random() * 900000).toString();
-    console.log("referralCode", referralCode);
+    const rewardPoints = 0;
+    
+    const newReferralCode = Math.floor(100000 + Math.random() * 900000).toString();
+    if (referralCode !== "") {
+      if(referralCode){
+        checkReferralCode(referralCode);
+        rewardPoints + 50;
+      }
+    }
 
 
     // Save additional user data in Firestore
-    await saveUserData(user.uid, { email, name, isVendor,phone,mailingAddress, accountCreated,referralCode });
+    await saveUserData(user.uid, { email, name, isVendor,phone,mailingAddress, accountCreated, newReferralCode,rewardPoints });
 
     // Dispatch Redux action to update state
-    dispatch(setUser({ uid: user.uid, email, name, isVendor }));
+    dispatch(setUser({ uid: user.uid, email, name, isVendor,rewardPoints }));
 
     return user;
   } catch (error) {

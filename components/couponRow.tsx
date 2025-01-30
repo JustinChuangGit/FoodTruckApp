@@ -23,8 +23,6 @@ const CouponRow: React.FC<CouponRowProps> = ({ section, onCardPress }) => {
     }))
   );
 
-  console.log("Coupons:", coupons);
-
   return (
     <View style={styles.mainSection}>
       <View

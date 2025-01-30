@@ -10,7 +10,7 @@ export const db = getFirestore(app);
 // Function to save user data
 export const saveUserData = async (
   uid: string,
-  data: { email: string; name: string; isVendor: boolean, phone: string, mailingAddress?: string, accountCreated?: string, referralCode?: string, latitude?: number, longitude?: number, rewardPoints?: number, coupons?: Coupon[], addedCoupons?: string[], moneySavedFromCoupons?: number, vendorName?: string, vendorPaid?: boolean, image?: string, truckImage?: string, price?: string, vendorType?: string, description?: string }
+  data: { email: string; name: string; isVendor: boolean, phone: string, mailingAddress?: string, accountCreated?: string, newReferralCode?: string, latitude?: number, longitude?: number, rewardPoints?: number, coupons?: Coupon[], addedCoupons?: string[], moneySavedFromCoupons?: number, vendorName?: string, vendorPaid?: boolean, image?: string, truckImage?: string, price?: string, vendorType?: string, description?: string }
 ): Promise<void> => {
   try {
     if(data.isVendor){
@@ -24,6 +24,20 @@ export const saveUserData = async (
     console.error("Error saving user data:", error);
     throw error;
   }
+
+  try {
+    if (data.newReferralCode) {
+        await setDoc(doc(db, "referralCodes", data.newReferralCode), {
+            uid: uid, // Store the user's UID for reference
+            isVendor: data.isVendor,
+        });
+        console.log("Referral code saved successfully.");
+    }
+} catch (error) {
+    console.error("Error saving referral code:", error);
+    throw error;
+}
+
 };
 
 // Function to fetch user data
@@ -620,7 +634,6 @@ export async function logImpression(
       accountImpression: arrayUnion(clickData), // Append to the array
     });
 
-    console.log(`Click-through logged for vendor: ${vendorUid}`);
   } catch (error) {
     console.error("Error logging click-through:", error);
   }
@@ -659,7 +672,6 @@ export async function logClickThrough(
       accountClicks: arrayUnion(clickData), // Append to the array
     });
 
-    console.log(`Click-through logged for vendor: ${vendorUid}`);
   } catch (error) {
     console.error("Error logging click-through:", error);
   }
@@ -697,8 +709,47 @@ export async function logCouponAdd(
       couponAdds: arrayUnion(clickData), // Append to the array
     });
 
-    console.log(`Click-through logged for vendor: ${vendorUid}`);
   } catch (error) {
     console.error("Error logging click-through:", error);
+  }
+}
+
+
+export async function checkReferralCode(referralCode: string): Promise<boolean> {
+  try {
+    // Reference the Firestore document where referral codes are stored
+    const referralDocRef = doc(db, "referralCodes", referralCode);
+    const referralDocSnap = await getDoc(referralDocRef);
+
+    // If document exists, the referral code exists in Firestore
+    if (referralDocSnap.exists()) {
+      addRewardPoints(referralDocSnap.data().uid);
+      return true;
+    }
+
+    return false;
+  } catch (error) {
+    console.error("Error checking referral code:", error);
+    return false; // Assume it doesn't exist if there's an error
+  }
+}
+
+
+export async function addRewardPoints(uid: string): Promise<void> {
+  if (!uid) {
+    return;
+  }
+
+  try {
+    // Reference the Firestore document for the user
+    const userDocRef = doc(db, "users", uid);
+
+    // Increment rewardPoints by 50
+    await updateDoc(userDocRef, {
+      rewardPoints: increment(50),
+    });
+
+  } catch (error) {
+    throw error;
   }
 }
