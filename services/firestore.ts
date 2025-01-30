@@ -10,7 +10,7 @@ export const db = getFirestore(app);
 // Function to save user data
 export const saveUserData = async (
   uid: string,
-  data: { email: string; name: string; isVendor: boolean, phone: string, mailingAddress?: string, accountCreated?: string, newReferralCode?: string, latitude?: number, longitude?: number, rewardPoints?: number, coupons?: Coupon[], addedCoupons?: string[], moneySavedFromCoupons?: number, vendorName?: string, vendorPaid?: boolean, image?: string, truckImage?: string, price?: string, vendorType?: string, description?: string }
+  data: { email: string; name: string; isVendor: boolean, phone: string, mailingAddress?: string, accountCreated?: string, referralCode?: string, latitude?: number, longitude?: number, rewardPoints?: number, coupons?: Coupon[], addedCoupons?: string[], moneySavedFromCoupons?: number, vendorName?: string, vendorPaid?: boolean, image?: string, truckImage?: string, price?: string, vendorType?: string, description?: string }
 ): Promise<void> => {
   try {
     if(data.isVendor){
@@ -26,8 +26,8 @@ export const saveUserData = async (
   }
 
   try {
-    if (data.newReferralCode) {
-        await setDoc(doc(db, "referralCodes", data.newReferralCode), {
+    if (data.referralCode) {
+        await setDoc(doc(db, "referralCodes", data.referralCode), {
             uid: uid, // Store the user's UID for reference
             isVendor: data.isVendor,
         });

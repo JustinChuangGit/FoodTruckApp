@@ -63,7 +63,7 @@ export const signUp = async (
       phone,
       mailingAddress,
       accountCreated,
-      newReferralCode,
+      referralCode: newReferralCode,
       rewardPoints, 
     });
 

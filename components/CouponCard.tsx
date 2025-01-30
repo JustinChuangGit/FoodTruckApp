@@ -89,7 +89,7 @@ const CouponCard: React.FC<CouponCardProps> = ({ coupon, vendor, onPress }) => {
           <Text style={styles.headline}>{coupon.headline}</Text>
           <Text style={styles.description}>{coupon.description}</Text>
         </View>
-        <>
+        <View>
           {vendor && (
             <Text style={styles.vendorDistance}>
               {vendor?.distance !== undefined
@@ -114,7 +114,7 @@ const CouponCard: React.FC<CouponCardProps> = ({ coupon, vendor, onPress }) => {
               {isApplied ? "Applied" : "Redeem"}
             </Text>
           </TouchableOpacity>
-        </>
+        </View>
       </TouchableOpacity>
     </View>
   );
@@ -159,6 +159,7 @@ const styles = StyleSheet.create({
     color: "#555",
     marginBottom: 8,
     textAlign: "left", // Ensures left justification
+    overflow: "hidden", // Ensures text doesn't overflow
   },
   addCouponButton: {
     backgroundColor: munchColors.primary,
@@ -198,6 +199,7 @@ const styles = StyleSheet.create({
     color: "#AAA",
     marginTop: 8,
     textAlign: "left", // Ensures left justification
+    marginBottom: 8,
   },
 });
 
