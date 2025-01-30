@@ -44,22 +44,31 @@ export const signUp = async (
   try {
     const userCredential = await createUserWithEmailAndPassword(auth, email, password);
     const user = userCredential.user;
-    const rewardPoints = 0;
+    let rewardPoints = 0;
     
     const newReferralCode = Math.floor(100000 + Math.random() * 900000).toString();
-    if (referralCode !== "") {
-      if(referralCode){
-        checkReferralCode(referralCode);
-        rewardPoints + 50;
+    if (referralCode) {
+      const isValidReferral = await checkReferralCode(referralCode);
+      if (isValidReferral) {
+        rewardPoints += 50;
       }
     }
 
 
     // Save additional user data in Firestore
-    await saveUserData(user.uid, { email, name, isVendor,phone,mailingAddress, accountCreated, newReferralCode,rewardPoints });
+    await saveUserData(user.uid, {
+      email,
+      name,
+      isVendor,
+      phone,
+      mailingAddress,
+      accountCreated,
+      newReferralCode, // ✅ Save the generated referral code
+      rewardPoints, // ✅ Save reward points correctly
+    });
 
     // Dispatch Redux action to update state
-    dispatch(setUser({ uid: user.uid, email, name, isVendor,rewardPoints }));
+    dispatch(setUser({ uid: user.uid, email, name, isVendor,rewardPoints, referralCode: newReferralCode }));
 
     return user;
   } catch (error) {
