@@ -58,6 +58,7 @@ export interface User {
   vendorName?: string; // Add vendor name
   vendorPaid?: boolean; // Add vendor paid status
   accountCreated?: Date; // Add account created date
+  referralCode?: string; // Add referral code
 }
 
 export interface Section {

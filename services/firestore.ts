@@ -10,7 +10,7 @@ export const db = getFirestore(app);
 // Function to save user data
 export const saveUserData = async (
   uid: string,
-  data: { email: string; name: string; isVendor: boolean, phone: string, mailingAddress?: string, accountCreated?: string}
+  data: { email: string; name: string; isVendor: boolean, phone: string, mailingAddress?: string, accountCreated?: string, referralCode?: string, latitude?: number, longitude?: number, rewardPoints?: number, coupons?: Coupon[], addedCoupons?: string[], moneySavedFromCoupons?: number, vendorName?: string, vendorPaid?: boolean, image?: string, truckImage?: string, price?: string, vendorType?: string, description?: string }
 ): Promise<void> => {
   try {
     if(data.isVendor){

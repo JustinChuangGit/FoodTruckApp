@@ -42,9 +42,12 @@ export const signUp = async (
   try {
     const userCredential = await createUserWithEmailAndPassword(auth, email, password);
     const user = userCredential.user;
+    const referralCode = Math.floor(100000 + Math.random() * 900000).toString();
+    console.log("referralCode", referralCode);
+
 
     // Save additional user data in Firestore
-    await saveUserData(user.uid, { email, name, isVendor,phone,mailingAddress, accountCreated });
+    await saveUserData(user.uid, { email, name, isVendor,phone,mailingAddress, accountCreated,referralCode });
 
     // Dispatch Redux action to update state
     dispatch(setUser({ uid: user.uid, email, name, isVendor }));
@@ -74,6 +77,8 @@ export const signIn = async (dispatch: AppDispatch, email: string, password: str
         email: user.email || "",
         ...userData,
       };
+      console.log("---------------------------------Firestore User Data:", userData); // 🔍 Debugging Log
+
     } else {
       // If not in `users`, try `vendors` collection
       const vendorDoc = await getDoc(doc(db, "vendors", user.uid));

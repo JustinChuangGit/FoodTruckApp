@@ -85,6 +85,8 @@ export default function UserRewardsScreen() {
     );
   };
 
+  console.log("referralCode: ", user?.referralCode);
+
   return (
     <View style={styles.container}>
       {/* Header */}
@@ -143,7 +145,14 @@ export default function UserRewardsScreen() {
         <Text style={styles.subtitle}>Earn More Rewards</Text>
 
         <TouchableOpacity
-          onPress={() => Alert.alert("Feature coming soon!")}
+          onPress={() =>
+            Alert.alert(
+              `Share your referral code: \n${
+                user?.referralCode ||
+                "Hmm. Something went wrong. Please contact us"
+              }`
+            )
+          }
           style={styles.earnMoreRewardsItem}
         >
           <View>
