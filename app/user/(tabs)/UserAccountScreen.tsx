@@ -5,12 +5,14 @@ import {
   StyleSheet,
   TouchableOpacity,
   SafeAreaView,
+  Button,
 } from "react-native";
 import { useRouter } from "expo-router";
 import { FontAwesome } from "@expo/vector-icons";
 import { useDispatch } from "react-redux"; // Import useDispatch
 import { signOutUser } from "@/services/auth"; // Import signOutUser
 import { munchColors } from "@/constants/Colors";
+import * as Sentry from "@sentry/react-native";
 
 export default function UserAccountScreen() {
   const router = useRouter();
@@ -67,6 +69,12 @@ export default function UserAccountScreen() {
             style={styles.rightChevron}
           />
         </TouchableOpacity>
+        <Button
+          title="Try!"
+          onPress={() => {
+            Sentry.captureException(new Error("First error"));
+          }}
+        />
       </View>
 
       {/* Sign Out Button */}

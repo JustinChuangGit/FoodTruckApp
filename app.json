@@ -15,20 +15,25 @@
     },
     "ios": {
       "supportsTablet": true,
+      "bundleIdentifier": "com.jc.munch",
       "config": {
-                "googleMapsApiKey": "AIzaSyDFzVWsI5ajHKH7i5d5kAX-nsOlEQM8cx4"
-            }
+        "googleMapsApiKey": "AIzaSyDFzVWsI5ajHKH7i5d5kAX-nsOlEQM8cx4"
+      },
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false
+      }
     },
     "android": {
+      "package": "com.jc.munch",
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
       "config": {
-                "googleMaps": {
-                    "apiKey": "AIzaSyDsOtvAhUXloEk7tUU58ZnyRx4BdvoAWCs"
-                }
-              }
+        "googleMaps": {
+          "apiKey": "AIzaSyDsOtvAhUXloEk7tUU58ZnyRx4BdvoAWCs"
+        }
+      }
     },
     "web": {
       "bundler": "metro",
@@ -37,13 +42,25 @@
     },
     "plugins": [
       "expo-router",
-      "expo-font"
+      "expo-font",
+      [
+        "@sentry/react-native/expo",
+        {
+          "url": "https://sentry.io/",
+          "project": "javascript-react",
+          "organization": "mnch-22"
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true
     },
     "extra": {
-      "googleMapsApiKey": "AIzaSyDFzVWsI5ajHKH7i5d5kAX-nsOlEQM8cx4"
-    }
+      "googleMapsApiKey": "AIzaSyDFzVWsI5ajHKH7i5d5kAX-nsOlEQM8cx4",
+      "eas": {
+        "projectId": "85c3be11-c802-41b0-b1e1-d598b22324a8"
+      }
+    },
+    "owner": "justinchuang"
   }
 }
