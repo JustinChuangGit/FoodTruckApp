@@ -12,7 +12,11 @@
       "distribution": "internal"
     },
     "production": {
-      "autoIncrement": true
+      "autoIncrement": true,
+      "env": {
+        "SENTRY_AUTH_TOKEN": "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"
+      }
+
     }
   },
   "submit": {

@@ -1,10 +1,10 @@
 {
   "expo": {
-    "name": "FoodTruckApp",
+    "name": "MNCH",
     "slug": "FoodTruckApp",
-    "version": "1.0.0",
+    "version": "1.0.2",
     "orientation": "portrait",
-    "icon": "./assets/images/icon.png",
+    "icon": "./assets/images/appstore.png",
     "scheme": "myapp",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
@@ -20,8 +20,10 @@
         "googleMapsApiKey": "AIzaSyDFzVWsI5ajHKH7i5d5kAX-nsOlEQM8cx4"
       },
       "infoPlist": {
-        "ITSAppUsesNonExemptEncryption": false
+        "ITSAppUsesNonExemptEncryption": false,
+        "NSLocationWhenInUseUsageDescription": "This app needs access to your location to show nearby food trucks."
       }
+      
     },
     "android": {
       "package": "com.jc.munch",
