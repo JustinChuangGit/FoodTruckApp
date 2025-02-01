@@ -55,7 +55,7 @@ export default function LoginScreen() {
         <View style={styles.inner}>
           <View style={styles.logoContainer}>
             <Image
-              source={require("@/assets/images/munchLogo.png")}
+              source={require("@/assets/images/mnchLogo.png")}
               style={styles.logo}
               resizeMode="contain"
             />

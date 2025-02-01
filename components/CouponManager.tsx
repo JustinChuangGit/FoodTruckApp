@@ -407,10 +407,10 @@ const CouponManager: React.FC = () => {
 
 const styles = StyleSheet.create({
   sectionHeader: {
-    fontSize: 18,
+    fontSize: 22,
     fontWeight: "bold",
     marginVertical: 10,
-    paddingHorizontal: 16,
+    paddingHorizontal: 25,
   },
   addCouponCard: {
     width: 120,
