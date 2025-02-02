@@ -61,6 +61,7 @@
     "react-native-screens": "^4.0.0",
     "react-native-select-dropdown": "^4.0.1",
     "react-native-snap-carousel": "^3.9.1",
+    "react-native-svg": "^15.11.1",
     "react-native-vector-icons": "^10.2.0",
     "react-native-web": "~0.19.10",
     "react-redux": "^9.2.0",

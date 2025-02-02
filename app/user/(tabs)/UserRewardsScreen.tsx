@@ -6,8 +6,6 @@ import {
   Alert,
   Vibration,
   SafeAreaView,
-  Image,
-  Touchable,
   TouchableOpacity,
 } from "react-native";
 import { useSelector } from "react-redux";

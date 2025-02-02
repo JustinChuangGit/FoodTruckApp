@@ -61,7 +61,7 @@ export default function LoginScreen() {
             />
           </View>
           <View style={styles.inputContainer}>
-            <Text style={styles.header}>Login Sentry</Text>
+            <Text style={styles.header}>Login</Text>
             <HorizontalLine />
             <TextInput
               style={styles.input}
