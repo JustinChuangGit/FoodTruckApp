@@ -60,13 +60,17 @@ export const RenderMenu: React.FC<RenderMenuProps> = ({
               <View key={menuItem.name} style={styles.menuItem}>
                 <View style={styles.menuItemTextContainer}>
                   <Text style={styles.menuItemName}>{menuItem.name}</Text>
-                  <Text style={styles.menuItemDescription}>
-                    {menuItem.description}
+                  <View style={styles.descriptionContainer}>
+                    <Text style={styles.menuItemDescription}>
+                      {menuItem.description}
+                    </Text>
+                  </View>
+                </View>
+                <View style={styles.priceContainer}>
+                  <Text style={styles.menuItemPrice}>
+                    ${menuItem.price.toFixed(2)}
                   </Text>
                 </View>
-                <Text style={styles.menuItemPrice}>
-                  ${menuItem.price.toFixed(2)}
-                </Text>
               </View>
             ))}
           </View>
@@ -121,5 +125,12 @@ const styles = StyleSheet.create({
   },
   menuCategoryContainer: {
     paddingHorizontal: 16,
+  },
+  descriptionContainer: {
+    flex: 1,
+    width: "80%",
+  },
+  priceContainer: {
+    justifyContent: "center",
   },
 });
