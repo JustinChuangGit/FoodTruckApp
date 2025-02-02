@@ -119,8 +119,9 @@ const VendorMapInfoCard: React.FC<VendorMapInfoCardProps> = ({
 
         <View style={styles.infoContainer}>
           <Text style={styles.title}>{vendor.vendorName}</Text>
-          <Text style={styles.subtitle}>{vendor.description}</Text>
-
+          <View style={styles.descriptionContainer}>
+            <Text style={styles.subtitle}>{vendor.description}</Text>
+          </View>
           <View style={styles.footer}>
             <Text style={styles.price}>{vendor.price}</Text>
             {distance && (
@@ -200,6 +201,8 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: "#555",
     marginBottom: 8,
+    flex: 1,
+    overflow: "hidden",
   },
   footer: {
     flexDirection: "row",
@@ -219,5 +222,10 @@ const styles = StyleSheet.create({
   rating: {
     fontSize: 14,
     color: "#333",
+  },
+  descriptionContainer: {
+    flex: 1,
+    overflow: "hidden",
+    height: 40,
   },
 });
