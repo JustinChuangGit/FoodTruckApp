@@ -64,7 +64,7 @@ const CouponCard: React.FC<CouponCardProps> = ({ coupon, vendor, onPress }) => {
   }, []); // Empty dependency array means it runs only once
 
   return (
-    <View style={[styles.card, { height: vendor ? 265 : 150 }]}>
+    <View style={[styles.card, { height: vendor ? 265 : 175 }]}>
       <TouchableOpacity
         onPress={onPress}
         style={styles.couponContent}
@@ -86,8 +86,12 @@ const CouponCard: React.FC<CouponCardProps> = ({ coupon, vendor, onPress }) => {
               />
             </View>
           )}
-          <Text style={styles.headline}>{coupon.headline}</Text>
-          <Text style={styles.description}>{coupon.description}</Text>
+          <View
+            style={[styles.textContainer, { maxHeight: vendor ? 60 : 150 }]}
+          >
+            <Text style={styles.headline}>{coupon.headline}</Text>
+            <Text style={styles.description}>{coupon.description}</Text>
+          </View>
         </View>
         <View>
           {vendor && (
@@ -200,6 +204,9 @@ const styles = StyleSheet.create({
     marginTop: 8,
     textAlign: "left", // Ensures left justification
     marginBottom: 8,
+  },
+  textContainer: {
+    overflow: "hidden",
   },
 });
 
