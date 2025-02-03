@@ -6,10 +6,26 @@ import {
   StyleSheet,
   Text,
   Animated,
+  ActivityIndicator,
 } from "react-native";
-import { Ionicons } from "@expo/vector-icons";
+import { FontAwesome } from "@expo/vector-icons";
+import { munchColors } from "@/constants/Colors";
 
 export default function UserEventsScreen() {
+  // Temporary state for example - replace with your actual loading/empty state logic
+  const [isLoading, setIsLoading] = React.useState(true);
+  const [events, setEvents] = React.useState([]);
+
+  React.useEffect(() => {
+    // Simulate data loading
+    const timer = setTimeout(() => {
+      setIsLoading(false);
+      setEvents([]); // Set to empty array to test empty state
+    }, 2000);
+
+    return () => clearTimeout(timer);
+  }, []);
+
   const shimmerAnimation = new Animated.Value(0);
 
   const startAnimation = () => {
@@ -23,8 +39,8 @@ export default function UserEventsScreen() {
   };
 
   React.useEffect(() => {
-    startAnimation();
-  }, []);
+    if (isLoading) startAnimation();
+  }, [isLoading]);
 
   const translateX = shimmerAnimation.interpolate({
     inputRange: [0, 1],
@@ -33,61 +49,88 @@ export default function UserEventsScreen() {
 
   const SkeletonEventItem = () => (
     <View style={styles.eventItem}>
-      {/* Shimmer Overlay */}
       <Animated.View
-        style={[
-          styles.shimmerOverlay,
-          {
-            transform: [{ translateX }],
-          },
-        ]}
+        style={[styles.shimmerOverlay, { transform: [{ translateX }] }]}
       />
-
-      {/* Image Placeholder */}
       <View style={styles.imagePlaceholder} />
-
-      {/* Event Details Placeholder */}
       <View style={styles.detailsContainer}>
-        <View style={[styles.textPlaceholder, { width: "60%", height: 20 }]} />
-        <View
-          style={[
-            styles.textPlaceholder,
-            { width: "40%", height: 16, marginTop: 8 },
-          ]}
-        />
-        <View
-          style={[
-            styles.textPlaceholder,
-            { width: "30%", height: 16, marginTop: 8 },
-          ]}
-        />
-
-        {/* Button Placeholder */}
+        <View style={[styles.textPlaceholder, { width: "60%" }]} />
+        <View style={[styles.textPlaceholder, { width: "40%" }]} />
+        <View style={[styles.textPlaceholder, { width: "30%" }]} />
         <View style={styles.buttonPlaceholder} />
       </View>
+      <FontAwesome name="chevron-right" size={16} style={styles.rightChevron} />
     </View>
   );
 
+  if (isLoading) {
+    return (
+      <SafeAreaView style={styles.container}>
+        <View style={styles.header}>
+          <Text style={styles.headerText}>Events</Text>
+          <FontAwesome name="filter" size={24} color="#e1e1e1" />
+        </View>
+
+        <FlatList
+          data={[1, 2, 3]}
+          renderItem={SkeletonEventItem}
+          keyExtractor={(item) => item.toString()}
+          contentContainerStyle={styles.listContent}
+        />
+      </SafeAreaView>
+    );
+  }
+
   return (
     <SafeAreaView style={styles.container}>
-      {/* Header */}
       <View style={styles.header}>
-        <Text style={styles.headerTitle}>Events</Text>
-        <Ionicons name="filter" size={24} color="#e1e1e1" />
+        <Text style={styles.headerText}>Events</Text>
+        <FontAwesome name="filter" size={24} color={munchColors.primary} />
       </View>
 
-      {/* Event List */}
-      <FlatList
-        data={[1, 2, 3]} // Dummy data for skeleton items
-        renderItem={SkeletonEventItem}
-        keyExtractor={(item) => item.toString()}
-        contentContainerStyle={styles.listContent}
-      />
+      {events.length === 0 ? (
+        <View style={styles.emptyState}>
+          <FontAwesome
+            name="calendar-times-o"
+            size={48}
+            color={munchColors.primary}
+          />
+          <Text style={styles.emptyStateText}>No events found</Text>
+          <Text style={styles.emptyStateSubText}>Check back later!</Text>
+        </View>
+      ) : (
+        <FlatList
+          data={events}
+          renderItem={({ item }) => ({
+            /* Your actual event list item component here */
+          })}
+          keyExtractor={(item) => item.id.toString()}
+          contentContainerStyle={styles.listContent}
+        />
+      )}
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
+  // ... keep all previous styles ...
+  emptyState: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    padding: 20,
+  },
+  emptyStateText: {
+    fontSize: 24,
+    fontWeight: "600",
+    color: munchColors.primary,
+    marginTop: 16,
+  },
+  emptyStateSubText: {
+    fontSize: 16,
+    color: "#666",
+    marginTop: 8,
+  },
   container: {
     flex: 1,
     backgroundColor: "#fff",
@@ -96,38 +139,43 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    padding: 16,
+    height: 100,
+    paddingHorizontal: 20,
     borderBottomWidth: 1,
-    borderBottomColor: "#f0f0f0",
+    borderBottomColor: "#ddd",
   },
-  headerTitle: {
-    fontSize: 24,
+  headerText: {
+    fontSize: 40,
     fontWeight: "bold",
-    color: "#e1e1e1",
+    color: "#000",
   },
   listContent: {
-    paddingHorizontal: 16,
+    paddingHorizontal: 20,
   },
   eventItem: {
     flexDirection: "row",
-    paddingVertical: 16,
+    alignItems: "center",
+    paddingVertical: 15,
+    paddingHorizontal: 20,
     borderBottomWidth: 1,
-    borderBottomColor: "#f0f0f0",
+    borderBottomColor: "#ddd",
   },
   imagePlaceholder: {
-    width: 100,
-    height: 100,
+    width: 80,
+    height: 80,
     borderRadius: 8,
     backgroundColor: "#e1e1e1",
   },
   detailsContainer: {
     flex: 1,
     marginLeft: 16,
-    justifyContent: "space-between",
+    justifyContent: "center",
   },
   textPlaceholder: {
+    height: 16,
     backgroundColor: "#e1e1e1",
     borderRadius: 4,
+    marginVertical: 4,
   },
   buttonPlaceholder: {
     width: 80,
@@ -144,5 +192,9 @@ const styles = StyleSheet.create({
     width: "30%",
     backgroundColor: "rgba(255,255,255,0.6)",
     zIndex: 1,
+  },
+  rightChevron: {
+    color: munchColors.primary,
+    marginLeft: 10,
   },
 });
