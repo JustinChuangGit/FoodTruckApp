@@ -35,6 +35,16 @@ export default function TabLayout() {
           ),
         }}
       />
+      <Tabs.Screen
+        name="UserEventsScreen"
+        options={{
+          title: "Events",
+          headerShown: false,
+          tabBarIcon: ({ color }) => (
+            <FontAwesome size={28} name="calendar" color={color} />
+          ),
+        }}
+      />
     </Tabs>
   );
 }
