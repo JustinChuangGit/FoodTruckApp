@@ -19,8 +19,8 @@ import * as Location from "expo-location";
 // Define your API keys for each platform
 const googleApiKey =
   Platform.OS === "ios"
-    ? "YOUR_IOS_API_KEY" // Replace with your actual iOS key
-    : "YOUR_ANDROID_API_KEY"; // Replace with your actual Android key
+    ? "AIzaSyCAmKtEKl98npLb2hZHxwUD-cwgPbCyxXo" // Replace with your actual iOS key
+    : "AIzaSyD59clq3p7M2BRzsYo0Wfh9PQo-B-21RVg"; // Replace with your actual Android key
 
 export default function CreateNewEventScreen() {
   const router = useRouter();
