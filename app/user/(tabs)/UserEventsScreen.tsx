@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import {
   SafeAreaView,
   View,
@@ -6,23 +6,22 @@ import {
   StyleSheet,
   Text,
   Animated,
-  ActivityIndicator,
+  TouchableOpacity,
 } from "react-native";
 import { FontAwesome } from "@expo/vector-icons";
 import { munchColors } from "@/constants/Colors";
+import { useRouter } from "expo-router";
 
 export default function UserEventsScreen() {
-  // Temporary state for example - replace with your actual loading/empty state logic
+  const router = useRouter();
   const [isLoading, setIsLoading] = React.useState(true);
   const [events, setEvents] = React.useState([]);
 
-  React.useEffect(() => {
-    // Simulate data loading
+  useEffect(() => {
     const timer = setTimeout(() => {
       setIsLoading(false);
-      setEvents([]); // Set to empty array to test empty state
+      setEvents([]);
     }, 2000);
-
     return () => clearTimeout(timer);
   }, []);
 
@@ -63,14 +62,21 @@ export default function UserEventsScreen() {
     </View>
   );
 
+  const HeaderRightButton = () => (
+    <TouchableOpacity
+      onPress={() => router.push("/sharedScreens/createNewEventScreen")}
+    >
+      <FontAwesome name="plus" size={24} color={munchColors.primary} />
+    </TouchableOpacity>
+  );
+
   if (isLoading) {
     return (
       <SafeAreaView style={styles.container}>
         <View style={styles.header}>
           <Text style={styles.headerText}>Events</Text>
-          <FontAwesome name="filter" size={24} color="#e1e1e1" />
+          <FontAwesome name="plus" size={24} color="#e1e1e1" />
         </View>
-
         <FlatList
           data={[1, 2, 3]}
           renderItem={SkeletonEventItem}
@@ -85,7 +91,7 @@ export default function UserEventsScreen() {
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
         <Text style={styles.headerText}>Events</Text>
-        <FontAwesome name="filter" size={24} color={munchColors.primary} />
+        <HeaderRightButton />
       </View>
 
       {events.length === 0 ? (
@@ -101,9 +107,10 @@ export default function UserEventsScreen() {
       ) : (
         <FlatList
           data={events}
-          renderItem={({ item }) => ({
-            /* Your actual event list item component here */
-          })}
+          renderItem={({ item }) => (
+            // Your actual event list item component here
+            <View />
+          )}
           keyExtractor={(item) => item.id.toString()}
           contentContainerStyle={styles.listContent}
         />
@@ -113,24 +120,6 @@ export default function UserEventsScreen() {
 }
 
 const styles = StyleSheet.create({
-  // ... keep all previous styles ...
-  emptyState: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    padding: 20,
-  },
-  emptyStateText: {
-    fontSize: 24,
-    fontWeight: "600",
-    color: munchColors.primary,
-    marginTop: 16,
-  },
-  emptyStateSubText: {
-    fontSize: 16,
-    color: "#666",
-    marginTop: 8,
-  },
   container: {
     flex: 1,
     backgroundColor: "#fff",
@@ -196,5 +185,22 @@ const styles = StyleSheet.create({
   rightChevron: {
     color: munchColors.primary,
     marginLeft: 10,
+  },
+  emptyState: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    padding: 20,
+  },
+  emptyStateText: {
+    fontSize: 24,
+    fontWeight: "600",
+    color: munchColors.primary,
+    marginTop: 16,
+  },
+  emptyStateSubText: {
+    fontSize: 16,
+    color: "#666",
+    marginTop: 8,
   },
 });
