@@ -10,6 +10,7 @@ import {
   ActivityIndicator,
   KeyboardAvoidingView,
   ScrollView,
+  Modal,
 } from "react-native";
 import { useRouter } from "expo-router";
 import { FontAwesome } from "@expo/vector-icons";
@@ -31,9 +32,14 @@ export default function CreateNewEventScreen() {
   const [description, setDescription] = React.useState("");
   const [region, setRegion] = React.useState<Region | null>(null);
   const [loading, setLoading] = React.useState(true);
+  const [isMapFullScreen, setIsMapFullScreen] = React.useState(false);
 
   // Create a ref for the autocomplete component (typed as any for convenience)
   const autoCompleteRef = React.useRef<any>(null);
+
+  useEffect(() => {
+    console.log("Region Updated:", region);
+  }, [region]);
 
   // Request user's current location on mount
   useEffect(() => {
@@ -169,6 +175,13 @@ export default function CreateNewEventScreen() {
                   color={munchColors.primary}
                 />
               </View>
+              {/* Fullscreen Toggle Button */}
+              <TouchableOpacity
+                style={styles.fullScreenButton}
+                onPress={() => setIsMapFullScreen(true)}
+              >
+                <FontAwesome name="arrows-alt" size={20} color="#fff" />
+              </TouchableOpacity>
             </View>
 
             <TextInput
@@ -189,6 +202,34 @@ export default function CreateNewEventScreen() {
           </View>
         </ScrollView>
       </KeyboardAvoidingView>
+
+      {/* Full Screen Map Modal */}
+      <Modal visible={isMapFullScreen} animationType="slide">
+        <SafeAreaView style={styles.fullScreenContainer}>
+          <View style={styles.fullScreenHeader}>
+            <Text style={styles.fullScreenHeaderText}>Reposition Map</Text>
+            <TouchableOpacity onPress={() => setIsMapFullScreen(false)}>
+              <FontAwesome name="times" size={24} color="#fff" />
+            </TouchableOpacity>
+          </View>
+          <View style={styles.fullScreenMapContainer}>
+            <MapView
+              style={styles.fullScreenMap}
+              region={region!}
+              onRegionChangeComplete={(newRegion) => setRegion(newRegion)}
+              showsUserLocation={true}
+            />
+            {/* Fixed Marker in Full Screen Mode */}
+            <View style={styles.markerFixed}>
+              <FontAwesome
+                name="map-marker"
+                size={30}
+                color={munchColors.primary}
+              />
+            </View>
+          </View>
+        </SafeAreaView>
+      </Modal>
     </SafeAreaView>
   );
 }
@@ -251,6 +292,14 @@ const styles = StyleSheet.create({
     marginLeft: -15,
     marginTop: -30,
   },
+  fullScreenButton: {
+    position: "absolute",
+    top: 10,
+    right: 10,
+    backgroundColor: munchColors.primary,
+    padding: 8,
+    borderRadius: 4,
+  },
   submitButton: {
     backgroundColor: munchColors.primary,
     paddingVertical: 15,
@@ -262,5 +311,28 @@ const styles = StyleSheet.create({
     fontSize: 18,
     color: "#fff",
     fontWeight: "bold",
+  },
+  fullScreenContainer: {
+    flex: 1,
+    backgroundColor: "#000",
+  },
+  fullScreenHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+    backgroundColor: munchColors.primary,
+  },
+  fullScreenHeaderText: {
+    fontSize: 20,
+    color: "#fff",
+  },
+  fullScreenMapContainer: {
+    flex: 1,
+    position: "relative",
+  },
+  fullScreenMap: {
+    flex: 1,
   },
 });
