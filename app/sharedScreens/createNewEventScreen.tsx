@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import {
   SafeAreaView,
   View,
@@ -36,7 +36,7 @@ export default function CreateNewEventScreen() {
   const autoCompleteRef = React.useRef<any>(null);
 
   // Request user's current location on mount
-  React.useEffect(() => {
+  useEffect(() => {
     (async () => {
       const { status } = await Location.requestForegroundPermissionsAsync();
       if (status !== "granted") {
@@ -135,7 +135,6 @@ export default function CreateNewEventScreen() {
                       latitudeDelta: 0.01,
                       longitudeDelta: 0.01,
                     });
-                    console.log("Selected lat/lng: ", lat, lng);
                   }
                 }}
                 query={{
