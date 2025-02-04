@@ -37,10 +37,6 @@ export default function CreateNewEventScreen() {
   // Create a ref for the autocomplete component (typed as any for convenience)
   const autoCompleteRef = React.useRef<any>(null);
 
-  useEffect(() => {
-    console.log("Region Updated:", region);
-  }, [region]);
-
   // Request user's current location on mount
   useEffect(() => {
     (async () => {
@@ -100,6 +96,30 @@ export default function CreateNewEventScreen() {
 
           {/* Form */}
           <View style={styles.formContainer}>
+            {/* Map View */}
+            <View style={styles.mapContainer}>
+              <MapView
+                style={styles.map}
+                region={region}
+                onRegionChangeComplete={(newRegion) => setRegion(newRegion)}
+                showsUserLocation={true}
+              />
+              {/* Fixed Marker in the Center */}
+              <View style={styles.markerFixed}>
+                <FontAwesome
+                  name="map-marker"
+                  size={30}
+                  color={munchColors.primary}
+                />
+              </View>
+              {/* Fullscreen Toggle Button */}
+              <TouchableOpacity
+                style={styles.fullScreenButton}
+                onPress={() => setIsMapFullScreen(true)}
+              >
+                <FontAwesome name="arrows-alt" size={20} color="#fff" />
+              </TouchableOpacity>
+            </View>
             <TextInput
               style={styles.input}
               placeholder="Event Title"
@@ -159,31 +179,6 @@ export default function CreateNewEventScreen() {
               />
             </View>
 
-            {/* Map View */}
-            <View style={styles.mapContainer}>
-              <MapView
-                style={styles.map}
-                region={region}
-                onRegionChangeComplete={(newRegion) => setRegion(newRegion)}
-                showsUserLocation={true}
-              />
-              {/* Fixed Marker in the Center */}
-              <View style={styles.markerFixed}>
-                <FontAwesome
-                  name="map-marker"
-                  size={30}
-                  color={munchColors.primary}
-                />
-              </View>
-              {/* Fullscreen Toggle Button */}
-              <TouchableOpacity
-                style={styles.fullScreenButton}
-                onPress={() => setIsMapFullScreen(true)}
-              >
-                <FontAwesome name="arrows-alt" size={20} color="#fff" />
-              </TouchableOpacity>
-            </View>
-
             <TextInput
               style={[styles.input, styles.multilineInput]}
               placeholder="Event Description"
@@ -205,13 +200,14 @@ export default function CreateNewEventScreen() {
 
       {/* Full Screen Map Modal */}
       <Modal visible={isMapFullScreen} animationType="slide">
-        <SafeAreaView style={styles.fullScreenContainer}>
-          <View style={styles.fullScreenHeader}>
-            <Text style={styles.fullScreenHeaderText}>Reposition Map</Text>
-            <TouchableOpacity onPress={() => setIsMapFullScreen(false)}>
-              <FontAwesome name="times" size={24} color="#fff" />
-            </TouchableOpacity>
-          </View>
+        <View style={styles.fullScreenContainer}>
+          {/* Absolute Positioned Close Button */}
+          <TouchableOpacity
+            style={styles.fullScreenCloseButton}
+            onPress={() => setIsMapFullScreen(false)}
+          >
+            <FontAwesome name="times" size={24} color="#fff" />
+          </TouchableOpacity>
           <View style={styles.fullScreenMapContainer}>
             <MapView
               style={styles.fullScreenMap}
@@ -228,7 +224,7 @@ export default function CreateNewEventScreen() {
               />
             </View>
           </View>
-        </SafeAreaView>
+        </View>
       </Modal>
     </SafeAreaView>
   );
@@ -316,23 +312,24 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "#000",
   },
-  fullScreenHeader: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    paddingHorizontal: 20,
-    paddingVertical: 10,
-    backgroundColor: munchColors.primary,
-  },
-  fullScreenHeaderText: {
-    fontSize: 20,
-    color: "#fff",
-  },
   fullScreenMapContainer: {
     flex: 1,
     position: "relative",
   },
   fullScreenMap: {
     flex: 1,
+  },
+  fullScreenCloseButton: {
+    position: "absolute",
+    top: 70,
+    right: 20,
+    zIndex: 10,
+    padding: 10,
+    backgroundColor: "rgba(0,0,0,0.5)",
+    borderRadius: 22,
+    width: 44,
+    height: 44,
+    alignItems: "center",
+    justifyContent: "center",
   },
 });
