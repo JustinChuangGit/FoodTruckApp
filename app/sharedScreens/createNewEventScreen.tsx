@@ -156,7 +156,7 @@ export default function CreateNewEventScreen() {
               setItems={setItems}
               containerStyle={styles.dropdownContainer}
               style={styles.dropdown}
-              dropDownStyle={styles.dropdownList}
+              // dropDownStyle={styles.dropdownList}
             />
             {eventType === "Other" && (
               <TextInput

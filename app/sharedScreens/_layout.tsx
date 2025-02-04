@@ -34,7 +34,7 @@ export default function SharedScreensLayout() {
         }}
       />
       <Stack.Screen
-        name="CreateNewEventScreen"
+        name="createNewEventScreen"
         options={{
           title: "Create New Event",
           headerShown: false,
