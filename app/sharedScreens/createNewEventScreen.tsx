@@ -21,9 +21,7 @@ import { apiKeys } from "@/constants/apiKeys";
 
 // Define your API keys for each platform
 const googleApiKey =
-  Platform.OS === "ios"
-    ? apiKeys.iosPlaces // Replace with your actual iOS key
-    : apiKeys.andoidPlaces; // Replace with your actual Android key
+  Platform.OS === "ios" ? apiKeys.iosPlaces : apiKeys.andoidPlaces;
 
 export default function CreateNewEventScreen() {
   const router = useRouter();
@@ -33,6 +31,9 @@ export default function CreateNewEventScreen() {
   const [description, setDescription] = React.useState("");
   const [region, setRegion] = React.useState<Region | null>(null);
   const [loading, setLoading] = React.useState(true);
+
+  // Create a ref for the autocomplete component (typed as any for convenience)
+  const autoCompleteRef = React.useRef<any>(null);
 
   // Request user's current location on mount
   React.useEffect(() => {
@@ -75,7 +76,10 @@ export default function CreateNewEventScreen() {
         behavior={Platform.OS === "ios" ? "padding" : "height"}
         keyboardVerticalOffset={100}
       >
-        <ScrollView contentContainerStyle={styles.scrollContainer}>
+        <ScrollView
+          contentContainerStyle={styles.scrollContainer}
+          keyboardShouldPersistTaps="always"
+        >
           {/* Header */}
           <View style={styles.header}>
             <TouchableOpacity onPress={() => router.back()}>
@@ -108,9 +112,17 @@ export default function CreateNewEventScreen() {
             {/* Address Autocomplete */}
             <View style={styles.autocompleteContainer}>
               <GooglePlacesAutocomplete
-                placeholder="Event Location"
+                ref={autoCompleteRef}
+                placeholder="Search for an address"
+                minLength={2}
+                listViewDisplayed={false}
+                fetchDetails={true} // Fetch details to get geometry info
+                renderDescription={(row) => row.description}
                 onPress={(data, details = null) => {
+                  // Update the text input with the selected address
                   setLocationText(data.description);
+                  autoCompleteRef.current?.setAddressText(data.description);
+                  // If details are available, update the region with the lat/lng
                   if (
                     details &&
                     details.geometry &&
@@ -123,13 +135,17 @@ export default function CreateNewEventScreen() {
                       latitudeDelta: 0.01,
                       longitudeDelta: 0.01,
                     });
+                    console.log("Selected lat/lng: ", lat, lng);
                   }
                 }}
                 query={{
                   key: googleApiKey,
                   language: "en",
                 }}
-                fetchDetails={true}
+                textInputProps={{
+                  value: locationText,
+                  onChangeText: setLocationText,
+                }}
                 styles={{
                   textInput: styles.input,
                   container: { flex: 0 },
