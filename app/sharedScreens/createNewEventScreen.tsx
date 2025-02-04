@@ -12,6 +12,8 @@ import {
   ScrollView,
   Modal,
 } from "react-native";
+import DateTimePicker from "@react-native-community/datetimepicker";
+import DropDownPicker from "react-native-dropdown-picker";
 import { useRouter } from "expo-router";
 import { FontAwesome } from "@expo/vector-icons";
 import { munchColors } from "@/constants/Colors";
@@ -26,10 +28,27 @@ const googleApiKey =
 
 export default function CreateNewEventScreen() {
   const router = useRouter();
-  const [title, setTitle] = React.useState("");
-  const [date, setDate] = React.useState("");
+
+  // Dropdown for event type
+  const [openDropdown, setOpenDropdown] = React.useState(false);
+  const [eventType, setEventType] = React.useState("Farmers Market");
+  const [items, setItems] = React.useState([
+    { label: "Farmers Market", value: "Farmers Market" },
+    { label: "Flea Market", value: "Flea Market" },
+    { label: "Other", value: "Other" },
+  ]);
+  const [customEventTitle, setCustomEventTitle] = React.useState("");
+
+  const [dateValue, setDateValue] = React.useState(new Date());
+  const [showDatePicker, setShowDatePicker] = React.useState(false);
+  const [startTime, setStartTime] = React.useState<Date | null>(null);
+  const [showStartTimePicker, setShowStartTimePicker] = React.useState(false);
+  const [endTime, setEndTime] = React.useState<Date | null>(null);
+  const [showEndTimePicker, setShowEndTimePicker] = React.useState(false);
+
   const [locationText, setLocationText] = React.useState("");
   const [description, setDescription] = React.useState("");
+  const [showDescription, setShowDescription] = React.useState(false);
   const [region, setRegion] = React.useState<Region | null>(null);
   const [loading, setLoading] = React.useState(true);
   const [isMapFullScreen, setIsMapFullScreen] = React.useState(false);
@@ -58,8 +77,16 @@ export default function CreateNewEventScreen() {
   }, []);
 
   const handleCreateEvent = () => {
-    // Capture the event details including the map's center location (region)
-    console.log({ title, date, locationText, description, region });
+    const eventTitle = eventType === "Other" ? customEventTitle : eventType;
+    console.log({
+      eventTitle,
+      date: dateValue,
+      startTime,
+      endTime,
+      locationText,
+      description,
+      region,
+    });
     router.back();
   };
 
@@ -94,7 +121,6 @@ export default function CreateNewEventScreen() {
             <Text style={styles.headerText}>Create Event</Text>
           </View>
 
-          {/* Form */}
           <View style={styles.formContainer}>
             {/* Map View */}
             <View style={styles.mapContainer}>
@@ -104,7 +130,6 @@ export default function CreateNewEventScreen() {
                 onRegionChangeComplete={(newRegion) => setRegion(newRegion)}
                 showsUserLocation={true}
               />
-              {/* Fixed Marker in the Center */}
               <View style={styles.markerFixed}>
                 <FontAwesome
                   name="map-marker"
@@ -112,7 +137,6 @@ export default function CreateNewEventScreen() {
                   color={munchColors.primary}
                 />
               </View>
-              {/* Fullscreen Toggle Button */}
               <TouchableOpacity
                 style={styles.fullScreenButton}
                 onPress={() => setIsMapFullScreen(true)}
@@ -120,20 +144,102 @@ export default function CreateNewEventScreen() {
                 <FontAwesome name="arrows-alt" size={20} color="#fff" />
               </TouchableOpacity>
             </View>
-            <TextInput
-              style={styles.input}
-              placeholder="Event Title"
-              value={title}
-              onChangeText={setTitle}
-              placeholderTextColor="#999"
+
+            {/* Event Type Dropdown */}
+            <Text style={styles.label}>Event Type</Text>
+            <DropDownPicker
+              open={openDropdown}
+              value={eventType}
+              items={items}
+              setOpen={setOpenDropdown}
+              setValue={setEventType}
+              setItems={setItems}
+              containerStyle={styles.dropdownContainer}
+              style={styles.dropdown}
+              dropDownStyle={styles.dropdownList}
             />
-            <TextInput
-              style={styles.input}
-              placeholder="Event Date"
-              value={date}
-              onChangeText={setDate}
-              placeholderTextColor="#999"
-            />
+            {eventType === "Other" && (
+              <TextInput
+                style={styles.input}
+                placeholder="Enter Event Title"
+                value={customEventTitle}
+                onChangeText={setCustomEventTitle}
+                placeholderTextColor="#999"
+              />
+            )}
+
+            {/* Date Picker */}
+            <TouchableOpacity
+              style={styles.dateButton}
+              onPress={() => setShowDatePicker(true)}
+            >
+              <Text style={styles.dateButtonText}>
+                Select Date: {dateValue.toDateString()}
+              </Text>
+            </TouchableOpacity>
+            {showDatePicker && (
+              <DateTimePicker
+                value={dateValue}
+                mode="date"
+                display="default"
+                onChange={(event, selectedDate) => {
+                  setShowDatePicker(false);
+                  if (selectedDate) {
+                    setDateValue(selectedDate);
+                  }
+                }}
+              />
+            )}
+
+            {/* Start Time Picker */}
+            <TouchableOpacity
+              style={styles.dateButton}
+              onPress={() => setShowStartTimePicker(true)}
+            >
+              <Text style={styles.dateButtonText}>
+                {startTime
+                  ? `Start Time: ${startTime.toLocaleTimeString()}`
+                  : "Add Start Time"}
+              </Text>
+            </TouchableOpacity>
+            {showStartTimePicker && (
+              <DateTimePicker
+                value={startTime || new Date()}
+                mode="time"
+                display="default"
+                onChange={(event, selectedTime) => {
+                  setShowStartTimePicker(false);
+                  if (selectedTime) {
+                    setStartTime(selectedTime);
+                  }
+                }}
+              />
+            )}
+
+            {/* End Time Picker */}
+            <TouchableOpacity
+              style={styles.dateButton}
+              onPress={() => setShowEndTimePicker(true)}
+            >
+              <Text style={styles.dateButtonText}>
+                {endTime
+                  ? `End Time: ${endTime.toLocaleTimeString()}`
+                  : "Add End Time"}
+              </Text>
+            </TouchableOpacity>
+            {showEndTimePicker && (
+              <DateTimePicker
+                value={endTime || new Date()}
+                mode="time"
+                display="default"
+                onChange={(event, selectedTime) => {
+                  setShowEndTimePicker(false);
+                  if (selectedTime) {
+                    setEndTime(selectedTime);
+                  }
+                }}
+              />
+            )}
 
             {/* Address Autocomplete */}
             <View style={styles.autocompleteContainer}>
@@ -142,13 +248,11 @@ export default function CreateNewEventScreen() {
                 placeholder="Search for an address"
                 minLength={2}
                 listViewDisplayed={false}
-                fetchDetails={true} // Fetch details to get geometry info
+                fetchDetails={true}
                 renderDescription={(row) => row.description}
                 onPress={(data, details = null) => {
-                  // Update the text input with the selected address
                   setLocationText(data.description);
                   autoCompleteRef.current?.setAddressText(data.description);
-                  // If details are available, update the region with the lat/lng
                   if (
                     details &&
                     details.geometry &&
@@ -179,15 +283,29 @@ export default function CreateNewEventScreen() {
               />
             </View>
 
-            <TextInput
-              style={[styles.input, styles.multilineInput]}
-              placeholder="Event Description"
-              value={description}
-              onChangeText={setDescription}
-              placeholderTextColor="#999"
-              multiline
-              numberOfLines={4}
-            />
+            {/* Description Toggle */}
+            {!showDescription && (
+              <TouchableOpacity
+                style={styles.addDescriptionButton}
+                onPress={() => setShowDescription(true)}
+              >
+                <Text style={styles.addDescriptionButtonText}>
+                  Add Description
+                </Text>
+              </TouchableOpacity>
+            )}
+            {showDescription && (
+              <TextInput
+                style={[styles.input, styles.multilineInput]}
+                placeholder="Event Description"
+                value={description}
+                onChangeText={setDescription}
+                placeholderTextColor="#999"
+                multiline
+                numberOfLines={4}
+              />
+            )}
+
             <TouchableOpacity
               style={styles.submitButton}
               onPress={handleCreateEvent}
@@ -200,8 +318,7 @@ export default function CreateNewEventScreen() {
 
       {/* Full Screen Map Modal */}
       <Modal visible={isMapFullScreen} animationType="slide">
-        <View style={styles.fullScreenContainer}>
-          {/* Absolute Positioned Close Button */}
+        <SafeAreaView style={styles.fullScreenContainer}>
           <TouchableOpacity
             style={styles.fullScreenCloseButton}
             onPress={() => setIsMapFullScreen(false)}
@@ -215,7 +332,6 @@ export default function CreateNewEventScreen() {
               onRegionChangeComplete={(newRegion) => setRegion(newRegion)}
               showsUserLocation={true}
             />
-            {/* Fixed Marker in Full Screen Mode */}
             <View style={styles.markerFixed}>
               <FontAwesome
                 name="map-marker"
@@ -224,7 +340,7 @@ export default function CreateNewEventScreen() {
               />
             </View>
           </View>
-        </View>
+        </SafeAreaView>
       </Modal>
     </SafeAreaView>
   );
@@ -255,6 +371,19 @@ const styles = StyleSheet.create({
   formContainer: {
     marginTop: 20,
     paddingHorizontal: 20,
+  },
+  label: {
+    fontSize: 16,
+    marginBottom: 8,
+  },
+  dropdownContainer: {
+    marginBottom: 16,
+  },
+  dropdown: {
+    borderColor: "#ddd",
+  },
+  dropdownList: {
+    borderColor: "#ddd",
   },
   input: {
     borderWidth: 1,
@@ -296,6 +425,28 @@ const styles = StyleSheet.create({
     padding: 8,
     borderRadius: 4,
   },
+  dateButton: {
+    backgroundColor: "#eee",
+    padding: 10,
+    borderRadius: 8,
+    marginBottom: 16,
+    alignItems: "center",
+  },
+  dateButtonText: {
+    fontSize: 16,
+    color: "#333",
+  },
+  addDescriptionButton: {
+    backgroundColor: "#eee",
+    padding: 10,
+    borderRadius: 8,
+    marginBottom: 16,
+    alignItems: "center",
+  },
+  addDescriptionButtonText: {
+    fontSize: 16,
+    color: "#333",
+  },
   submitButton: {
     backgroundColor: munchColors.primary,
     paddingVertical: 15,
@@ -312,24 +463,20 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "#000",
   },
+  fullScreenCloseButton: {
+    position: "absolute",
+    top: 10,
+    right: 10,
+    zIndex: 10,
+    padding: 10,
+    backgroundColor: "rgba(0,0,0,0.5)",
+    borderRadius: 20,
+  },
   fullScreenMapContainer: {
     flex: 1,
     position: "relative",
   },
   fullScreenMap: {
     flex: 1,
-  },
-  fullScreenCloseButton: {
-    position: "absolute",
-    top: 70,
-    right: 20,
-    zIndex: 10,
-    padding: 10,
-    backgroundColor: "rgba(0,0,0,0.5)",
-    borderRadius: 22,
-    width: 44,
-    height: 44,
-    alignItems: "center",
-    justifyContent: "center",
   },
 });
