@@ -8,6 +8,8 @@ import {
   StyleSheet,
   Platform,
   ActivityIndicator,
+  KeyboardAvoidingView,
+  ScrollView,
 } from "react-native";
 import { useRouter } from "expo-router";
 import { FontAwesome } from "@expo/vector-icons";
@@ -15,12 +17,13 @@ import { munchColors } from "@/constants/Colors";
 import { GooglePlacesAutocomplete } from "react-native-google-places-autocomplete";
 import MapView, { Region } from "react-native-maps";
 import * as Location from "expo-location";
+import { apiKeys } from "@/constants/apiKeys";
 
 // Define your API keys for each platform
 const googleApiKey =
   Platform.OS === "ios"
-    ? "AIzaSyCAmKtEKl98npLb2hZHxwUD-cwgPbCyxXo" // Replace with your actual iOS key
-    : "AIzaSyD59clq3p7M2BRzsYo0Wfh9PQo-B-21RVg"; // Replace with your actual Android key
+    ? apiKeys.iosPlaces // Replace with your actual iOS key
+    : apiKeys.andoidPlaces; // Replace with your actual Android key
 
 export default function CreateNewEventScreen() {
   const router = useRouter();
@@ -67,98 +70,110 @@ export default function CreateNewEventScreen() {
 
   return (
     <SafeAreaView style={styles.container}>
-      {/* Header */}
-      <View style={styles.header}>
-        <TouchableOpacity onPress={() => router.back()}>
-          <FontAwesome
-            name="arrow-left"
-            size={24}
-            color={munchColors.primary}
-          />
-        </TouchableOpacity>
-        <Text style={styles.headerText}>Create Event</Text>
-      </View>
-
-      {/* Form */}
-      <View style={styles.formContainer}>
-        <TextInput
-          style={styles.input}
-          placeholder="Event Title"
-          value={title}
-          onChangeText={setTitle}
-          placeholderTextColor="#999"
-        />
-        <TextInput
-          style={styles.input}
-          placeholder="Event Date"
-          value={date}
-          onChangeText={setDate}
-          placeholderTextColor="#999"
-        />
-
-        {/* Address Autocomplete */}
-        <View style={styles.autocompleteContainer}>
-          <GooglePlacesAutocomplete
-            placeholder="Event Location"
-            onPress={(data, details = null) => {
-              setLocationText(data.description);
-              if (details && details.geometry && details.geometry.location) {
-                const { lat, lng } = details.geometry.location;
-                setRegion({
-                  latitude: lat,
-                  longitude: lng,
-                  latitudeDelta: 0.01,
-                  longitudeDelta: 0.01,
-                });
-              }
-            }}
-            query={{
-              key: googleApiKey,
-              language: "en",
-            }}
-            fetchDetails={true}
-            styles={{
-              textInput: styles.input,
-              container: { flex: 0 },
-              listView: { backgroundColor: "#fff" },
-            }}
-          />
-        </View>
-
-        {/* Map View */}
-        <View style={styles.mapContainer}>
-          <MapView
-            style={styles.map}
-            region={region}
-            onRegionChangeComplete={(newRegion) => setRegion(newRegion)}
-            showsUserLocation={true}
-          />
-          {/* Fixed Marker in the Center */}
-          <View style={styles.markerFixed}>
-            <FontAwesome
-              name="map-marker"
-              size={30}
-              color={munchColors.primary}
-            />
+      <KeyboardAvoidingView
+        style={{ flex: 1 }}
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
+        keyboardVerticalOffset={100}
+      >
+        <ScrollView contentContainerStyle={styles.scrollContainer}>
+          {/* Header */}
+          <View style={styles.header}>
+            <TouchableOpacity onPress={() => router.back()}>
+              <FontAwesome
+                name="arrow-left"
+                size={24}
+                color={munchColors.primary}
+              />
+            </TouchableOpacity>
+            <Text style={styles.headerText}>Create Event</Text>
           </View>
-        </View>
 
-        <TextInput
-          style={[styles.input, styles.multilineInput]}
-          placeholder="Event Description"
-          value={description}
-          onChangeText={setDescription}
-          placeholderTextColor="#999"
-          multiline
-          numberOfLines={4}
-        />
-        <TouchableOpacity
-          style={styles.submitButton}
-          onPress={handleCreateEvent}
-        >
-          <Text style={styles.submitButtonText}>Create Event</Text>
-        </TouchableOpacity>
-      </View>
+          {/* Form */}
+          <View style={styles.formContainer}>
+            <TextInput
+              style={styles.input}
+              placeholder="Event Title"
+              value={title}
+              onChangeText={setTitle}
+              placeholderTextColor="#999"
+            />
+            <TextInput
+              style={styles.input}
+              placeholder="Event Date"
+              value={date}
+              onChangeText={setDate}
+              placeholderTextColor="#999"
+            />
+
+            {/* Address Autocomplete */}
+            <View style={styles.autocompleteContainer}>
+              <GooglePlacesAutocomplete
+                placeholder="Event Location"
+                onPress={(data, details = null) => {
+                  setLocationText(data.description);
+                  if (
+                    details &&
+                    details.geometry &&
+                    details.geometry.location
+                  ) {
+                    const { lat, lng } = details.geometry.location;
+                    setRegion({
+                      latitude: lat,
+                      longitude: lng,
+                      latitudeDelta: 0.01,
+                      longitudeDelta: 0.01,
+                    });
+                  }
+                }}
+                query={{
+                  key: googleApiKey,
+                  language: "en",
+                }}
+                fetchDetails={true}
+                styles={{
+                  textInput: styles.input,
+                  container: { flex: 0 },
+                  listView: { backgroundColor: "#fff" },
+                }}
+              />
+            </View>
+
+            {/* Map View */}
+            <View style={styles.mapContainer}>
+              <MapView
+                style={styles.map}
+                region={region}
+                onRegionChangeComplete={(newRegion) => setRegion(newRegion)}
+                showsUserLocation={true}
+              />
+              {/* Fixed Marker in the Center */}
+              <View style={styles.markerFixed}>
+                <FontAwesome
+                  name="map-marker"
+                  size={30}
+                  color={munchColors.primary}
+                />
+              </View>
+            </View>
+
+            <TextInput
+              style={[styles.input, styles.multilineInput]}
+              placeholder="Event Description"
+              value={description}
+              onChangeText={setDescription}
+              placeholderTextColor="#999"
+              multiline
+              numberOfLines={4}
+            />
+            <TouchableOpacity
+              style={styles.submitButton}
+              onPress={handleCreateEvent}
+            >
+              <Text style={styles.submitButtonText}>Create Event</Text>
+            </TouchableOpacity>
+          </View>
+        </ScrollView>
+      </KeyboardAvoidingView>
     </SafeAreaView>
   );
 }
@@ -167,6 +182,9 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#fff",
+  },
+  scrollContainer: {
+    flexGrow: 1,
   },
   header: {
     flexDirection: "row",
