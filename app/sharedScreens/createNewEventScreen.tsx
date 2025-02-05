@@ -21,6 +21,7 @@ import { GooglePlacesAutocomplete } from "react-native-google-places-autocomplet
 import MapView, { Region } from "react-native-maps";
 import * as Location from "expo-location";
 import { apiKeys } from "@/constants/apiKeys";
+import { munchStyles } from "@/constants/styles";
 
 // Define your API keys for each platform
 const googleApiKey =
@@ -191,16 +192,6 @@ export default function CreateNewEventScreen() {
             )}
 
             {/* Start Time Picker */}
-            <TouchableOpacity
-              style={styles.dateButton}
-              onPress={() => setShowStartTimePicker(true)}
-            >
-              <Text style={styles.dateButtonText}>
-                {startTime
-                  ? `Start Time: ${startTime.toLocaleTimeString()}`
-                  : "Add Start Time"}
-              </Text>
-            </TouchableOpacity>
             {showStartTimePicker && (
               <DateTimePicker
                 value={startTime || new Date()}
@@ -216,16 +207,6 @@ export default function CreateNewEventScreen() {
             )}
 
             {/* End Time Picker */}
-            <TouchableOpacity
-              style={styles.dateButton}
-              onPress={() => setShowEndTimePicker(true)}
-            >
-              <Text style={styles.dateButtonText}>
-                {endTime
-                  ? `End Time: ${endTime.toLocaleTimeString()}`
-                  : "Add End Time"}
-              </Text>
-            </TouchableOpacity>
             {showEndTimePicker && (
               <DateTimePicker
                 value={endTime || new Date()}
@@ -282,17 +263,7 @@ export default function CreateNewEventScreen() {
               />
             </View>
 
-            {/* Description Toggle */}
-            {!showDescription && (
-              <TouchableOpacity
-                style={styles.addDescriptionButton}
-                onPress={() => setShowDescription(true)}
-              >
-                <Text style={styles.addDescriptionButtonText}>
-                  Add Description
-                </Text>
-              </TouchableOpacity>
-            )}
+            {/* Description */}
             {showDescription && (
               <TextInput
                 style={[styles.input, styles.multilineInput]}
@@ -304,15 +275,73 @@ export default function CreateNewEventScreen() {
                 numberOfLines={4}
               />
             )}
-
-            <TouchableOpacity
-              style={styles.submitButton}
-              onPress={handleCreateEvent}
-            >
-              <Text style={styles.submitButtonText}>Create Event</Text>
-            </TouchableOpacity>
           </View>
         </ScrollView>
+
+        {/* Add Buttons at the Bottom */}
+        <View style={styles.bottomButtonContainer}>
+          <TouchableOpacity
+            style={[
+              styles.addButton,
+              {
+                backgroundColor: showStartTimePicker
+                  ? "grey"
+                  : munchColors.primary,
+              },
+            ]}
+            onPress={() => setShowStartTimePicker((prev) => !prev)}
+          >
+            {showStartTimePicker ? (
+              <FontAwesome name="minus" size={16} color="#fff" />
+            ) : (
+              <FontAwesome name="plus" size={16} color="#fff" />
+            )}
+
+            <Text style={styles.addButtonText}>Start Time</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[
+              styles.addButton,
+              {
+                backgroundColor: showEndTimePicker
+                  ? "grey"
+                  : munchColors.primary,
+              },
+            ]}
+            onPress={() => setShowEndTimePicker((prev) => !prev)}
+          >
+            {showEndTimePicker ? (
+              <FontAwesome name="minus" size={16} color="#fff" />
+            ) : (
+              <FontAwesome name="plus" size={16} color="#fff" />
+            )}
+
+            <Text style={styles.addButtonText}>End Time</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[
+              styles.addButton,
+              {
+                backgroundColor: showDescription ? "grey" : munchColors.primary,
+              },
+            ]}
+            onPress={() => setShowDescription((prev) => !prev)}
+          >
+            {showDescription ? (
+              <FontAwesome name="minus" size={16} color="#fff" />
+            ) : (
+              <FontAwesome name="plus" size={16} color="#fff" />
+            )}
+            <Text style={styles.addButtonText}>Description</Text>
+          </TouchableOpacity>
+        </View>
+
+        <TouchableOpacity
+          style={styles.submitButton}
+          onPress={handleCreateEvent}
+        >
+          <Text style={styles.submitButtonText}>Create Event</Text>
+        </TouchableOpacity>
       </KeyboardAvoidingView>
 
       {/* Full Screen Map Modal */}
@@ -452,6 +481,8 @@ const styles = StyleSheet.create({
     borderRadius: 25,
     alignItems: "center",
     marginTop: 20,
+    width: "90%",
+    marginHorizontal: "auto",
   },
   submitButtonText: {
     fontSize: 18,
@@ -481,5 +512,24 @@ const styles = StyleSheet.create({
   },
   fullScreenMap: {
     flex: 1,
+  },
+  bottomButtonContainer: {
+    flexDirection: "row",
+    justifyContent: "space-evenly",
+    alignItems: "center",
+    paddingHorizontal: 10,
+  },
+  addButton: {
+    backgroundColor: munchColors.primary,
+    paddingVertical: 10,
+    paddingHorizontal: 15,
+    borderRadius: munchStyles.smallRadius,
+    flexDirection: "row",
+  },
+  addButtonText: {
+    color: "#fff",
+    fontSize: 14,
+    fontWeight: "bold",
+    marginLeft: 10,
   },
 });
