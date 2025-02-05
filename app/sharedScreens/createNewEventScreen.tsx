@@ -11,6 +11,7 @@ import {
   KeyboardAvoidingView,
   ScrollView,
   Modal,
+  Alert,
 } from "react-native";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import DropDownPicker from "react-native-dropdown-picker";
@@ -22,6 +23,8 @@ import MapView, { Region } from "react-native-maps";
 import * as Location from "expo-location";
 import { apiKeys } from "@/constants/apiKeys";
 import { munchStyles } from "@/constants/styles";
+import { saveEvent } from "@/services/firestore";
+import { Event } from "@/constants/types";
 
 // Define your API keys for each platform
 const googleApiKey =
@@ -32,8 +35,9 @@ export default function CreateNewEventScreen() {
 
   // Dropdown for event type
   const [openDropdown, setOpenDropdown] = React.useState(false);
-  const [eventType, setEventType] = React.useState("Farmers Market");
+  const [eventType, setEventType] = React.useState("");
   const [items, setItems] = React.useState([
+    { label: "Select From Dropdown", value: "" },
     { label: "Farmers Market", value: "Farmers Market" },
     { label: "Flea Market", value: "Flea Market" },
     { label: "Other", value: "Other" },
@@ -95,18 +99,67 @@ export default function CreateNewEventScreen() {
     })();
   }, []);
 
-  const handleCreateEvent = () => {
-    const eventTitle = eventType === "Other" ? customEventTitle : eventType;
-    console.log({
+  const handleCreateEvent = async () => {
+    const eventTitle =
+      eventType === "Other" ? customEventTitle.trim() : eventType; // Trim spaces
+
+    // Validation checks
+    if (eventTitle === "") {
+      Alert.alert("Validation Error", "Please enter an event title.");
+      return;
+    }
+
+    if (
+      !region ||
+      typeof region.latitude !== "number" ||
+      typeof region.longitude !== "number"
+    ) {
+      Alert.alert("Validation Error", "Please select a valid location.");
+      return;
+    }
+
+    if (!dateValue || isNaN(new Date(dateValue).getTime())) {
+      Alert.alert("Validation Error", "Please select a valid date.");
+      return;
+    }
+
+    if (showStartTimePicker && !startTime) {
+      Alert.alert("Validation Error", "Please select a start time.");
+      return;
+    }
+
+    if (showEndTimePicker && !endTime) {
+      Alert.alert("Validation Error", "Please select an end time.");
+      return;
+    }
+
+    console.log("Validation Passed! Proceeding to save event...");
+
+    const newEvent: Event = {
       eventTitle,
       date: dateValue,
       startTime,
       endTime,
-      locationText,
-      description,
-      region,
-    });
-    router.back();
+      locationText: locationText.trim(),
+      description: description.trim(),
+      region: {
+        latitude: region.latitude,
+        longitude: region.longitude,
+        latitudeDelta: region.latitudeDelta ?? 0.01,
+        longitudeDelta: region.longitudeDelta ?? 0.01,
+      },
+      createdBy: "user-uid", // Replace with actual UID from auth
+    };
+
+    try {
+      const eventId = await saveEvent(newEvent);
+      console.log("Event successfully created with ID:", eventId);
+      Alert.alert("Success", "Event created successfully!");
+      router.back();
+    } catch (error) {
+      console.error("Failed to create event:", error);
+      Alert.alert("Error", "Something went wrong. Please try again.");
+    }
   };
 
   if (loading || !region) {
@@ -122,7 +175,7 @@ export default function CreateNewEventScreen() {
       <KeyboardAvoidingView
         style={{ flex: 1 }}
         behavior={Platform.OS === "ios" ? "padding" : "height"}
-        keyboardVerticalOffset={100}
+        keyboardVerticalOffset={10}
       >
         <ScrollView
           contentContainerStyle={styles.scrollContainer}
@@ -139,227 +192,234 @@ export default function CreateNewEventScreen() {
             </TouchableOpacity>
             <Text style={styles.headerText}>Create Event</Text>
           </View>
-
-          <View style={styles.formContainer}>
-            {/* Map View */}
-            <View style={styles.mapContainer}>
-              <MapView
-                style={styles.map}
-                region={region}
-                onRegionChangeComplete={(newRegion) => setRegion(newRegion)}
-                showsUserLocation={true}
-              />
-              <View style={styles.markerFixed}>
-                <FontAwesome
-                  name="map-marker"
-                  size={30}
-                  color={munchColors.primary}
+          <View style={{ justifyContent: "space-between", flex: 1 }}>
+            <View style={styles.formContainer}>
+              {/* Map View */}
+              <View style={styles.mapContainer}>
+                <MapView
+                  style={styles.map}
+                  region={region}
+                  onRegionChangeComplete={(newRegion) => setRegion(newRegion)}
+                  showsUserLocation={true}
                 />
+                <View style={styles.markerFixed}>
+                  <FontAwesome
+                    name="map-marker"
+                    size={30}
+                    color={munchColors.primary}
+                  />
+                </View>
+                <TouchableOpacity
+                  style={styles.fullScreenButton}
+                  onPress={() => setIsMapFullScreen(true)}
+                >
+                  <FontAwesome name="arrows-alt" size={20} color="#fff" />
+                </TouchableOpacity>
               </View>
-              <TouchableOpacity
-                style={styles.fullScreenButton}
-                onPress={() => setIsMapFullScreen(true)}
-              >
-                <FontAwesome name="arrows-alt" size={20} color="#fff" />
-              </TouchableOpacity>
-            </View>
 
-            {/* Event Type Dropdown */}
-            <Text style={styles.label}>Event Type</Text>
-            <DropDownPicker
-              open={openDropdown}
-              value={eventType}
-              items={items}
-              setOpen={setOpenDropdown}
-              setValue={setEventType}
-              setItems={setItems}
-              containerStyle={styles.dropdownContainer}
-              style={styles.dropdown}
-            />
-            {eventType === "Other" && (
-              <TextInput
-                style={styles.input}
-                placeholder="Enter Event Title"
-                value={customEventTitle}
-                onChangeText={setCustomEventTitle}
-                placeholderTextColor="#999"
+              {/* Event Type Dropdown */}
+              <Text style={styles.label}>Event Type</Text>
+              <DropDownPicker
+                open={openDropdown}
+                value={eventType}
+                items={items}
+                setOpen={setOpenDropdown}
+                setValue={setEventType}
+                setItems={setItems}
+                containerStyle={styles.dropdownContainer}
+                style={styles.dropdown}
               />
-            )}
+              {eventType === "Other" && (
+                <TextInput
+                  style={styles.input}
+                  placeholder="Enter Event Title"
+                  value={customEventTitle}
+                  onChangeText={setCustomEventTitle}
+                  placeholderTextColor="#999"
+                />
+              )}
 
-            <View style={styles.autocompleteContainer}>
-              <Text style={styles.label}>Address</Text>
+              <View style={styles.autocompleteContainer}>
+                <Text style={styles.label}>Address</Text>
 
-              <GooglePlacesAutocomplete
-                ref={autoCompleteRef}
-                placeholder="Search for an address"
-                minLength={2}
-                listViewDisplayed={false}
-                fetchDetails={true}
-                renderDescription={(row) => row.description}
-                onPress={(data, details = null) => {
-                  setLocationText(data.description);
-                  autoCompleteRef.current?.setAddressText(data.description);
-                  if (
-                    details &&
-                    details.geometry &&
-                    details.geometry.location
-                  ) {
-                    const { lat, lng } = details.geometry.location;
-                    setRegion({
-                      latitude: lat,
-                      longitude: lng,
-                      latitudeDelta: 0.01,
-                      longitudeDelta: 0.01,
-                    });
-                  }
-                }}
-                query={{
-                  key: googleApiKey,
-                  language: "en",
-                }}
-                textInputProps={{
-                  value: locationText,
-                  onChangeText: setLocationText,
-                }}
-                styles={{
-                  textInput: styles.input,
-                  container: { flex: 0 },
-                  listView: { backgroundColor: "#fff" },
-                }}
-              />
-            </View>
-            <View style={styles.dateContainer}>
-              <View style={styles.dateSubcontainer}>
-                <Text style={styles.dateButtonText}>Select Date:</Text>
-                <DateTimePicker
-                  value={dateValue}
-                  style={styles.datePicker}
-                  mode="date"
-                  display="default"
-                  onChange={(event, selectedDate) => {
-                    if (selectedDate) {
-                      setDateValue(selectedDate);
+                <GooglePlacesAutocomplete
+                  ref={autoCompleteRef}
+                  placeholder="Search for an address"
+                  minLength={2}
+                  listViewDisplayed={false}
+                  fetchDetails={true}
+                  renderDescription={(row) => row.description}
+                  onPress={(data, details = null) => {
+                    setLocationText(data.description);
+                    autoCompleteRef.current?.setAddressText(data.description);
+                    if (
+                      details &&
+                      details.geometry &&
+                      details.geometry.location
+                    ) {
+                      const { lat, lng } = details.geometry.location;
+                      setRegion({
+                        latitude: lat,
+                        longitude: lng,
+                        latitudeDelta: 0.01,
+                        longitudeDelta: 0.01,
+                      });
                     }
+                  }}
+                  query={{
+                    key: googleApiKey,
+                    language: "en",
+                  }}
+                  textInputProps={{
+                    value: locationText,
+                    onChangeText: setLocationText,
+                  }}
+                  styles={{
+                    textInput: styles.input,
+                    container: { flex: 0 },
+                    listView: { backgroundColor: "#fff" },
                   }}
                 />
               </View>
-              {showStartTimePicker && (
+              <View style={styles.dateContainer}>
                 <View style={styles.dateSubcontainer}>
-                  <Text style={styles.dateButtonText}>Start Time:</Text>
-
+                  <Text style={styles.dateButtonText}>Select Date:</Text>
                   <DateTimePicker
-                    value={startTime || new Date()}
-                    mode="time"
+                    value={dateValue}
+                    style={styles.datePicker}
+                    mode="date"
                     display="default"
-                    onChange={(event, selectedTime) => {
-                      if (selectedTime) {
-                        setStartTime(selectedTime);
+                    accentColor={munchColors.primary}
+                    onChange={(event, selectedDate) => {
+                      if (selectedDate) {
+                        setDateValue(selectedDate);
                       }
                     }}
                   />
                 </View>
-              )}
-              {/* End Time Picker */}
-              {showEndTimePicker && (
-                <View style={styles.dateSubcontainer}>
-                  <Text style={styles.dateButtonText}>End Time:</Text>
+                {showStartTimePicker && (
+                  <View style={styles.dateSubcontainer}>
+                    <Text style={styles.dateButtonText}>Start Time:</Text>
 
-                  <DateTimePicker
-                    value={endTime || new Date()}
-                    mode="time"
-                    display="default"
-                    onChange={(event, selectedTime) => {
-                      if (selectedTime) {
-                        setEndTime(selectedTime);
-                      }
-                    }}
+                    <DateTimePicker
+                      value={startTime || new Date()}
+                      mode="time"
+                      display="default"
+                      accentColor={munchColors.primary}
+                      onChange={(event, selectedTime) => {
+                        if (selectedTime) {
+                          setStartTime(selectedTime);
+                        }
+                      }}
+                    />
+                  </View>
+                )}
+                {/* End Time Picker */}
+                {showEndTimePicker && (
+                  <View style={styles.dateSubcontainer}>
+                    <Text style={styles.dateButtonText}>End Time:</Text>
+
+                    <DateTimePicker
+                      value={endTime || new Date()}
+                      mode="time"
+                      display="default"
+                      accentColor={munchColors.primary}
+                      onChange={(event, selectedTime) => {
+                        if (selectedTime) {
+                          setEndTime(selectedTime);
+                        }
+                      }}
+                    />
+                  </View>
+                )}
+              </View>
+
+              {/* Description */}
+              {showDescription && (
+                <View>
+                  <Text style={styles.label}>Description</Text>
+                  <TextInput
+                    style={[styles.input, styles.multilineInput]}
+                    placeholder="Event Description"
+                    value={description}
+                    onChangeText={setDescription}
+                    placeholderTextColor="#999"
+                    multiline
+                    numberOfLines={4}
                   />
                 </View>
               )}
             </View>
+            <View>
+              {/* Add Buttons at the Bottom */}
+              <View style={styles.bottomButtonContainer}>
+                <TouchableOpacity
+                  style={[
+                    styles.addButton,
+                    {
+                      backgroundColor: showStartTimePicker
+                        ? "grey"
+                        : munchColors.primary,
+                    },
+                  ]}
+                  onPress={() => setShowStartTimePicker((prev) => !prev)}
+                >
+                  {showStartTimePicker ? (
+                    <FontAwesome name="minus" size={16} color="#fff" />
+                  ) : (
+                    <FontAwesome name="plus" size={16} color="#fff" />
+                  )}
 
-            {/* Description */}
-            {showDescription && (
-              <View>
-                <Text style={styles.label}>Description</Text>
-                <TextInput
-                  style={[styles.input, styles.multilineInput]}
-                  placeholder="Event Description"
-                  value={description}
-                  onChangeText={setDescription}
-                  placeholderTextColor="#999"
-                  multiline
-                  numberOfLines={4}
-                />
+                  <Text style={styles.addButtonText}>Start Time</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={[
+                    styles.addButton,
+                    {
+                      backgroundColor: showEndTimePicker
+                        ? "grey"
+                        : munchColors.primary,
+                    },
+                  ]}
+                  onPress={() => setShowEndTimePicker((prev) => !prev)}
+                >
+                  {showEndTimePicker ? (
+                    <FontAwesome name="minus" size={16} color="#fff" />
+                  ) : (
+                    <FontAwesome name="plus" size={16} color="#fff" />
+                  )}
+
+                  <Text style={styles.addButtonText}>End Time</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={[
+                    styles.addButton,
+                    {
+                      backgroundColor: showDescription
+                        ? "grey"
+                        : munchColors.primary,
+                    },
+                  ]}
+                  onPress={() => setShowDescription((prev) => !prev)}
+                >
+                  {showDescription ? (
+                    <FontAwesome name="minus" size={16} color="#fff" />
+                  ) : (
+                    <FontAwesome name="plus" size={16} color="#fff" />
+                  )}
+                  <Text style={styles.addButtonText}>Description</Text>
+                </TouchableOpacity>
               </View>
-            )}
+
+              <TouchableOpacity
+                style={styles.submitButton}
+                onPress={handleCreateEvent}
+              >
+                <Text style={styles.submitButtonText}>Create Event</Text>
+              </TouchableOpacity>
+            </View>
           </View>
         </ScrollView>
-
-        {/* Add Buttons at the Bottom */}
-        <View style={styles.bottomButtonContainer}>
-          <TouchableOpacity
-            style={[
-              styles.addButton,
-              {
-                backgroundColor: showStartTimePicker
-                  ? "grey"
-                  : munchColors.primary,
-              },
-            ]}
-            onPress={() => setShowStartTimePicker((prev) => !prev)}
-          >
-            {showStartTimePicker ? (
-              <FontAwesome name="minus" size={16} color="#fff" />
-            ) : (
-              <FontAwesome name="plus" size={16} color="#fff" />
-            )}
-
-            <Text style={styles.addButtonText}>Start Time</Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={[
-              styles.addButton,
-              {
-                backgroundColor: showEndTimePicker
-                  ? "grey"
-                  : munchColors.primary,
-              },
-            ]}
-            onPress={() => setShowEndTimePicker((prev) => !prev)}
-          >
-            {showEndTimePicker ? (
-              <FontAwesome name="minus" size={16} color="#fff" />
-            ) : (
-              <FontAwesome name="plus" size={16} color="#fff" />
-            )}
-
-            <Text style={styles.addButtonText}>End Time</Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={[
-              styles.addButton,
-              {
-                backgroundColor: showDescription ? "grey" : munchColors.primary,
-              },
-            ]}
-            onPress={() => setShowDescription((prev) => !prev)}
-          >
-            {showDescription ? (
-              <FontAwesome name="minus" size={16} color="#fff" />
-            ) : (
-              <FontAwesome name="plus" size={16} color="#fff" />
-            )}
-            <Text style={styles.addButtonText}>Description</Text>
-          </TouchableOpacity>
-        </View>
-
-        <TouchableOpacity
-          style={styles.submitButton}
-          onPress={handleCreateEvent}
-        >
-          <Text style={styles.submitButtonText}>Create Event</Text>
-        </TouchableOpacity>
       </KeyboardAvoidingView>
 
       {/* Full Screen Map Modal */}
@@ -409,7 +469,7 @@ const styles = StyleSheet.create({
     borderBottomColor: "#ddd",
   },
   headerText: {
-    fontSize: 40,
+    fontSize: 35,
     fontWeight: "bold",
     color: "#000",
     marginLeft: 20,
@@ -421,6 +481,7 @@ const styles = StyleSheet.create({
   label: {
     fontSize: 16,
     marginBottom: 8,
+    fontWeight: "bold",
   },
   dropdownContainer: {
     marginBottom: 16,
@@ -482,6 +543,7 @@ const styles = StyleSheet.create({
     marginBottom: 4,
     fontSize: 16,
     color: "#333",
+    fontWeight: "bold",
   },
   addDescriptionButton: {
     backgroundColor: "#eee",

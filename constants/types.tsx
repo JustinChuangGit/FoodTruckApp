@@ -93,3 +93,20 @@ export type Coupon = {
   createdOn?: number; // Timestamp of when the coupon was created
   createdOnReadable?: string; // Readable date of when the coupon was created
 };
+
+export type Event = {
+  eventTitle: string;
+  date: Date;
+  startTime?: Date | null;
+  endTime?: Date | null;
+  locationText?: string;
+  description?: string;
+  region: {
+    latitude: number;
+    longitude: number;
+    latitudeDelta: number;
+    longitudeDelta: number;
+  };
+  createdBy: string; // User UID
+  createdAt?: Date;
+};

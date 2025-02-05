@@ -3,7 +3,7 @@ import { app } from "../firebaseConfig"; // Import the initialized Firebase app
 import { Alert } from "react-native"; // For React Native prompts (adjust for web if needed)
 import { MenuItem } from "@/constants/types"; // Import the MenuItem type
 import { Timestamp } from "firebase/firestore";
-import { Coupon } from "@/constants/types"; // Import the Coupon type
+import { Coupon, Event } from "@/constants/types"; // Import the Coupon type
 // Initialize Firestore
 export const db = getFirestore(app);
 
@@ -753,3 +753,27 @@ export async function addRewardPoints(uid: string): Promise<void> {
     throw error;
   }
 }
+
+
+
+export const saveEvent = async (event: Event): Promise<string> => {
+  try {
+    const eventsRef = collection(db, "events");
+
+    const eventData = {
+      ...event,
+      date: event.date.toISOString(),
+      startTime: event.startTime ? event.startTime.toISOString() : null,
+      endTime: event.endTime ? event.endTime.toISOString() : null,
+      createdAt: serverTimestamp(), 
+    };
+
+    const docRef = await addDoc(eventsRef, eventData);
+    console.log("Event saved successfully with ID:", docRef.id);
+
+    return docRef.id;
+  } catch (error) {
+    console.error("Error saving event:", error);
+    throw error;
+  }
+};
