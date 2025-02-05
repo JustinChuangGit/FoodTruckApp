@@ -156,7 +156,6 @@ export default function CreateNewEventScreen() {
               setItems={setItems}
               containerStyle={styles.dropdownContainer}
               style={styles.dropdown}
-              // dropDownStyle={styles.dropdownList}
             />
             {eventType === "Other" && (
               <TextInput
@@ -318,7 +317,7 @@ export default function CreateNewEventScreen() {
 
       {/* Full Screen Map Modal */}
       <Modal visible={isMapFullScreen} animationType="slide">
-        <SafeAreaView style={styles.fullScreenContainer}>
+        <View style={styles.fullScreenContainer}>
           <TouchableOpacity
             style={styles.fullScreenCloseButton}
             onPress={() => setIsMapFullScreen(false)}
@@ -340,7 +339,7 @@ export default function CreateNewEventScreen() {
               />
             </View>
           </View>
-        </SafeAreaView>
+        </View>
       </Modal>
     </SafeAreaView>
   );
@@ -465,12 +464,16 @@ const styles = StyleSheet.create({
   },
   fullScreenCloseButton: {
     position: "absolute",
-    top: 10,
-    right: 10,
+    top: 60,
+    right: 20,
     zIndex: 10,
     padding: 10,
     backgroundColor: "rgba(0,0,0,0.5)",
-    borderRadius: 20,
+    borderRadius: 30,
+    width: 50,
+    height: 50,
+    justifyContent: "center",
+    alignItems: "center",
   },
   fullScreenMapContainer: {
     flex: 1,
