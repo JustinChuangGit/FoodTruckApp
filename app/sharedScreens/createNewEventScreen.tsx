@@ -57,6 +57,24 @@ export default function CreateNewEventScreen() {
   // Create a ref for the autocomplete component (typed as any for convenience)
   const autoCompleteRef = React.useRef<any>(null);
 
+  useEffect(() => {
+    if (!showStartTimePicker) {
+      setStartTime(null);
+    }
+  }, [showStartTimePicker]);
+
+  useEffect(() => {
+    if (!showEndTimePicker) {
+      setEndTime(null);
+    }
+  }, [showEndTimePicker]);
+
+  useEffect(() => {
+    if (!showDescription) {
+      setDescription("");
+    }
+  }, [showDescription]);
+
   // Request user's current location on mount
   useEffect(() => {
     (async () => {
@@ -168,61 +186,9 @@ export default function CreateNewEventScreen() {
               />
             )}
 
-            {/* Date Picker */}
-            <TouchableOpacity
-              style={styles.dateButton}
-              onPress={() => setShowDatePicker(true)}
-            >
-              <Text style={styles.dateButtonText}>
-                Select Date: {dateValue.toDateString()}
-              </Text>
-            </TouchableOpacity>
-            {showDatePicker && (
-              <DateTimePicker
-                value={dateValue}
-                mode="date"
-                display="default"
-                onChange={(event, selectedDate) => {
-                  setShowDatePicker(false);
-                  if (selectedDate) {
-                    setDateValue(selectedDate);
-                  }
-                }}
-              />
-            )}
-
-            {/* Start Time Picker */}
-            {showStartTimePicker && (
-              <DateTimePicker
-                value={startTime || new Date()}
-                mode="time"
-                display="default"
-                onChange={(event, selectedTime) => {
-                  setShowStartTimePicker(false);
-                  if (selectedTime) {
-                    setStartTime(selectedTime);
-                  }
-                }}
-              />
-            )}
-
-            {/* End Time Picker */}
-            {showEndTimePicker && (
-              <DateTimePicker
-                value={endTime || new Date()}
-                mode="time"
-                display="default"
-                onChange={(event, selectedTime) => {
-                  setShowEndTimePicker(false);
-                  if (selectedTime) {
-                    setEndTime(selectedTime);
-                  }
-                }}
-              />
-            )}
-
-            {/* Address Autocomplete */}
             <View style={styles.autocompleteContainer}>
+              <Text style={styles.label}>Address</Text>
+
               <GooglePlacesAutocomplete
                 ref={autoCompleteRef}
                 placeholder="Search for an address"
@@ -262,18 +228,70 @@ export default function CreateNewEventScreen() {
                 }}
               />
             </View>
+            <View style={styles.dateContainer}>
+              <View style={styles.dateSubcontainer}>
+                <Text style={styles.dateButtonText}>Select Date:</Text>
+                <DateTimePicker
+                  value={dateValue}
+                  style={styles.datePicker}
+                  mode="date"
+                  display="default"
+                  onChange={(event, selectedDate) => {
+                    if (selectedDate) {
+                      setDateValue(selectedDate);
+                    }
+                  }}
+                />
+              </View>
+              {showStartTimePicker && (
+                <View style={styles.dateSubcontainer}>
+                  <Text style={styles.dateButtonText}>Start Time:</Text>
+
+                  <DateTimePicker
+                    value={startTime || new Date()}
+                    mode="time"
+                    display="default"
+                    onChange={(event, selectedTime) => {
+                      if (selectedTime) {
+                        setStartTime(selectedTime);
+                      }
+                    }}
+                  />
+                </View>
+              )}
+              {/* End Time Picker */}
+              {showEndTimePicker && (
+                <View style={styles.dateSubcontainer}>
+                  <Text style={styles.dateButtonText}>End Time:</Text>
+
+                  <DateTimePicker
+                    value={endTime || new Date()}
+                    mode="time"
+                    display="default"
+                    onChange={(event, selectedTime) => {
+                      if (selectedTime) {
+                        setEndTime(selectedTime);
+                      }
+                    }}
+                  />
+                </View>
+              )}
+            </View>
 
             {/* Description */}
             {showDescription && (
-              <TextInput
-                style={[styles.input, styles.multilineInput]}
-                placeholder="Event Description"
-                value={description}
-                onChangeText={setDescription}
-                placeholderTextColor="#999"
-                multiline
-                numberOfLines={4}
-              />
+              <View>
+                <Text style={styles.label}>Description</Text>
+                <TextInput
+                  style={[styles.input, styles.multilineInput]}
+                  placeholder="Event Description"
+                  value={description}
+                  onChangeText={setDescription}
+                  placeholderTextColor="#999"
+                  multiline
+                  numberOfLines={4}
+                />
+              </View>
             )}
           </View>
         </ScrollView>
@@ -427,7 +445,7 @@ const styles = StyleSheet.create({
     textAlignVertical: "top",
   },
   autocompleteContainer: {
-    marginBottom: 16,
+    marginBottom: 8,
   },
   mapContainer: {
     height: 200,
@@ -461,6 +479,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   dateButtonText: {
+    marginBottom: 4,
     fontSize: 16,
     color: "#333",
   },
@@ -532,4 +551,13 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     marginLeft: 10,
   },
+  dateContainer: {
+    marginBottom: 16,
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  dateSubcontainer: {
+    alignItems: "center",
+  },
+  datePicker: {},
 });
