@@ -25,6 +25,8 @@ import { apiKeys } from "@/constants/apiKeys";
 import { munchStyles } from "@/constants/styles";
 import { saveEvent } from "@/services/firestore";
 import { Event } from "@/constants/types";
+import { selectUser } from "@/redux/authSlice";
+import { useSelector } from "react-redux";
 
 // Define your API keys for each platform
 const googleApiKey =
@@ -32,7 +34,7 @@ const googleApiKey =
 
 export default function CreateNewEventScreen() {
   const router = useRouter();
-
+  const user = useSelector(selectUser);
   // Dropdown for event type
   const [openDropdown, setOpenDropdown] = React.useState(false);
   const [eventType, setEventType] = React.useState("");
@@ -148,7 +150,7 @@ export default function CreateNewEventScreen() {
         latitudeDelta: region.latitudeDelta ?? 0.01,
         longitudeDelta: region.longitudeDelta ?? 0.01,
       },
-      createdBy: "user-uid", // Replace with actual UID from auth
+      createdBy: user?.uid || "unknown-user",
     };
 
     try {
