@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import {
   SafeAreaView,
   View,
@@ -11,11 +11,12 @@ import {
 import { FontAwesome } from "@expo/vector-icons";
 import { munchColors } from "@/constants/Colors";
 import { useRouter } from "expo-router";
+import { fetchEvents } from "@/services/firestore";
+import { Event } from "@/constants/types";
 
 export default function UserEventsScreen() {
   const router = useRouter();
-  const [isLoading, setIsLoading] = React.useState(true);
-  const [events, setEvents] = React.useState([]);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -26,6 +27,24 @@ export default function UserEventsScreen() {
   }, []);
 
   const shimmerAnimation = new Animated.Value(0);
+  const [events, setEvents] = useState<Event[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const loadEvents = async () => {
+      try {
+        setLoading(true);
+        const eventsData = await fetchEvents();
+        setEvents(eventsData);
+      } catch (error) {
+        console.error("Failed to load events:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadEvents();
+  }, []);
 
   const startAnimation = () => {
     Animated.loop(
@@ -111,7 +130,9 @@ export default function UserEventsScreen() {
             // Your actual event list item component here
             <View />
           )}
-          keyExtractor={(item) => item.id.toString()}
+          keyExtractor={(item) =>
+            item.id ? item.id.toString() : Math.random().toString()
+          }
           contentContainerStyle={styles.listContent}
         />
       )}

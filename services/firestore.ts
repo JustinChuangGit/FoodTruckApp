@@ -6,6 +6,7 @@ import { Timestamp } from "firebase/firestore";
 import { Coupon, Event } from "@/constants/types"; // Import the Coupon type
 // Initialize Firestore
 export const db = getFirestore(app);
+import { v4 as uuidv4 } from "uuid"; // Generate a unique ID
 
 // Function to save user data
 export const saveUserData = async (
@@ -755,25 +756,61 @@ export async function addRewardPoints(uid: string): Promise<void> {
 }
 
 
-
 export const saveEvent = async (event: Event): Promise<string> => {
   try {
-    const eventsRef = collection(db, "events");
+    const eventId = uuidv4(); // Generate a unique event ID
+    const eventRef = doc(db, "events", eventId); // Create a Firestore doc reference
 
     const eventData = {
       ...event,
+      eventId, // Store event ID inside the document
       date: event.date.toISOString(),
       startTime: event.startTime ? event.startTime.toISOString() : null,
       endTime: event.endTime ? event.endTime.toISOString() : null,
-      createdAt: serverTimestamp(), 
+      createdAt: serverTimestamp(),
     };
 
-    const docRef = await addDoc(eventsRef, eventData);
-    console.log("Event saved successfully with ID:", docRef.id);
+    await setDoc(eventRef, eventData); // Save data with custom ID
+    console.log("Event saved successfully with ID:", eventId);
 
-    return docRef.id;
+    return eventId;
   } catch (error) {
     console.error("Error saving event:", error);
+    throw error;
+  }
+};
+
+
+export const fetchEvents = async (): Promise<Event[]> => {
+  try {
+    const eventsRef = collection(db, "events"); // Reference to Firestore "events" collection
+    const querySnapshot = await getDocs(eventsRef);
+
+    const events: Event[] = querySnapshot.docs.map((doc) => {
+      const data = doc.data();
+      return {
+        id: data.id,
+        eventTitle: data.eventTitle,
+        date: new Date(data.date),
+        startTime: data.startTime ? new Date(data.startTime) : null,
+        endTime: data.endTime ? new Date(data.endTime) : null,
+        locationText: data.locationText,
+        description: data.description || "",
+        region: {
+          latitude: data.region.latitude,
+          longitude: data.region.longitude,
+          latitudeDelta: data.region.latitudeDelta ?? 0.01,
+          longitudeDelta: data.region.longitudeDelta ?? 0.01,
+        },
+        createdBy: data.createdBy,
+        createdAt: data.createdAt?.toDate() || new Date(), // Convert Firestore timestamp
+      };
+    });
+
+    console.log("Fetched Events:", events);
+    return events;
+  } catch (error) {
+    console.error("Error fetching events:", error);
     throw error;
   }
 };

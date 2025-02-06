@@ -95,6 +95,7 @@ export type Coupon = {
 };
 
 export type Event = {
+  id?: string;
   eventTitle: string;
   date: Date;
   startTime?: Date | null;
