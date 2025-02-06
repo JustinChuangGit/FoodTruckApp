@@ -1,119 +1,112 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import {
   SafeAreaView,
   View,
   FlatList,
   StyleSheet,
   Text,
-  Animated,
   TouchableOpacity,
+  RefreshControl,
 } from "react-native";
 import { FontAwesome } from "@expo/vector-icons";
 import { munchColors } from "@/constants/Colors";
 import { useRouter } from "expo-router";
 import { fetchEvents } from "@/services/firestore";
 import { Event } from "@/constants/types";
+import { format } from "date-fns";
 
 export default function UserEventsScreen() {
   const router = useRouter();
-  const [isLoading, setIsLoading] = useState(true);
-
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setIsLoading(false);
-      setEvents([]);
-    }, 2000);
-    return () => clearTimeout(timer);
-  }, []);
-
-  const shimmerAnimation = new Animated.Value(0);
   const [events, setEvents] = useState<Event[]>([]);
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false); // State for pull-to-refresh
+
+  const loadEvents = async () => {
+    try {
+      setLoading(true);
+      const eventsData = await fetchEvents();
+      setEvents(eventsData);
+    } catch (error) {
+      console.error("Failed to load events:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const loadEvents = async () => {
-      try {
-        setLoading(true);
-        const eventsData = await fetchEvents();
-        setEvents(eventsData);
-      } catch (error) {
-        console.error("Failed to load events:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
     loadEvents();
   }, []);
 
-  const startAnimation = () => {
-    Animated.loop(
-      Animated.timing(shimmerAnimation, {
-        toValue: 1,
-        duration: 1000,
-        useNativeDriver: true,
-      })
-    ).start();
+  // Function to handle pull-to-refresh
+  const onRefresh = useCallback(async () => {
+    setRefreshing(true);
+    await loadEvents();
+    setRefreshing(false);
+  }, []);
+
+  const categorizeEvents = () => {
+    const today = new Date();
+    const tomorrow = new Date();
+    tomorrow.setDate(today.getDate() + 1);
+
+    const todayEvents: Event[] = [];
+    const tomorrowEvents: Event[] = [];
+    const upcomingEvents: Event[] = [];
+
+    events
+      .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()) // Sort from closest to furthest
+      .forEach((event) => {
+        const eventDate = new Date(event.date);
+        if (eventDate.toDateString() === today.toDateString()) {
+          todayEvents.push(event);
+        } else if (eventDate.toDateString() === tomorrow.toDateString()) {
+          tomorrowEvents.push(event);
+        } else {
+          upcomingEvents.push(event);
+        }
+      });
+
+    return { todayEvents, tomorrowEvents, upcomingEvents };
   };
 
-  React.useEffect(() => {
-    if (isLoading) startAnimation();
-  }, [isLoading]);
+  const { todayEvents, tomorrowEvents, upcomingEvents } = categorizeEvents();
 
-  const translateX = shimmerAnimation.interpolate({
-    inputRange: [0, 1],
-    outputRange: [-100, 300],
-  });
-
-  const SkeletonEventItem = () => (
-    <View style={styles.eventItem}>
-      <Animated.View
-        style={[styles.shimmerOverlay, { transform: [{ translateX }] }]}
-      />
-      <View style={styles.imagePlaceholder} />
+  const renderEventItem = ({ item }: { item: Event }) => (
+    <TouchableOpacity
+      style={styles.eventItem}
+      onPress={() => router.push(`/event/${item.id}`)}
+    >
       <View style={styles.detailsContainer}>
-        <View style={[styles.textPlaceholder, { width: "60%" }]} />
-        <View style={[styles.textPlaceholder, { width: "40%" }]} />
-        <View style={[styles.textPlaceholder, { width: "30%" }]} />
-        <View style={styles.buttonPlaceholder} />
+        <Text style={styles.eventTitle}>{item.eventTitle}</Text>
+        <Text style={styles.eventDate}>
+          {format(new Date(item.date), "EEEE, MMM d, yyyy")}
+        </Text>
+        {item.startTime && item.endTime && (
+          <Text style={styles.eventTime}>
+            {format(new Date(item.startTime), "h:mm a")} -{" "}
+            {format(new Date(item.endTime), "h:mm a")}
+          </Text>
+        )}
+        <Text style={styles.eventLocation}>{item.locationText}</Text>
       </View>
       <FontAwesome name="chevron-right" size={16} style={styles.rightChevron} />
-    </View>
-  );
-
-  const HeaderRightButton = () => (
-    <TouchableOpacity
-      onPress={() => router.push("/sharedScreens/createNewEventScreen")}
-    >
-      <FontAwesome name="plus" size={24} color={munchColors.primary} />
     </TouchableOpacity>
   );
-
-  if (isLoading) {
-    return (
-      <SafeAreaView style={styles.container}>
-        <View style={styles.header}>
-          <Text style={styles.headerText}>Events</Text>
-          <FontAwesome name="plus" size={24} color="#e1e1e1" />
-        </View>
-        <FlatList
-          data={[1, 2, 3]}
-          renderItem={SkeletonEventItem}
-          keyExtractor={(item) => item.toString()}
-          contentContainerStyle={styles.listContent}
-        />
-      </SafeAreaView>
-    );
-  }
 
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
         <Text style={styles.headerText}>Events</Text>
-        <HeaderRightButton />
+        <TouchableOpacity
+          onPress={() => router.push("/sharedScreens/createNewEventScreen")}
+        >
+          <FontAwesome name="plus" size={24} color={munchColors.primary} />
+        </TouchableOpacity>
       </View>
 
-      {events.length === 0 ? (
+      {loading ? (
+        <Text style={styles.loadingText}>Loading events...</Text>
+      ) : events.length === 0 ? (
         <View style={styles.emptyState}>
           <FontAwesome
             name="calendar-times-o"
@@ -125,15 +118,25 @@ export default function UserEventsScreen() {
         </View>
       ) : (
         <FlatList
-          data={events}
+          data={[
+            { title: "Today", data: todayEvents },
+            { title: "Tomorrow", data: tomorrowEvents },
+            { title: "Upcoming", data: upcomingEvents },
+          ].filter((section) => section.data.length > 0)}
           renderItem={({ item }) => (
-            // Your actual event list item component here
-            <View />
+            <View>
+              <Text style={styles.sectionHeader}>{item.title}</Text>
+              <FlatList
+                data={item.data}
+                renderItem={renderEventItem}
+                keyExtractor={(event) => event.id ?? Math.random().toString()}
+              />
+            </View>
           )}
-          keyExtractor={(item) =>
-            item.id ? item.id.toString() : Math.random().toString()
+          keyExtractor={(item) => item.title}
+          refreshControl={
+            <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
           }
-          contentContainerStyle={styles.listContent}
         />
       )}
     </SafeAreaView>
@@ -149,18 +152,22 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    height: 100,
+    height: 80,
     paddingHorizontal: 20,
     borderBottomWidth: 1,
     borderBottomColor: "#ddd",
   },
   headerText: {
-    fontSize: 40,
+    fontSize: 32,
     fontWeight: "bold",
     color: "#000",
   },
-  listContent: {
+  sectionHeader: {
+    fontSize: 22,
+    fontWeight: "bold",
+    color: munchColors.primary,
     paddingHorizontal: 20,
+    paddingTop: 10,
   },
   eventItem: {
     flexDirection: "row",
@@ -170,42 +177,37 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: "#ddd",
   },
-  imagePlaceholder: {
-    width: 80,
-    height: 80,
-    borderRadius: 8,
-    backgroundColor: "#e1e1e1",
-  },
   detailsContainer: {
     flex: 1,
-    marginLeft: 16,
-    justifyContent: "center",
+    marginLeft: 10,
   },
-  textPlaceholder: {
-    height: 16,
-    backgroundColor: "#e1e1e1",
-    borderRadius: 4,
-    marginVertical: 4,
+  eventTitle: {
+    fontSize: 18,
+    fontWeight: "bold",
+    color: "#333",
   },
-  buttonPlaceholder: {
-    width: 80,
-    height: 30,
-    backgroundColor: "#e1e1e1",
-    borderRadius: 15,
-    marginTop: 12,
+  eventDate: {
+    fontSize: 14,
+    color: "#666",
   },
-  shimmerOverlay: {
-    position: "absolute",
-    top: 0,
-    left: 0,
-    height: "100%",
-    width: "30%",
-    backgroundColor: "rgba(255,255,255,0.6)",
-    zIndex: 1,
+  eventTime: {
+    fontSize: 14,
+    color: "#666",
+  },
+  eventLocation: {
+    fontSize: 14,
+    fontWeight: "600",
+    color: munchColors.primary,
+    marginTop: 4,
   },
   rightChevron: {
     color: munchColors.primary,
-    marginLeft: 10,
+  },
+  loadingText: {
+    textAlign: "center",
+    marginTop: 50,
+    fontSize: 18,
+    color: "#888",
   },
   emptyState: {
     flex: 1,
