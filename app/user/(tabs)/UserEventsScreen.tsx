@@ -9,6 +9,7 @@ import {
   RefreshControl,
   ScrollView,
   Dimensions,
+  Modal,
 } from "react-native";
 import { FontAwesome } from "@expo/vector-icons";
 import { munchColors } from "@/constants/Colors";
@@ -16,6 +17,7 @@ import { useRouter } from "expo-router";
 import { fetchEvents } from "@/services/firestore";
 import { Event } from "@/constants/types";
 import { format } from "date-fns";
+import MapView, { Marker } from "react-native-maps";
 
 const height = Dimensions.get("window").height;
 
@@ -24,6 +26,8 @@ export default function UserEventsScreen() {
   const [events, setEvents] = useState<Event[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false); // State for pull-to-refresh
+  const [modalVisible, setModalVisible] = useState(false);
+  const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
 
   const loadEvents = async () => {
     try {
@@ -47,6 +51,16 @@ export default function UserEventsScreen() {
     await loadEvents();
     setRefreshing(false);
   }, []);
+
+  const openEventModal = (event: Event) => {
+    setSelectedEvent(event);
+    setModalVisible(true);
+  };
+
+  const closeEventModal = () => {
+    setSelectedEvent(null);
+    setModalVisible(false);
+  };
 
   const categorizeEvents = () => {
     const today = new Date();
@@ -78,7 +92,7 @@ export default function UserEventsScreen() {
   const renderEventItem = ({ item }: { item: Event }) => (
     <TouchableOpacity
       style={styles.eventItem}
-      onPress={() => router.push(`/event/${item.id}`)}
+      onPress={() => openEventModal(item)}
     >
       <View style={styles.detailsContainer}>
         <Text style={styles.eventTitle}>{item.eventTitle}</Text>
@@ -149,6 +163,58 @@ export default function UserEventsScreen() {
           }
         />
       )}
+      <Modal visible={modalVisible} animationType="slide" transparent={true}>
+        {selectedEvent && (
+          <View style={styles.modalContainer}>
+            <View style={styles.modalContent}>
+              <TouchableOpacity
+                style={styles.closeButton}
+                onPress={closeEventModal}
+              >
+                <FontAwesome name="times" size={24} color="#fff" />
+              </TouchableOpacity>
+
+              {/* Map */}
+              <MapView
+                style={styles.map}
+                initialRegion={{
+                  latitude: selectedEvent.region.latitude,
+                  longitude: selectedEvent.region.longitude,
+                  latitudeDelta: selectedEvent.region.latitudeDelta,
+                  longitudeDelta: selectedEvent.region.longitudeDelta,
+                }}
+              >
+                <Marker
+                  coordinate={{
+                    latitude: selectedEvent.region.latitude,
+                    longitude: selectedEvent.region.longitude,
+                  }}
+                  title={selectedEvent.eventTitle}
+                  description={selectedEvent.locationText}
+                />
+              </MapView>
+
+              {/* Event Details */}
+              <Text style={styles.modalTitle}>{selectedEvent.eventTitle}</Text>
+              <Text style={styles.modalDate}>
+                {format(new Date(selectedEvent.date), "EEEE, MMM d, yyyy")}
+              </Text>
+              {selectedEvent.startTime && selectedEvent.endTime && (
+                <Text style={styles.modalTime}>
+                  {format(new Date(selectedEvent.startTime), "h:mm a")} -{" "}
+                  {format(new Date(selectedEvent.endTime), "h:mm a")}
+                </Text>
+              )}
+              <Text style={styles.modalLocation}>
+                {selectedEvent.locationText}
+              </Text>
+              <Text style={styles.modalDescription}>
+                {selectedEvent.description}
+              </Text>
+            </View>
+          </View>
+        )}
+      </Modal>
     </SafeAreaView>
   );
 }
@@ -235,5 +301,56 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: "#666",
     marginTop: 8,
+  },
+  modalContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "rgba(0,0,0,0.5)",
+  },
+  modalContent: {
+    width: "90%",
+    backgroundColor: "#fff",
+    padding: 20,
+    borderRadius: 10,
+    alignItems: "center",
+  },
+  closeButton: {
+    position: "absolute",
+    top: 10,
+    right: 10,
+    padding: 10,
+    backgroundColor: "rgba(0,0,0,0.6)",
+    borderRadius: 20,
+  },
+  map: {
+    width: "100%",
+    height: 200,
+    borderRadius: 10,
+    marginBottom: 10,
+  },
+  modalTitle: {
+    fontSize: 22,
+    fontWeight: "bold",
+    color: munchColors.primary,
+  },
+  modalDate: {
+    fontSize: 16,
+    color: "#555",
+  },
+  modalTime: {
+    fontSize: 16,
+    color: "#777",
+  },
+  modalLocation: {
+    fontSize: 16,
+    fontWeight: "bold",
+    marginTop: 10,
+    color: munchColors.primary,
+  },
+  modalDescription: {
+    fontSize: 14,
+    textAlign: "center",
+    marginTop: 10,
   },
 });
