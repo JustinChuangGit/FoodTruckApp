@@ -7,6 +7,8 @@ import {
   Text,
   TouchableOpacity,
   RefreshControl,
+  ScrollView,
+  Dimensions,
 } from "react-native";
 import { FontAwesome } from "@expo/vector-icons";
 import { munchColors } from "@/constants/Colors";
@@ -14,6 +16,8 @@ import { useRouter } from "expo-router";
 import { fetchEvents } from "@/services/firestore";
 import { Event } from "@/constants/types";
 import { format } from "date-fns";
+
+const height = Dimensions.get("window").height;
 
 export default function UserEventsScreen() {
   const router = useRouter();
@@ -107,15 +111,21 @@ export default function UserEventsScreen() {
       {loading ? (
         <Text style={styles.loadingText}>Loading events...</Text>
       ) : events.length === 0 ? (
-        <View style={styles.emptyState}>
-          <FontAwesome
-            name="calendar-times-o"
-            size={48}
-            color={munchColors.primary}
-          />
-          <Text style={styles.emptyStateText}>No events found</Text>
-          <Text style={styles.emptyStateSubText}>Check back later!</Text>
-        </View>
+        <ScrollView
+          refreshControl={
+            <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+          }
+        >
+          <View style={[styles.emptyState, { height: height - 250 }]}>
+            <FontAwesome
+              name="calendar-times-o"
+              size={48}
+              color={munchColors.primary}
+            />
+            <Text style={styles.emptyStateText}>No events found</Text>
+            <Text style={styles.emptyStateSubText}>Check back later!</Text>
+          </View>
+        </ScrollView>
       ) : (
         <FlatList
           data={[

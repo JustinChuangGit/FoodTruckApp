@@ -129,11 +129,7 @@ export default function CreateNewEventScreen() {
       return;
     }
 
-    if (
-      !region ||
-      typeof region.latitude !== "number" ||
-      typeof region.longitude !== "number"
-    ) {
+    if (locationText === "") {
       Alert.alert("Validation Error", "Please select a valid location.");
       return;
     }
@@ -163,10 +159,10 @@ export default function CreateNewEventScreen() {
       locationText: locationText.trim(),
       description: description.trim(),
       region: {
-        latitude: region.latitude,
-        longitude: region.longitude,
-        latitudeDelta: region.latitudeDelta ?? 0.01,
-        longitudeDelta: region.longitudeDelta ?? 0.01,
+        latitude: region?.latitude ?? 0,
+        longitude: region?.longitude ?? 0,
+        latitudeDelta: region?.latitudeDelta ?? 0.01,
+        longitudeDelta: region?.longitudeDelta ?? 0.01,
       },
       createdBy: user?.uid || "unknown-user",
     };
