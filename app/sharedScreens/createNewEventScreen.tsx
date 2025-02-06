@@ -101,6 +101,24 @@ export default function CreateNewEventScreen() {
     })();
   }, []);
 
+  const reverseGeocode = async (latitude: number, longitude: number) => {
+    try {
+      const response = await fetch(
+        `https://maps.googleapis.com/maps/api/geocode/json?latlng=${latitude},${longitude}&key=${apiKeys.iosPlaces}`
+      );
+      const data = await response.json();
+      if (data.status === "OK" && data.results.length > 0) {
+        return data.results[0].formatted_address; // Get the first result
+      } else {
+        console.warn("No address found for the given coordinates.");
+        return "Unknown Location";
+      }
+    } catch (error) {
+      console.error("Error in reverse geocoding:", error);
+      return "Unknown Location";
+    }
+  };
+
   const handleCreateEvent = async () => {
     const eventTitle =
       eventType === "Other" ? customEventTitle.trim() : eventType; // Trim spaces
@@ -201,7 +219,17 @@ export default function CreateNewEventScreen() {
                 <MapView
                   style={styles.map}
                   region={region}
-                  onRegionChangeComplete={(newRegion) => setRegion(newRegion)}
+                  onRegionChangeComplete={async (newRegion) => {
+                    setRegion(newRegion); // Update region state
+
+                    // Call Reverse Geocoding when the user drags the map
+                    const derivedAddress = await reverseGeocode(
+                      newRegion.latitude,
+                      newRegion.longitude
+                    );
+                    setLocationText(derivedAddress); // Update the address text field
+                    autoCompleteRef.current?.setAddressText(derivedAddress); // Sync with GooglePlacesAutocomplete
+                  }}
                   showsUserLocation={true}
                 />
                 <View style={styles.markerFixed}>
@@ -246,7 +274,7 @@ export default function CreateNewEventScreen() {
 
                 <GooglePlacesAutocomplete
                   ref={autoCompleteRef}
-                  placeholder="Search for an address"
+                  placeholder="Search for an address or place in the map"
                   minLength={2}
                   listViewDisplayed={false}
                   fetchDetails={true}
@@ -274,7 +302,7 @@ export default function CreateNewEventScreen() {
                   }}
                   textInputProps={{
                     value: locationText,
-                    onChangeText: setLocationText,
+                    onChangeText: (text) => setLocationText(text),
                   }}
                   styles={{
                     textInput: styles.input,
@@ -437,7 +465,17 @@ export default function CreateNewEventScreen() {
             <MapView
               style={styles.fullScreenMap}
               region={region!}
-              onRegionChangeComplete={(newRegion) => setRegion(newRegion)}
+              onRegionChangeComplete={async (newRegion) => {
+                setRegion(newRegion); // Update region state
+
+                // Call Reverse Geocoding when the user drags the map
+                const derivedAddress = await reverseGeocode(
+                  newRegion.latitude,
+                  newRegion.longitude
+                );
+                setLocationText(derivedAddress); // Update the address text field
+                autoCompleteRef.current?.setAddressText(derivedAddress); // Sync with GooglePlacesAutocomplete
+              }}
               showsUserLocation={true}
             />
             <View style={styles.markerFixed}>
