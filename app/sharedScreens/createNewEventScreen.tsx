@@ -40,8 +40,11 @@ export default function CreateNewEventScreen() {
   const [eventType, setEventType] = React.useState("");
   const [items, setItems] = React.useState([
     { label: "Select From Dropdown", value: "" },
-    { label: "Farmers Market", value: "Farmers Market" },
+    { label: "Market", value: "Farmers Market" },
+    { label: "Food Truck Rally", value: "Food Truck Rally" },
+    { label: "Pop-Up Shop", value: "Pop-Up Shop" },
     { label: "Flea Market", value: "Flea Market" },
+    { label: "Market", value: "Market" },
     { label: "Other", value: "Other" },
   ]);
   const [customEventTitle, setCustomEventTitle] = React.useState("");
@@ -246,6 +249,7 @@ export default function CreateNewEventScreen() {
               {/* Event Type Dropdown */}
               <Text style={styles.label}>Event Type</Text>
               <DropDownPicker
+                listMode="FLATLIST"
                 open={openDropdown}
                 value={eventType}
                 items={items}

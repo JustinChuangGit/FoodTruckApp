@@ -164,7 +164,8 @@ export default function UserEventsScreen() {
 
   const categorizeEvents = () => {
     const today = new Date();
-    const tomorrow = new Date();
+    today.setHours(0, 0, 0, 0); // Normalize to start of the day
+    const tomorrow = new Date(today);
     tomorrow.setDate(today.getDate() + 1);
 
     const todayEvents: Event[] = [];
@@ -172,6 +173,7 @@ export default function UserEventsScreen() {
     const upcomingEvents: Event[] = [];
 
     events
+      .filter((event) => new Date(event.date).getTime() >= today.getTime()) // ❌ Exclude past events
       .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()) // Sort from closest to furthest
       .forEach((event) => {
         const eventDate = new Date(event.date);
@@ -515,7 +517,9 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     backgroundColor: "transparent",
   },
-  modalTextContainer: {},
+  modalTextContainer: {
+    width: "100%",
+  },
   getDirectionsButton: {
     width: 250,
     height: 40,

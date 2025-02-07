@@ -69,12 +69,6 @@ export default function UserAccountScreen() {
             style={styles.rightChevron}
           />
         </TouchableOpacity>
-        <Button
-          title="Try!"
-          onPress={() => {
-            Sentry.captureException(new Error("First error"));
-          }}
-        />
       </View>
 
       {/* Sign Out Button */}
