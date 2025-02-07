@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback } from "react";
+import React, { useEffect, useState, useCallback, useMemo } from "react";
 import {
   SafeAreaView,
   View,
@@ -18,9 +18,48 @@ import { fetchEvents } from "@/services/firestore";
 import { Event } from "@/constants/types";
 import { format } from "date-fns";
 import MapView, { Marker } from "react-native-maps";
+import { selectUser } from "@/redux/authSlice";
+import { useSelector } from "react-redux";
+import * as Location from "expo-location"; // Import expo-location
 
 const height = Dimensions.get("window").height;
 
+const useUnits = (): "miles" | "km" => {
+  return useMemo(() => {
+    const locale = Intl.DateTimeFormat().resolvedOptions().locale;
+    return locale.includes("US") ? "miles" : "km";
+  }, []);
+};
+
+const calculateDistance = (
+  lat1: number,
+  lon1: number,
+  lat2: number,
+  lon2: number,
+  units: "miles" | "km" // ✅ Pass units as argument
+): string => {
+  const R: number = 6371; // Earth's radius in kilometers
+
+  const toRad = (value: number): number => (value * Math.PI) / 180;
+
+  const dLat: number = toRad(lat2 - lat1);
+  const dLon: number = toRad(lon2 - lon1);
+
+  const a: number =
+    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.cos(toRad(lat1)) *
+      Math.cos(toRad(lat2)) *
+      Math.sin(dLon / 2) *
+      Math.sin(dLon / 2);
+
+  const c: number = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  const distanceKm: number = R * c; // Distance in kilometers
+
+  // ✅ Use units argument instead of calling useUnits inside a regular function
+  const distance = units === "miles" ? distanceKm * 0.621371 : distanceKm;
+
+  return `${distance.toFixed(2)} ${units}`;
+};
 export default function UserEventsScreen() {
   const router = useRouter();
   const [events, setEvents] = useState<Event[]>([]);
@@ -28,6 +67,27 @@ export default function UserEventsScreen() {
   const [refreshing, setRefreshing] = useState(false); // State for pull-to-refresh
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
+  const user = useSelector(selectUser);
+  const [userLocation, setUserLocation] = useState<{
+    latitude: number;
+    longitude: number;
+  } | null>(null); // Store user's location
+  const units = useUnits();
+
+  useEffect(() => {
+    (async () => {
+      const { status } = await Location.requestForegroundPermissionsAsync();
+      if (status !== "granted") {
+        console.error("Permission to access location was denied");
+        return;
+      }
+      const location = await Location.getCurrentPositionAsync({});
+      setUserLocation({
+        latitude: location.coords.latitude,
+        longitude: location.coords.longitude,
+      });
+    })();
+  }, []);
 
   const loadEvents = async () => {
     try {
@@ -103,6 +163,17 @@ export default function UserEventsScreen() {
           <Text style={styles.eventTime}>
             {format(new Date(item.startTime), "h:mm a")} -{" "}
             {format(new Date(item.endTime), "h:mm a")}
+          </Text>
+        )}
+        {userLocation && (
+          <Text style={styles.eventDistance}>
+            {calculateDistance(
+              userLocation?.latitude,
+              userLocation?.longitude,
+              item.region.latitude,
+              item.region.longitude,
+              units
+            )}
           </Text>
         )}
         <Text style={styles.eventLocation}>{item.locationText}</Text>
@@ -191,7 +262,16 @@ export default function UserEventsScreen() {
                   }}
                   title={selectedEvent.eventTitle}
                   description={selectedEvent.locationText}
-                />
+                >
+                  {/* Custom Styled Marker */}
+                  <View style={styles.customMarker}>
+                    <FontAwesome
+                      name="map-marker"
+                      size={30}
+                      color={munchColors.primary}
+                    />
+                  </View>
+                </Marker>
               </MapView>
 
               {/* Event Details */}
@@ -203,6 +283,17 @@ export default function UserEventsScreen() {
                 <Text style={styles.modalTime}>
                   {format(new Date(selectedEvent.startTime), "h:mm a")} -{" "}
                   {format(new Date(selectedEvent.endTime), "h:mm a")}
+                </Text>
+              )}
+              {userLocation && (
+                <Text style={styles.eventDistance}>
+                  {calculateDistance(
+                    userLocation?.latitude,
+                    userLocation?.longitude,
+                    selectedEvent.region.latitude,
+                    selectedEvent.region.longitude,
+                    units
+                  )}
                 </Text>
               )}
               <Text style={styles.modalLocation}>
@@ -352,5 +443,15 @@ const styles = StyleSheet.create({
     fontSize: 14,
     textAlign: "center",
     marginTop: 10,
+  },
+  eventDistance: {
+    fontSize: 14,
+    color: "#777",
+    marginTop: 4,
+  },
+  customMarker: {
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "transparent",
   },
 });
