@@ -34,6 +34,18 @@ const useUnits = (): "miles" | "km" => {
     return locale.includes("US") ? "miles" : "km";
   }, []);
 };
+const formatAddress = (address: string): string => {
+  if (!address) return "";
+
+  // Regex to match a common address pattern: "123 Main St, City, State ZIP, Country"
+  const addressParts = address.split(",");
+
+  if (addressParts.length >= 2) {
+    return `${addressParts[0]}, ${addressParts[1]}`.trim(); // Keep only Street and City
+  }
+
+  return address; // Return as-is if format isn't recognized
+};
 
 const calculateDistance = (
   lat1: number,
@@ -85,6 +97,7 @@ export default function UserEventsScreen() {
         console.error("Permission to access location was denied");
         return;
       }
+
       const location = await Location.getCurrentPositionAsync({});
       setUserLocation({
         latitude: location.coords.latitude,
@@ -203,7 +216,9 @@ export default function UserEventsScreen() {
             )}
           </Text>
         )}
-        <Text style={styles.eventLocation}>{item.locationText}</Text>
+        <Text style={styles.eventLocation}>
+          {formatAddress(item.locationText ?? "")}
+        </Text>
       </View>
       <FontAwesome name="chevron-right" size={16} style={styles.rightChevron} />
     </TouchableOpacity>
@@ -281,6 +296,7 @@ export default function UserEventsScreen() {
                   latitudeDelta: selectedEvent.region.latitudeDelta,
                   longitudeDelta: selectedEvent.region.longitudeDelta,
                 }}
+                showsUserLocation={true}
               >
                 <Marker
                   coordinate={{
@@ -330,7 +346,7 @@ export default function UserEventsScreen() {
                   {selectedEvent.description}
                 </Text>
                 <Text style={styles.modalLocation}>
-                  {selectedEvent.locationText}
+                  {formatAddress(selectedEvent.locationText ?? "")}
                 </Text>
                 <TouchableOpacity
                   style={styles.getDirectionsButton}
@@ -483,6 +499,7 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     marginTop: 10,
     color: munchColors.primary,
+    textAlign: "center",
   },
   modalDescription: {
     fontSize: 14,
@@ -513,5 +530,12 @@ const styles = StyleSheet.create({
     textAlign: "center",
     fontSize: 16,
     fontWeight: "bold",
+  },
+  userMarker: {
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: munchColors.primary,
+    borderRadius: 20,
+    padding: 6,
   },
 });
