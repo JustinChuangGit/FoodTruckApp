@@ -25,16 +25,7 @@ export default function TabLayout() {
           ),
         }}
       />
-      <Tabs.Screen
-        name="UserAccountScreen"
-        options={{
-          title: "Account",
-          headerShown: false,
-          tabBarIcon: ({ color }) => (
-            <FontAwesome size={28} name="user" color={color} />
-          ),
-        }}
-      />
+
       <Tabs.Screen
         name="UserEventsScreen"
         options={{

@@ -30,9 +30,10 @@ export default function UserAccountScreen() {
   return (
     <SafeAreaView style={styles.container}>
       {/* Header */}
-      <View style={styles.header}>
+      <TouchableOpacity style={styles.header} onPress={() => router.back()}>
+        <FontAwesome name="chevron-left" size={24} color="black" />
         <Text style={styles.headerText}>Account</Text>
-      </View>
+      </TouchableOpacity>
 
       {/* Menu Options */}
       <View style={styles.menuContainer}>
@@ -96,6 +97,8 @@ const styles = StyleSheet.create({
     fontSize: 40,
     fontWeight: "bold",
     color: "#000",
+
+    marginLeft: 10,
   },
   menuContainer: {
     marginTop: 20,

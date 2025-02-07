@@ -6,6 +6,7 @@ import {
   StyleSheet,
   Dimensions,
   Animated,
+  TouchableOpacity,
 } from "react-native";
 import MapView, { Marker, PROVIDER_DEFAULT } from "react-native-maps";
 import * as Location from "expo-location";
@@ -28,6 +29,7 @@ import { router } from "expo-router";
 import CouponRow from "@/components/couponRow";
 import { useSelector } from "react-redux";
 import { selectUser } from "../../../redux/authSlice"; // Update the path as needed
+import { FontAwesome } from "@expo/vector-icons";
 
 const { width } = Dimensions.get("window");
 
@@ -319,6 +321,12 @@ export default function Index() {
 
   return (
     <SafeAreaView style={styles.container}>
+      <TouchableOpacity
+        style={styles.accountScreenButtonContainer}
+        onPress={() => router.push("/user/otherScreens/UserAccountScreen")}
+      >
+        <FontAwesome name="bars" size={32} color="white" />
+      </TouchableOpacity>
       {location && (
         <MapView
           ref={mapRef}
@@ -592,5 +600,11 @@ const styles = StyleSheet.create({
     borderRadius: 15, // Inner circle
     backgroundColor: "white", // Inner circle color
     zIndex: 999, // Place the marker above other content
+  },
+  accountScreenButtonContainer: {
+    position: "absolute",
+    top: 60,
+    right: 30,
+    zIndex: 999,
   },
 });

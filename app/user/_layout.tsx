@@ -9,6 +9,13 @@ export default function UserLayout() {
     <Provider store={store}>
       <Stack>
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+        <Stack.Screen
+          name="otherScreens/UserAccountScreen"
+          options={{
+            title: "Account",
+            headerShown: false,
+          }}
+        />
       </Stack>
     </Provider>
   );
