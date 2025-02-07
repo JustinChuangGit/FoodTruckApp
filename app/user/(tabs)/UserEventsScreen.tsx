@@ -10,6 +10,9 @@ import {
   ScrollView,
   Dimensions,
   Modal,
+  Linking,
+  Platform,
+  Alert,
 } from "react-native";
 import { FontAwesome } from "@expo/vector-icons";
 import { munchColors } from "@/constants/Colors";
@@ -21,6 +24,7 @@ import MapView, { Marker } from "react-native-maps";
 import { selectUser } from "@/redux/authSlice";
 import { useSelector } from "react-redux";
 import * as Location from "expo-location"; // Import expo-location
+import { munchStyles } from "@/constants/styles";
 
 const height = Dimensions.get("window").height;
 
@@ -88,6 +92,29 @@ export default function UserEventsScreen() {
       });
     })();
   }, []);
+
+  const openMaps = () => {
+    if (!selectedEvent) {
+      Alert.alert("Error", "Please Try Again");
+      return;
+    }
+    const { latitude, longitude } = selectedEvent.region;
+    const label = encodeURIComponent(selectedEvent.eventTitle);
+
+    let url = "";
+
+    if (Platform.OS === "ios") {
+      // Open in Apple Maps
+      url = `maps://?q=${label}&ll=${latitude},${longitude}`;
+    } else {
+      // Open in Google Maps
+      url = `https://www.google.com/maps/search/?api=1&query=${latitude},${longitude}`;
+    }
+
+    Linking.openURL(url).catch((err) =>
+      console.error("Failed to open maps", err)
+    );
+  };
 
   const loadEvents = async () => {
     try {
@@ -274,34 +301,48 @@ export default function UserEventsScreen() {
                 </Marker>
               </MapView>
 
-              {/* Event Details */}
-              <Text style={styles.modalTitle}>{selectedEvent.eventTitle}</Text>
-              <Text style={styles.modalDate}>
-                {format(new Date(selectedEvent.date), "EEEE, MMM d, yyyy")}
-              </Text>
-              {selectedEvent.startTime && selectedEvent.endTime && (
-                <Text style={styles.modalTime}>
-                  {format(new Date(selectedEvent.startTime), "h:mm a")} -{" "}
-                  {format(new Date(selectedEvent.endTime), "h:mm a")}
+              <View style={styles.modalTextContainer}>
+                {/* Event Details */}
+                <Text style={styles.modalTitle}>
+                  {selectedEvent.eventTitle}
                 </Text>
-              )}
-              {userLocation && (
-                <Text style={styles.eventDistance}>
-                  {calculateDistance(
-                    userLocation?.latitude,
-                    userLocation?.longitude,
-                    selectedEvent.region.latitude,
-                    selectedEvent.region.longitude,
-                    units
-                  )}
+                <Text style={styles.modalDate}>
+                  {format(new Date(selectedEvent.date), "EEEE, MMM d, yyyy")}
                 </Text>
-              )}
-              <Text style={styles.modalLocation}>
-                {selectedEvent.locationText}
-              </Text>
-              <Text style={styles.modalDescription}>
-                {selectedEvent.description}
-              </Text>
+                {selectedEvent.startTime && selectedEvent.endTime && (
+                  <Text style={styles.modalTime}>
+                    {format(new Date(selectedEvent.startTime), "h:mm a")} -{" "}
+                    {format(new Date(selectedEvent.endTime), "h:mm a")}
+                  </Text>
+                )}
+                {userLocation && (
+                  <Text style={styles.eventDistance}>
+                    {calculateDistance(
+                      userLocation?.latitude,
+                      userLocation?.longitude,
+                      selectedEvent.region.latitude,
+                      selectedEvent.region.longitude,
+                      units
+                    )}
+                  </Text>
+                )}
+                <Text style={styles.modalDescription}>
+                  {selectedEvent.description}
+                </Text>
+                <Text style={styles.modalLocation}>
+                  {selectedEvent.locationText}
+                </Text>
+                <TouchableOpacity
+                  style={styles.getDirectionsButton}
+                  onPress={
+                    () => openMaps() // Open maps when button is pressed
+                  }
+                >
+                  <Text style={styles.getDirectionsButtonText}>
+                    Get Directions
+                  </Text>
+                </TouchableOpacity>
+              </View>
             </View>
           </View>
         )}
@@ -403,7 +444,7 @@ const styles = StyleSheet.create({
     width: "90%",
     backgroundColor: "#fff",
     padding: 20,
-    borderRadius: 10,
+    borderRadius: munchStyles.smallRadius,
     alignItems: "center",
   },
   closeButton: {
@@ -412,16 +453,20 @@ const styles = StyleSheet.create({
     right: 10,
     padding: 10,
     backgroundColor: "rgba(0,0,0,0.6)",
-    borderRadius: 20,
+    borderRadius: 30,
+    zIndex: 10,
+    width: 45,
+    height: 45,
+    alignItems: "center",
   },
   map: {
     width: "100%",
-    height: 200,
+    height: 300,
     borderRadius: 10,
     marginBottom: 10,
   },
   modalTitle: {
-    fontSize: 22,
+    fontSize: 25,
     fontWeight: "bold",
     color: munchColors.primary,
   },
@@ -441,7 +486,6 @@ const styles = StyleSheet.create({
   },
   modalDescription: {
     fontSize: 14,
-    textAlign: "center",
     marginTop: 10,
   },
   eventDistance: {
@@ -453,5 +497,21 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     backgroundColor: "transparent",
+  },
+  modalTextContainer: {},
+  getDirectionsButton: {
+    width: 250,
+    height: 40,
+    backgroundColor: munchColors.primary,
+    justifyContent: "center",
+    marginHorizontal: "auto",
+    marginTop: 20,
+    borderRadius: munchStyles.smallRadius,
+  },
+  getDirectionsButtonText: {
+    color: "#fff",
+    textAlign: "center",
+    fontSize: 16,
+    fontWeight: "bold",
   },
 });
