@@ -10,7 +10,7 @@ import {
 import { Event } from "@/constants/types";
 import { FontAwesome } from "@expo/vector-icons";
 import { munchStyles } from "@/constants/styles";
-import { format } from "date-fns";
+import { format, differenceInCalendarDays } from "date-fns";
 
 interface EventCardProps {
   event: Event;
@@ -19,6 +19,28 @@ interface EventCardProps {
 
 const EventCard: React.FC<EventCardProps> = ({ event, onPress }) => {
   const [loading, setLoading] = useState(false);
+
+  // Calculate the display date based on whether the event is today or tomorrow.
+  const eventDate = new Date(event.date);
+  const dayDiff = differenceInCalendarDays(eventDate, new Date());
+  let displayDate: string;
+  if (dayDiff === 0) {
+    displayDate = "Today";
+  } else if (dayDiff === 1) {
+    displayDate = "Tomorrow";
+  } else {
+    displayDate = format(eventDate, "EEE, MMM d");
+  }
+
+  // Process the location string to remove state, zip, and country.
+  // This assumes the location is a comma-separated string, e.g.
+  // "123 Main St, Springfield, IL 62704, USA"
+  // and that you only want the first two parts.
+  const locationParts = event.locationText ? event.locationText.split(",") : [];
+  const displayLocation =
+    locationParts.length >= 2
+      ? locationParts.slice(0, 2).join(",").trim()
+      : event.locationText || "";
 
   return (
     <TouchableOpacity style={styles.cardItem} onPress={onPress}>
@@ -31,7 +53,9 @@ const EventCard: React.FC<EventCardProps> = ({ event, onPress }) => {
           />
         )}
         <Image
-          source={{ uri: "https://via.placeholder.com/218x130.png?text=Event" }}
+          source={{
+            uri: "https://via.placeholder.com/218x130.png?text=Event",
+          }}
           style={styles.eventImage}
           onLoadStart={() => setLoading(true)}
           onLoad={() => setLoading(false)}
@@ -39,16 +63,14 @@ const EventCard: React.FC<EventCardProps> = ({ event, onPress }) => {
       </View>
       <View style={styles.eventInfoContainer}>
         <Text style={styles.eventName}>{event.eventTitle}</Text>
-        <Text style={styles.eventDate}>
-          {format(new Date(event.date), "EEE, MMM d")}
-        </Text>
+        <Text style={styles.eventDate}>{displayDate}</Text>
         {event.startTime && event.endTime && (
           <Text style={styles.eventTime}>
             {format(new Date(event.startTime), "h:mm a")} -{" "}
             {format(new Date(event.endTime), "h:mm a")}
           </Text>
         )}
-        <Text style={styles.eventLocation}>{event.locationText}</Text>
+        <Text style={styles.eventLocation}>{displayLocation}</Text>
       </View>
     </TouchableOpacity>
   );

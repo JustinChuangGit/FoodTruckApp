@@ -180,7 +180,7 @@ export default function Index() {
   const mapRef = useRef<MapView>(null);
   const bottomSheetRef = useRef<BottomSheet>(null);
   const SECTIONDATA = formatSections(groupVendorsByType(vendors));
-  const snapPoints = useMemo(() => ["15%", "50%", "90%"], []);
+  const snapPoints = useMemo(() => ["15%", "50%", "95%"], []);
   const scaleAnim = useRef(new Animated.Value(0)).current; // Initial scale value
   const nearbyVendors = getNearbyVendors(vendors, location);
   const user = useSelector(selectUser);
