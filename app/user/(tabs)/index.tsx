@@ -199,14 +199,37 @@ export default function Index() {
       }
     })();
   }, []);
+  // Filter events that occur today or later.
   const upcomingEvents = sortedEvents.filter(
     (event) => new Date(event.date).getTime() >= new Date().setHours(0, 0, 0, 0)
   );
 
+  // If user location is available, compute and add the distance property to each event.
+  const eventsWithDistance = location
+    ? upcomingEvents.map((event) => {
+        if (
+          event.region &&
+          typeof event.region.latitude === "number" &&
+          typeof event.region.longitude === "number"
+        ) {
+          const distance = haversine(
+            location,
+            {
+              latitude: event.region.latitude,
+              longitude: event.region.longitude,
+            },
+            { unit: "meter" }
+          );
+          return { ...event, distance }; // Add the distance property.
+        }
+        return event;
+      })
+    : upcomingEvents;
+
   const combinedData: CombinedData[] = [
     {
       type: "eventRow" as const,
-      section: { title: "Events", events: upcomingEvents },
+      section: { title: "Events", events: eventsWithDistance },
       key: "eventRow",
     },
     { type: "myRow" as const, section: nearbyVendors, key: "myRow1" },

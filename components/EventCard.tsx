@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import {
   View,
   Text,
@@ -8,19 +8,20 @@ import {
   ActivityIndicator,
 } from "react-native";
 import { Event } from "@/constants/types";
-import { FontAwesome } from "@expo/vector-icons";
 import { munchStyles } from "@/constants/styles";
 import { format, differenceInCalendarDays } from "date-fns";
 
 interface EventCardProps {
-  event: Event;
+  event: Event & { distance?: number }; // Precomputed distance in meters
   onPress: () => void;
+  // Optionally, you could still pass userLocation if needed.
+  userLocation?: { latitude: number; longitude: number };
 }
 
 const EventCard: React.FC<EventCardProps> = ({ event, onPress }) => {
   const [loading, setLoading] = useState(false);
 
-  // Calculate the display date based on whether the event is today or tomorrow.
+  // Calculate the display date.
   const eventDate = new Date(event.date);
   const dayDiff = differenceInCalendarDays(eventDate, new Date());
   let displayDate: string;
@@ -32,15 +33,32 @@ const EventCard: React.FC<EventCardProps> = ({ event, onPress }) => {
     displayDate = format(eventDate, "EEE, MMM d");
   }
 
-  // Process the location string to remove state, zip, and country.
-  // This assumes the location is a comma-separated string, e.g.
-  // "123 Main St, Springfield, IL 62704, USA"
-  // and that you only want the first two parts.
+  // Process the location string: Only keep the first two comma-separated parts.
   const locationParts = event.locationText ? event.locationText.split(",") : [];
   const displayLocation =
     locationParts.length >= 2
       ? locationParts.slice(0, 2).join(",").trim()
       : event.locationText || "";
+
+  // Determine units based on locale.
+  const units = useMemo(() => {
+    const locale = Intl.DateTimeFormat().resolvedOptions().locale;
+    return locale.includes("US") ? "miles" : "km";
+  }, []);
+
+  // Compute the distance display string using the precomputed distance.
+  const distanceDisplay = useMemo(() => {
+    if (typeof event.distance === "number") {
+      if (units === "miles") {
+        const distanceInMiles = event.distance / 1609.34;
+        return `${distanceInMiles.toFixed(1)} mi`;
+      } else {
+        const distanceInKm = event.distance / 1000;
+        return `${distanceInKm.toFixed(1)} km`;
+      }
+    }
+    return "";
+  }, [event.distance, units]);
 
   return (
     <TouchableOpacity style={styles.cardItem} onPress={onPress}>
@@ -64,6 +82,9 @@ const EventCard: React.FC<EventCardProps> = ({ event, onPress }) => {
       <View style={styles.eventInfoContainer}>
         <Text style={styles.eventName}>{event.eventTitle}</Text>
         <Text style={styles.eventDate}>{displayDate}</Text>
+        {distanceDisplay !== "" && (
+          <Text style={styles.eventDistance}>{distanceDisplay}</Text>
+        )}
         {event.startTime && event.endTime && (
           <Text style={styles.eventTime}>
             {format(new Date(event.startTime), "h:mm a")} -{" "}
@@ -89,6 +110,7 @@ const styles = StyleSheet.create({
     shadowRadius: 3,
     elevation: 3,
     marginBottom: 10,
+    height: 250,
   },
   imageContainer: {
     width: "100%",
@@ -116,6 +138,10 @@ const styles = StyleSheet.create({
     color: "#333",
   },
   eventDate: {
+    fontSize: 14,
+    color: "#555",
+  },
+  eventDistance: {
     fontSize: 14,
     color: "#555",
   },
