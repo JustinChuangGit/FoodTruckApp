@@ -814,3 +814,16 @@ export const fetchEvents = async (): Promise<Event[]> => {
     throw error;
   }
 };
+
+export const getSortedEvents = async (): Promise<Event[]> => {
+  try {
+    // Fetch events from Firestore
+    const events = await fetchEvents();
+    // Sort the events by date in ascending order
+    const sortedEvents = events.sort((a, b) => a.date.getTime() - b.date.getTime());
+    return sortedEvents;
+  } catch (error) {
+    console.error("Error sorting events:", error);
+    throw error;
+  }
+};
