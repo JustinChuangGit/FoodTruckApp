@@ -30,6 +30,40 @@ import CouponRow from "@/components/couponRow";
 import { useSelector } from "react-redux";
 import { selectUser } from "../../../redux/authSlice"; // Update the path as needed
 import { FontAwesome } from "@expo/vector-icons";
+import { getSortedEvents } from "@/services/firestore";
+import { Event } from "@/constants/types";
+import EventListRow from "@/components/EventListRow";
+
+interface MyRowSection {
+  id: string;
+  title: string;
+  vendors: Vendor[];
+}
+
+interface EventRowSection {
+  title: string;
+  events: Event[];
+}
+
+interface MyRowData {
+  type: "myRow";
+  section: MyRowSection;
+  key: string;
+}
+
+interface CouponRowData {
+  type: "couponRow";
+  section: MyRowSection;
+  key: string;
+}
+
+interface EventRowData {
+  type: "eventRow";
+  section: EventRowSection;
+  key: string;
+}
+
+type CombinedData = MyRowData | CouponRowData | EventRowData;
 
 const { width } = Dimensions.get("window");
 
@@ -150,13 +184,37 @@ export default function Index() {
   const scaleAnim = useRef(new Animated.Value(0)).current; // Initial scale value
   const nearbyVendors = getNearbyVendors(vendors, location);
   const user = useSelector(selectUser);
-  const combinedData = [
-    { type: "myRow", section: nearbyVendors, key: "myRow1" }, // First row
-    { type: "couponRow", section: nearbyVendors, key: "couponRow" }, // Second row
+  const [sortedEvents, setSortedEvents] = useState<Event[]>([]);
+  const [loadingEvents, setLoadingEvents] = useState<boolean>(true);
+
+  useEffect(() => {
+    (async () => {
+      try {
+        const events = await getSortedEvents();
+        setSortedEvents(events);
+      } catch (error) {
+        console.error("Error fetching sorted events:", error);
+      } finally {
+        setLoadingEvents(false);
+      }
+    })();
+  }, []);
+  const upcomingEvents = sortedEvents.filter(
+    (event) => new Date(event.date).getTime() >= new Date().setHours(0, 0, 0, 0)
+  );
+
+  const combinedData: CombinedData[] = [
+    {
+      type: "eventRow" as const,
+      section: { title: "Events", events: upcomingEvents },
+      key: "eventRow",
+    },
+    { type: "myRow" as const, section: nearbyVendors, key: "myRow1" },
+    { type: "couponRow" as const, section: nearbyVendors, key: "couponRow" },
     ...SECTIONDATA.map((item, index) => ({
-      type: "myRow",
+      type: "myRow" as const,
       section: item,
-      key: `myRow${index + 2}`, // Unique keys for subsequent rows
+      key: `myRow${index + 2}`,
     })),
   ];
 
@@ -408,11 +466,22 @@ export default function Index() {
             </Text>
             <HorizontalLine />
           </View>
+
           <BottomSheetFlatList
             data={combinedData}
             showsVerticalScrollIndicator={false}
             keyExtractor={(item) => item.key}
             renderItem={({ item }) => {
+              if (item.type === "eventRow") {
+                return (
+                  <EventListRow
+                    section={item.section}
+                    onEventPress={(event) =>
+                      console.log("Event pressed:", event)
+                    }
+                  />
+                );
+              }
               if (item.type === "myRow") {
                 return (
                   <MyRow section={item.section} onCardPress={handleCardPress} />
@@ -426,7 +495,7 @@ export default function Index() {
                   />
                 );
               }
-              return null; // Default case (optional)
+              return null;
             }}
             contentContainerStyle={{
               paddingHorizontal: 0,
