@@ -89,14 +89,14 @@ const EventCard: React.FC<EventCardProps> = ({ event, onPress }) => {
         <Text style={styles.eventName}>{event.eventTitle}</Text>
         <Text style={styles.eventDate}>{displayDate}</Text>
         {distanceDisplay !== "" && (
-          <Text style={styles.eventDistance}>{distanceDisplay}</Text>
+          <Text style={styles.eventDistance}>{distanceDisplay} Away</Text>
         )}
-        {event.startTime && event.endTime && (
+        {/* {event.startTime && event.endTime && (
           <Text style={styles.eventTime}>
             {format(new Date(event.startTime), "h:mm a")} -{" "}
             {format(new Date(event.endTime), "h:mm a")}
           </Text>
-        )}
+        )} */}
         <Text style={styles.eventLocation}>{displayLocation}</Text>
       </View>
     </TouchableOpacity>
@@ -106,26 +106,22 @@ const EventCard: React.FC<EventCardProps> = ({ event, onPress }) => {
 const styles = StyleSheet.create({
   cardItem: {
     borderRadius: munchStyles.smallRadius,
-    width: 250,
-    marginLeft: 10,
-    paddingHorizontal: 16,
     backgroundColor: "#fff",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 3,
-    elevation: 3,
-    marginBottom: 10,
-    height: 250,
+    height: 150,
+    flexDirection: "row",
+    alignItems: "center",
+    marginHorizontal: 8,
   },
   imageContainer: {
-    width: "100%",
+    width: 130,
     height: 130,
     justifyContent: "center",
     alignItems: "center",
     borderRadius: munchStyles.smallRadius,
     overflow: "hidden",
     backgroundColor: "#e0e0e0",
+    resizeMode: "cover",
+    marginRight: 8,
   },
   eventImage: {
     width: "100%",
@@ -138,6 +134,9 @@ const styles = StyleSheet.create({
   },
   eventInfoContainer: {
     marginTop: 8,
+    alignContent: "center",
+    justifyContent: "center",
+    width: 150,
   },
   eventName: {
     fontSize: 16,
