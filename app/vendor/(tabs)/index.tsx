@@ -32,6 +32,9 @@ import { doc, setDoc, deleteDoc } from "firebase/firestore";
 import { useDispatch } from "react-redux";
 import { updateLocation } from "@/redux/authSlice"; // Adjust the path
 import CouponManager from "@/components/CouponManager";
+import { getSortedEvents } from "@/services/firestore";
+import { Event } from "@/constants/types";
+import EventListRow from "@/components/EventListRow";
 
 const { width } = Dimensions.get("window");
 
@@ -91,6 +94,47 @@ export default function Index() {
   const hasRunOnce = useRef(false); // Track if the logic has run
   const dispatch = useDispatch();
   const vendorPaid = user?.vendorPaid || false;
+  const [sortedEvents, setSortedEvents] = useState<Event[]>([]);
+  const [loadingEvents, setLoadingEvents] = useState<boolean>(true);
+
+  useEffect(() => {
+    (async () => {
+      try {
+        const events = await getSortedEvents();
+        setSortedEvents(events);
+      } catch (error) {
+        console.error("Error fetching sorted events:", error);
+      } finally {
+        setLoadingEvents(false);
+      }
+    })();
+  }, []);
+  // After you filter for upcoming events:
+  const upcomingEvents = sortedEvents.filter(
+    (event) => new Date(event.date).getTime() >= new Date().setHours(0, 0, 0, 0)
+  );
+
+  // Compute and add the distance property (in meters) if location is available.
+  const eventsWithDistance = location
+    ? upcomingEvents.map((event) => {
+        if (
+          event.region &&
+          typeof event.region.latitude === "number" &&
+          typeof event.region.longitude === "number"
+        ) {
+          const distance = haversine(
+            location,
+            {
+              latitude: event.region.latitude,
+              longitude: event.region.longitude,
+            },
+            { unit: "meter" }
+          );
+          return { ...event, distance };
+        }
+        return event;
+      })
+    : upcomingEvents;
 
   useEffect(() => {
     (async () => {
@@ -417,6 +461,14 @@ export default function Index() {
                 )}
                 <MyRow section={item} onCardPress={handleCardPress} />
                 <CouponManager />
+                {upcomingEvents.length > 0 && (
+                  <EventListRow
+                    section={{ title: "Events", events: eventsWithDistance }}
+                    onEventPress={(event) =>
+                      console.log("Event pressed:", event)
+                    }
+                  />
+                )}
               </BottomSheetView>
             )}
             contentContainerStyle={{
