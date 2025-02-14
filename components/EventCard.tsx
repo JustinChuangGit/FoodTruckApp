@@ -10,6 +10,7 @@ import {
 import { Event } from "@/constants/types";
 import { munchStyles } from "@/constants/styles";
 import { format, differenceInCalendarDays } from "date-fns";
+import { munchColors } from "@/constants/Colors";
 
 interface EventCardProps {
   event: Event & { distance?: number }; // Precomputed distance in meters
@@ -157,7 +158,7 @@ const styles = StyleSheet.create({
   },
   eventLocation: {
     fontSize: 14,
-    color: "#007bff",
+    color: munchColors.primary,
     marginTop: 4,
   },
 });
