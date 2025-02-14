@@ -18,9 +18,17 @@ interface EventCardProps {
   userLocation?: { latitude: number; longitude: number };
 }
 
+const eventImageMap: { [key: string]: any } = {
+  "Farmers Market": require("@/assets/images/FarmersMarketEvent.png"),
+  "Food Truck Rally": require("@/assets/images/FoodTruckEvent.png"),
+  "Small Business Vendors": require("@/assets/images/vendorEvent.png"),
+};
+
 const EventCard: React.FC<EventCardProps> = ({ event, onPress }) => {
   const [loading, setLoading] = useState(false);
-
+  const eventImage =
+    eventImageMap[event.eventTitle] ||
+    require("@/assets/images/otherEvent.png");
   // Calculate the display date.
   const eventDate = new Date(event.date);
   const dayDiff = differenceInCalendarDays(eventDate, new Date());
@@ -71,9 +79,7 @@ const EventCard: React.FC<EventCardProps> = ({ event, onPress }) => {
           />
         )}
         <Image
-          source={{
-            uri: "https://via.placeholder.com/218x130.png?text=Event",
-          }}
+          source={eventImage}
           style={styles.eventImage}
           onLoadStart={() => setLoading(true)}
           onLoad={() => setLoading(false)}
@@ -124,6 +130,7 @@ const styles = StyleSheet.create({
   eventImage: {
     width: "100%",
     height: "100%",
+    backgroundColor: "#FFF",
   },
   loadingIndicator: {
     position: "absolute",

@@ -40,11 +40,9 @@ export default function CreateNewEventScreen() {
   const [eventType, setEventType] = React.useState("");
   const [items, setItems] = React.useState([
     { label: "Select From Dropdown", value: "" },
-    { label: "Market", value: "Farmers Market" },
+    { label: "Farmers Market", value: "Farmers Market" },
     { label: "Food Truck Rally", value: "Food Truck Rally" },
-    { label: "Pop-Up Shop", value: "Pop-Up Shop" },
-    { label: "Flea Market", value: "Flea Market" },
-    { label: "Market", value: "Market" },
+    { label: "Small Business Vendors", value: "Small Business Vendors" },
     { label: "Other", value: "Other" },
   ]);
   const [customEventTitle, setCustomEventTitle] = React.useState("");
