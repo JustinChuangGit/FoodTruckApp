@@ -459,7 +459,6 @@ export default function Index() {
                     </Text>
                   </TouchableOpacity>
                 )}
-                <MyRow section={item} onCardPress={handleCardPress} />
                 <CouponManager />
                 {upcomingEvents.length > 0 && (
                   <EventListRow
@@ -469,6 +468,7 @@ export default function Index() {
                     }
                   />
                 )}
+                <MyRow section={item} onCardPress={handleCardPress} />
               </BottomSheetView>
             )}
             contentContainerStyle={{
