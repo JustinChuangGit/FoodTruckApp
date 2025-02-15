@@ -40,6 +40,13 @@ export default function SharedScreensLayout() {
           headerShown: false,
         }}
       />
+      <Stack.Screen
+        name="eventDetailsScreen"
+        options={{
+          title: "Event Details",
+          headerShown: false,
+        }}
+      />
     </Stack>
   );
 }

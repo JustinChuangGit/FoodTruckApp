@@ -33,6 +33,8 @@ import { FontAwesome } from "@expo/vector-icons";
 import { getSortedEvents } from "@/services/firestore";
 import { Event } from "@/constants/types";
 import EventListRow from "@/components/EventListRow";
+import EventMarker from "@/components/EventMarker";
+import EventMapInfoCard from "@/components/EventMapInfoCard";
 
 interface MyRowSection {
   id: string;
@@ -186,6 +188,11 @@ export default function Index() {
   const user = useSelector(selectUser);
   const [sortedEvents, setSortedEvents] = useState<Event[]>([]);
   const [loadingEvents, setLoadingEvents] = useState<boolean>(true);
+  const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
+  const [eventCarouselIndex, setEventCarouselIndex] = useState(0);
+  const [activeCarousel, setActiveCarousel] = useState<
+    "vendor" | "event" | null
+  >(null);
 
   useEffect(() => {
     (async () => {
@@ -199,12 +206,12 @@ export default function Index() {
       }
     })();
   }, []);
+
   // Filter events that occur today or later.
   const upcomingEvents = sortedEvents.filter(
     (event) => new Date(event.date).getTime() >= new Date().setHours(0, 0, 0, 0)
   );
 
-  // If user location is available, compute and add the distance property to each event.
   const eventsWithDistance = location
     ? upcomingEvents.map((event) => {
         if (
@@ -220,7 +227,7 @@ export default function Index() {
             },
             { unit: "meter" }
           );
-          return { ...event, distance }; // Add the distance property.
+          return { ...event, distance };
         }
         return event;
       })
@@ -336,15 +343,38 @@ export default function Index() {
   const handleMarkerPress = (vendor: Vendor) => {
     console.log("Marker pressed");
     const index = vendors.findIndex((v) => v.uid === vendor.uid);
+    // Set vendor carousel active and clear event carousel
+    setActiveCarousel("vendor");
     setSelectedVendor(vendor);
+    setSelectedEvent(null);
     setCarouselIndex(index);
     logImpression(
-      vendor?.uid ?? "unknown_vendor", // Default value for undefined vendor ID
-      user?.uid ?? "unknown_user", // Default value for undefined user ID
-      user?.latitude ?? 0, // Default latitude
-      user?.longitude ?? 0, // Default longitude
+      vendor?.uid ?? "unknown_vendor",
+      user?.uid ?? "unknown_user",
+      user?.latitude ?? 0,
+      user?.longitude ?? 0,
       "carousel"
     );
+  };
+
+  // Inside your marker press handler for events:
+  const handleEventMarkerPress = (event: Event, index: number) => {
+    // Set event carousel active and clear vendor carousel
+    setActiveCarousel("event");
+    setSelectedEvent(event);
+    setSelectedVendor(null);
+    setEventCarouselIndex(index);
+    if (mapRef.current && event.region) {
+      mapRef.current.animateToRegion(
+        {
+          latitude: event.region.latitude,
+          longitude: event.region.longitude,
+          latitudeDelta: 0.01,
+          longitudeDelta: 0.01,
+        },
+        500
+      );
+    }
   };
 
   const handleCardClose = () => {
@@ -362,8 +392,41 @@ export default function Index() {
     handlePress(vendor, "coupon");
   };
 
+  const handleEventPress = (event: Event) => {
+    setActiveCarousel("event");
+    setSelectedEvent(event);
+    setSelectedVendor(null);
+    const index = eventsWithDistance.findIndex(
+      (event) => event.createdAt === event.createdAt
+    );
+    setEventCarouselIndex(index);
+    if (mapRef.current && event.region) {
+      mapRef.current.animateToRegion(
+        {
+          latitude: event.region.latitude,
+          longitude: event.region.longitude,
+          latitudeDelta: 0.01,
+          longitudeDelta: 0.01,
+        },
+        500 // animation duration in ms
+      );
+    }
+    // Push to the event details page with parameters.
+    router.push({
+      pathname: "/sharedScreens/eventDetailsScreen",
+      params: {
+        eventId: event.id,
+        eventTitle: event.eventTitle,
+        eventDate: event.date.toString(), // You may format this as needed.
+        region: JSON.stringify(event.region),
+        description: event.description,
+        // Add any additional parameters as needed.
+      },
+    });
+  };
+
   const handlePress = (vendor: Vendor, pressType: string) => {
-    console.log("HandlePress");
+    setSelectedEvent(null);
     setSelectedVendor(vendor);
     const index = vendors.findIndex((v) => v.uid === vendor.uid);
     setCarouselIndex(index);
@@ -429,6 +492,16 @@ export default function Index() {
             />
           ))}
 
+          {eventsWithDistance.map((event, index) => (
+            <EventMarker
+              key={event.id || `event-${index}`}
+              event={event}
+              onPress={(event) => {
+                handleEventMarkerPress(event, index);
+              }}
+            />
+          ))}
+
           {selectedVendor && (
             <Marker
               coordinate={{
@@ -451,7 +524,7 @@ export default function Index() {
         </MapView>
       )}
 
-      {selectedVendor && (
+      {activeCarousel === "vendor" && selectedVendor && (
         <View style={styles.carouselContainer}>
           <Carousel
             width={width * 0.9}
@@ -470,6 +543,43 @@ export default function Index() {
               handleMarkerPress(vendors[index]);
             }}
             defaultIndex={Math.min(carouselIndex, vendors.length - 1)} // Ensure index is within bounds
+          />
+        </View>
+      )}
+
+      {activeCarousel === "event" && selectedEvent && (
+        <View style={styles.carouselContainer}>
+          <Carousel
+            width={width * 0.9}
+            height={250}
+            data={eventsWithDistance}
+            renderItem={({ index }) => (
+              <EventMapInfoCard
+                event={eventsWithDistance[index]}
+                userLocation={location}
+                onClose={() => setSelectedEvent(null)}
+                onPress={(event) => {
+                  handleEventPress(event);
+                }}
+              />
+            )}
+            onSnapToItem={(index) => {
+              setEventCarouselIndex(index);
+              const newEvent = eventsWithDistance[index];
+              setSelectedEvent(newEvent);
+              if (mapRef.current && newEvent.region) {
+                mapRef.current.animateToRegion(
+                  {
+                    latitude: newEvent.region.latitude,
+                    longitude: newEvent.region.longitude,
+                    latitudeDelta: 0.01,
+                    longitudeDelta: 0.01,
+                  },
+                  500 // duration in ms
+                );
+              }
+            }}
+            defaultIndex={eventCarouselIndex}
           />
         </View>
       )}
@@ -499,9 +609,7 @@ export default function Index() {
                 return (
                   <EventListRow
                     section={item.section}
-                    onEventPress={(event) =>
-                      console.log("Event pressed:", event)
-                    }
+                    onEventPress={(event) => handleEventPress(event)}
                   />
                 );
               }

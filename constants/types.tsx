@@ -111,3 +111,8 @@ export type Event = {
   createdBy: string; // User UID
   createdAt?: Date;
 };
+
+export interface EventMarkerProps {
+  event: Event;
+  onPress: (event: Event) => void;
+}
