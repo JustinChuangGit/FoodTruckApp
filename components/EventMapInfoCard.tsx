@@ -13,6 +13,7 @@ import { FontAwesome } from "@expo/vector-icons";
 import { format, differenceInCalendarDays } from "date-fns";
 import haversine from "haversine";
 import { Event } from "@/constants/types";
+import { munchColors } from "@/constants/Colors";
 
 interface EventMapInfoCardProps {
   event: Event;
@@ -20,7 +21,11 @@ interface EventMapInfoCardProps {
   userLocation: { latitude: number; longitude: number } | null;
   onPress: (event: Event) => void;
 }
-
+const eventImageMap: { [key: string]: any } = {
+  "Farmers Market": require("@/assets/images/FarmersMarketEvent.png"),
+  "Food Truck Rally": require("@/assets/images/FoodTruckEvent.png"),
+  "Small Business Vendors": require("@/assets/images/vendorEvent.png"),
+};
 const EventMapInfoCard: React.FC<EventMapInfoCardProps> = ({
   event,
   onClose,
@@ -30,6 +35,9 @@ const EventMapInfoCard: React.FC<EventMapInfoCardProps> = ({
   const [loading, setLoading] = useState(true);
   const scaleAnim = useRef(new Animated.Value(0)).current;
   const opacityAnim = useRef(new Animated.Value(0)).current;
+  const eventImage =
+    eventImageMap[event.eventTitle] ||
+    require("@/assets/images/otherEvent.png");
 
   // Determine unit based on locale.
   const units = useMemo(() => {
@@ -65,6 +73,12 @@ const EventMapInfoCard: React.FC<EventMapInfoCardProps> = ({
   } else {
     displayDate = format(eventDate, "EEE, MMM d");
   }
+
+  const locationParts = event.locationText ? event.locationText.split(",") : [];
+  const displayLocation =
+    locationParts.length >= 2
+      ? locationParts.slice(0, 2).join(",").trim()
+      : event.locationText || "";
 
   // Compute time display if available.
   const timeDisplay =
@@ -120,11 +134,7 @@ const EventMapInfoCard: React.FC<EventMapInfoCardProps> = ({
           )}
           <Image
             key={event.id}
-            source={{
-              uri:
-                // event.image ||
-                "https://via.placeholder.com/218x130.png?text=Event",
-            }}
+            source={eventImage}
             style={styles.image}
             onLoadStart={() => setLoading(true)}
             onLoad={() => setLoading(false)}
@@ -141,7 +151,7 @@ const EventMapInfoCard: React.FC<EventMapInfoCardProps> = ({
             </Text>
           )}
           <Text style={styles.location} numberOfLines={1}>
-            {event.locationText}
+            {displayLocation}
           </Text>
         </View>
       </TouchableOpacity>
@@ -215,7 +225,7 @@ const styles = StyleSheet.create({
   },
   location: {
     fontSize: 14,
-    color: "#007bff",
+    color: munchColors.primary,
     marginTop: 4,
   },
 });

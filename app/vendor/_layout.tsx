@@ -25,6 +25,13 @@ export default function VendorLayout() {
           name="otherScreens/vendorSignupTriageScreen"
           options={{ headerShown: false }}
         />
+        <Stack.Screen
+          name="otherScreens/VendorAccountScreen"
+          options={{
+            title: "Account",
+            headerShown: false,
+          }}
+        />
       </Stack>
     </Provider>
   );

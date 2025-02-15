@@ -37,6 +37,7 @@ import { Event } from "@/constants/types";
 import EventListRow from "@/components/EventListRow";
 import EventMarker from "@/components/EventMarker";
 import EventMapInfoCard from "@/components/EventMapInfoCard";
+import { FontAwesome } from "@expo/vector-icons";
 
 const { width } = Dimensions.get("window");
 
@@ -407,6 +408,12 @@ export default function Index() {
 
   return (
     <SafeAreaView style={styles.container}>
+      <TouchableOpacity
+        style={styles.accountScreenButtonContainer}
+        onPress={() => router.push("/vendor/otherScreens/VendorAccountScreen")}
+      >
+        <FontAwesome name="bars" size={32} color="white" />
+      </TouchableOpacity>
       {location && (
         <MapView
           ref={mapRef}
@@ -735,5 +742,11 @@ const styles = StyleSheet.create({
     borderRadius: 15, // Inner circle
     backgroundColor: "white", // Inner circle color
     zIndex: 999, // Place the marker above other content
+  },
+  accountScreenButtonContainer: {
+    position: "absolute",
+    top: 60,
+    right: 30,
+    zIndex: 999,
   },
 });

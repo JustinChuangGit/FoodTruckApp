@@ -26,12 +26,12 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
-        name="VendorAccountScreen"
+        name="VendorEventsScreen"
         options={{
-          title: "Account",
+          title: "Events",
           headerShown: false,
           tabBarIcon: ({ color }) => (
-            <FontAwesome size={28} name="user" color={color} />
+            <FontAwesome size={28} name="calendar" color={color} />
           ),
         }}
       />
