@@ -38,6 +38,7 @@ import EventListRow from "@/components/EventListRow";
 import EventMarker from "@/components/EventMarker";
 import EventMapInfoCard from "@/components/EventMapInfoCard";
 import { FontAwesome } from "@expo/vector-icons";
+import { munchColors } from "@/constants/Colors";
 
 const { width } = Dimensions.get("window");
 
@@ -412,7 +413,7 @@ export default function Index() {
         style={styles.accountScreenButtonContainer}
         onPress={() => router.push("/vendor/otherScreens/VendorAccountScreen")}
       >
-        <FontAwesome name="bars" size={32} color="white" />
+        <FontAwesome name="gear" size={32} color="#FFF" />
       </TouchableOpacity>
       {location && (
         <MapView

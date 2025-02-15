@@ -469,7 +469,7 @@ export default function Index() {
         style={styles.accountScreenButtonContainer}
         onPress={() => router.push("/user/otherScreens/UserAccountScreen")}
       >
-        <FontAwesome name="bars" size={32} color="white" />
+        <FontAwesome name="gear" size={32} color="white" />
       </TouchableOpacity>
       {location && (
         <MapView
