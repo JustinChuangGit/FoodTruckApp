@@ -397,7 +397,7 @@ export default function Index() {
     setSelectedEvent(event);
     setSelectedVendor(null);
     const index = eventsWithDistance.findIndex(
-      (event) => event.createdAt === event.createdAt
+      (event) => event.id === event.id
     );
     setEventCarouselIndex(index);
     if (mapRef.current && event.region) {
