@@ -2,16 +2,16 @@
   "expo": {
     "name": "MNCH",
     "slug": "FoodTruckApp",
-    "version": "1.0.4",
+    "version": "1.0.5",
     "orientation": "portrait",
     "icon": "./assets/images/appstore.png",
     "scheme": "myapp",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "splash": {
-      "image": "./assets/images/splash.png",
+      "image": "./assets/images/appstore.png",
       "resizeMode": "contain",
-      "backgroundColor": "#ffffff"
+      "backgroundColor": "#ed8200"
     },
     "ios": {
       "supportsTablet": true,
@@ -28,8 +28,8 @@
     "android": {
       "package": "com.jc.munch",
       "adaptiveIcon": {
-        "foregroundImage": "./assets/images/adaptive-icon.png",
-        "backgroundColor": "#ffffff"
+        "foregroundImage": "./assets/images/appstore.png",
+        "backgroundColor": "#ed8200"
       },
       "config": {
         "googleMaps": {
