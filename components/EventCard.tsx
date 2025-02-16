@@ -72,13 +72,6 @@ const EventCard: React.FC<EventCardProps> = ({ event, onPress }) => {
   return (
     <TouchableOpacity style={styles.cardItem} onPress={onPress}>
       <View style={styles.imageContainer}>
-        {loading && (
-          <ActivityIndicator
-            size="small"
-            color="#007bff"
-            style={styles.loadingIndicator}
-          />
-        )}
         <Image
           source={eventImage}
           style={styles.eventImage}

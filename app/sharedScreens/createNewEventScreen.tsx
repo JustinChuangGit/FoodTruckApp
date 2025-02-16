@@ -171,7 +171,7 @@ export default function CreateNewEventScreen() {
     try {
       const eventId = await saveEvent(newEvent);
       console.log("Event successfully created with ID:", eventId);
-      Alert.alert("Success", "Event created successfully!");
+      Alert.alert("Success", "Your Event Has Been Sent For Approval");
       router.back();
     } catch (error) {
       console.error("Failed to create event:", error);

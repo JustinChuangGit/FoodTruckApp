@@ -759,7 +759,7 @@ export async function addRewardPoints(uid: string): Promise<void> {
 export const saveEvent = async (event: Event): Promise<string> => {
   try {
     const eventId = uuidv4(); // Generate a unique event ID
-    const eventRef = doc(db, "events", eventId); // Create a Firestore doc reference
+    const eventRef = doc(db, "EventsPendingApproval", eventId); // Create a Firestore doc reference
 
     const eventData = {
       ...event,
