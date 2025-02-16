@@ -89,6 +89,7 @@ export default function UserEventsScreen() {
     longitude: number;
   } | null>(null); // Store user's location
   const units = useUnits();
+  const [distance, setDistance] = useState<string>("");
 
   useEffect(() => {
     (async () => {
@@ -152,9 +153,29 @@ export default function UserEventsScreen() {
     setRefreshing(false);
   }, []);
 
-  const openEventModal = (event: Event) => {
-    setSelectedEvent(event);
-    setModalVisible(true);
+  const handleEventPress = (event: Event) => {
+    // Push to the event details page with parameters.
+    router.push({
+      pathname: "/sharedScreens/eventDetailsScreen",
+      params: {
+        eventId: event.id,
+        eventTitle: event.eventTitle,
+        eventDate: event.date.toString(),
+        region: JSON.stringify(event.region),
+        description: event.description,
+        locationText: event.locationText, // added parameter
+        startTime: event.startTime ? event.startTime.toISOString() : null, // added parameter
+        endTime: event.endTime ? event.endTime.toISOString() : null, // added parameter
+        image: event.image, // added parameter
+        distance: calculateDistance(
+          userLocation?.latitude || 0,
+          userLocation?.longitude || 0,
+          event.region.latitude,
+          event.region.longitude,
+          units
+        ),
+      },
+    });
   };
 
   const closeEventModal = () => {
@@ -194,7 +215,7 @@ export default function UserEventsScreen() {
   const renderEventItem = ({ item }: { item: Event }) => (
     <TouchableOpacity
       style={styles.eventItem}
-      onPress={() => openEventModal(item)}
+      onPress={() => handleEventPress(item)}
     >
       <View style={styles.detailsContainer}>
         <Text style={styles.eventTitle}>{item.eventTitle}</Text>

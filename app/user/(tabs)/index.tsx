@@ -417,10 +417,13 @@ export default function Index() {
       params: {
         eventId: event.id,
         eventTitle: event.eventTitle,
-        eventDate: event.date.toString(), // You may format this as needed.
+        eventDate: event.date.toString(),
         region: JSON.stringify(event.region),
         description: event.description,
-        // Add any additional parameters as needed.
+        locationText: event.locationText, // added parameter
+        startTime: event.startTime ? event.startTime.toISOString() : null, // added parameter
+        endTime: event.endTime ? event.endTime.toISOString() : null, // added parameter
+        image: event.image, // added parameter
       },
     });
   };

@@ -110,6 +110,8 @@ export type Event = {
   };
   createdBy: string; // User UID
   createdAt?: Date;
+  image?: string;
+  distance?: number;
 };
 
 export interface EventMarkerProps {
