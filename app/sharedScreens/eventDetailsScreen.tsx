@@ -17,6 +17,7 @@ import { format } from "date-fns";
 import * as Location from "expo-location";
 import { munchColors } from "@/constants/Colors";
 import { munchStyles } from "@/constants/styles";
+import HorizontalLine from "@/components/default/HorizontalLine";
 
 // Helper function: Format the address to show only street and city.
 const formatAddress = (address?: string): string => {
@@ -146,12 +147,12 @@ export default function EventDetailsScreen() {
   };
 
   return (
-    <ScrollView contentContainerStyle={styles.container}>
+    <View style={styles.container}>
       <TouchableOpacity
         style={styles.closeButton}
         onPress={() => router.back()}
       >
-        <FontAwesome name="times" size={24} color="#fff" />
+        <FontAwesome name="chevron-left" size={24} color="#fff" />
       </TouchableOpacity>
 
       {initialRegion && (
@@ -190,6 +191,17 @@ export default function EventDetailsScreen() {
             {format(new Date(endTime), "h:mm a")}
           </Text>
         )}
+        {startTime && !endTime && (
+          <Text style={styles.modalTime}>
+            Start Time: {format(new Date(startTime), "h:mm a")}
+          </Text>
+        )}
+        {endTime && !startTime && (
+          <Text style={styles.modalTime}>
+            End Time: {format(new Date(endTime), "h:mm a")}
+          </Text>
+        )}
+
         {userLocation && initialRegion && (
           <Text style={styles.eventDistance}>
             {calculateDistance(
@@ -198,38 +210,45 @@ export default function EventDetailsScreen() {
               initialRegion.latitude,
               initialRegion.longitude,
               units
-            )}
+            )}{" "}
+            Away
           </Text>
         )}
-        <Text style={styles.modalDescription}>{description}</Text>
         <Text style={styles.modalLocation}>{formatAddress(locationText)}</Text>
-        <TouchableOpacity style={styles.getDirectionsButton} onPress={openMaps}>
-          <Text style={styles.getDirectionsButtonText}>Get Directions</Text>
-        </TouchableOpacity>
+        <HorizontalLine />
+        <Text style={styles.modalDescription}>{description}</Text>
+        <View style={styles.buttonContainer}>
+          <TouchableOpacity
+            style={styles.getDirectionsButton}
+            onPress={openMaps}
+          >
+            <Text style={styles.getDirectionsButtonText}>Get Directions</Text>
+          </TouchableOpacity>
+        </View>
       </View>
-    </ScrollView>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flexGrow: 1,
-    padding: 20,
     backgroundColor: "#fff",
   },
   closeButton: {
     position: "absolute",
-    top: 50,
-    left: 10,
+    top: 60,
+    left: 20,
     zIndex: 10,
-    backgroundColor: "#007bff",
+    backgroundColor: munchColors.primary,
     borderRadius: 20,
     padding: 8,
+    width: 40,
+    height: 40,
   },
   map: {
     width: "100%",
-    height: 300,
-    borderRadius: 10,
+    height: 400,
     marginBottom: 10,
   },
   customMarker: {
@@ -239,42 +258,38 @@ const styles = StyleSheet.create({
   },
   modalTextContainer: {
     width: "100%",
+    padding: 20,
+    flex: 1,
   },
   modalTitle: {
-    fontSize: 25,
+    fontSize: 35,
     fontWeight: "bold",
     color: munchColors.primary,
-    textAlign: "center",
-    marginBottom: 10,
+    marginBottom: 20,
   },
   modalDate: {
-    fontSize: 16,
+    fontSize: 18,
     color: "#555",
-    textAlign: "center",
   },
   modalTime: {
     fontSize: 16,
     color: "#777",
-    textAlign: "center",
     marginTop: 5,
   },
   eventDistance: {
     fontSize: 16,
     color: "#777",
-    textAlign: "center",
     marginTop: 5,
   },
   modalDescription: {
     fontSize: 16,
     color: "#555",
     marginTop: 10,
-    textAlign: "center",
   },
   modalLocation: {
     fontSize: 16,
     color: munchColors.primary,
     marginTop: 5,
-    textAlign: "center",
   },
   getDirectionsButton: {
     marginTop: 15,
@@ -283,10 +298,21 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     borderRadius: munchStyles.smallRadius,
     alignItems: "center",
+    width: 350,
+    height: 50,
+    justifyContent: "center",
   },
   getDirectionsButtonText: {
     color: "#fff",
     fontSize: 16,
     fontWeight: "bold",
+  },
+  buttonContainer: {
+    position: "absolute",
+    bottom: 50,
+    left: 0,
+    right: 0,
+    alignItems: "center",
+    justifyContent: "center",
   },
 });
