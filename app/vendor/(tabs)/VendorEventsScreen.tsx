@@ -13,6 +13,7 @@ import {
   Linking,
   Platform,
   Alert,
+  Image,
 } from "react-native";
 import { FontAwesome } from "@expo/vector-icons";
 import { munchColors } from "@/constants/Colors";
@@ -76,7 +77,7 @@ const calculateDistance = (
 
   return `${distance.toFixed(2)} ${units}`;
 };
-export default function UserEventsScreen() {
+export default function VendorEventsScreen() {
   const router = useRouter();
   const [events, setEvents] = useState<Event[]>([]);
   const [loading, setLoading] = useState(true);
@@ -89,6 +90,7 @@ export default function UserEventsScreen() {
     longitude: number;
   } | null>(null); // Store user's location
   const units = useUnits();
+  const [distance, setDistance] = useState<string>("");
 
   useEffect(() => {
     (async () => {
@@ -152,9 +154,29 @@ export default function UserEventsScreen() {
     setRefreshing(false);
   }, []);
 
-  const openEventModal = (event: Event) => {
-    setSelectedEvent(event);
-    setModalVisible(true);
+  const handleEventPress = (event: Event) => {
+    // Push to the event details page with parameters.
+    router.push({
+      pathname: "/sharedScreens/eventDetailsScreen",
+      params: {
+        eventId: event.id,
+        eventTitle: event.eventTitle,
+        eventDate: event.date.toString(),
+        region: JSON.stringify(event.region),
+        description: event.description,
+        locationText: event.locationText, // added parameter
+        startTime: event.startTime ? event.startTime.toISOString() : null, // added parameter
+        endTime: event.endTime ? event.endTime.toISOString() : null, // added parameter
+        image: event.image, // added parameter
+        distance: calculateDistance(
+          userLocation?.latitude || 0,
+          userLocation?.longitude || 0,
+          event.region.latitude,
+          event.region.longitude,
+          units
+        ),
+      },
+    });
   };
 
   const closeEventModal = () => {
@@ -191,40 +213,68 @@ export default function UserEventsScreen() {
 
   const { todayEvents, tomorrowEvents, upcomingEvents } = categorizeEvents();
 
-  const renderEventItem = ({ item }: { item: Event }) => (
-    <TouchableOpacity
-      style={styles.eventItem}
-      onPress={() => openEventModal(item)}
-    >
-      <View style={styles.detailsContainer}>
-        <Text style={styles.eventTitle}>{item.eventTitle}</Text>
-        <Text style={styles.eventDate}>
-          {format(new Date(item.date), "EEEE, MMM d, yyyy")}
-        </Text>
-        {item.startTime && item.endTime && (
-          <Text style={styles.eventTime}>
-            {format(new Date(item.startTime), "h:mm a")} -{" "}
-            {format(new Date(item.endTime), "h:mm a")}
+  const renderEventItem = ({ item }: { item: Event }) => {
+    // Map event titles to local images.
+    const eventImageMap: { [key: string]: any } = {
+      "Farmers Market": require("@/assets/images/FarmersMarketEvent.png"),
+      "Food Truck Rally": require("@/assets/images/FoodTruckEvent.png"),
+      "Small Business Vendors": require("@/assets/images/vendorEvent.png"),
+    };
+
+    const eventImage =
+      eventImageMap[item.eventTitle] ||
+      require("@/assets/images/otherEvent.png");
+
+    return (
+      <TouchableOpacity
+        style={styles.eventItem}
+        onPress={() => handleEventPress(item)}
+      >
+        <Image source={eventImage} style={styles.eventImage} />
+        <View style={styles.detailsContainer}>
+          <Text style={styles.eventTitle}>{item.eventTitle}</Text>
+          <Text style={styles.eventDate}>
+            {format(new Date(item.date), "EEEE, MMM d, yyyy")}
           </Text>
-        )}
-        {userLocation && (
-          <Text style={styles.eventDistance}>
-            {calculateDistance(
-              userLocation?.latitude,
-              userLocation?.longitude,
-              item.region.latitude,
-              item.region.longitude,
-              units
-            )}
+          {item.startTime && item.endTime && (
+            <Text style={styles.eventTime}>
+              {format(new Date(item.startTime), "h:mm a")} -{" "}
+              {format(new Date(item.endTime), "h:mm a")}
+            </Text>
+          )}
+          {item.startTime && !item.endTime && (
+            <Text style={styles.eventTime}>
+              Start Time: {format(new Date(item.startTime), "h:mm a")}
+            </Text>
+          )}
+          {item.endTime && !item.startTime && (
+            <Text style={styles.eventTime}>
+              End Time: {format(new Date(item.endTime), "h:mm a")}
+            </Text>
+          )}
+          {userLocation && (
+            <Text style={styles.eventDistance}>
+              {calculateDistance(
+                userLocation?.latitude,
+                userLocation?.longitude,
+                item.region.latitude,
+                item.region.longitude,
+                units
+              )}
+            </Text>
+          )}
+          <Text style={styles.eventLocation}>
+            {formatAddress(item.locationText ?? "")}
           </Text>
-        )}
-        <Text style={styles.eventLocation}>
-          {formatAddress(item.locationText ?? "")}
-        </Text>
-      </View>
-      <FontAwesome name="chevron-right" size={16} style={styles.rightChevron} />
-    </TouchableOpacity>
-  );
+        </View>
+        <FontAwesome
+          name="chevron-right"
+          size={16}
+          style={styles.rightChevron}
+        />
+      </TouchableOpacity>
+    );
+  };
 
   return (
     <SafeAreaView style={styles.container}>
@@ -510,7 +560,6 @@ const styles = StyleSheet.create({
   eventDistance: {
     fontSize: 14,
     color: "#777",
-    marginTop: 4,
   },
   customMarker: {
     alignItems: "center",
@@ -541,5 +590,11 @@ const styles = StyleSheet.create({
     backgroundColor: munchColors.primary,
     borderRadius: 20,
     padding: 6,
+  },
+  eventImage: {
+    width: 90,
+    height: 90,
+    borderRadius: 8,
+    marginRight: 10,
   },
 });

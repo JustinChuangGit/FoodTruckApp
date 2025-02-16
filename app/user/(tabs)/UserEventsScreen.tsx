@@ -242,6 +242,16 @@ export default function UserEventsScreen() {
               {format(new Date(item.endTime), "h:mm a")}
             </Text>
           )}
+          {item.startTime && !item.endTime && (
+            <Text style={styles.eventTime}>
+              Start Time: {format(new Date(item.startTime), "h:mm a")}
+            </Text>
+          )}
+          {item.endTime && !item.startTime && (
+            <Text style={styles.eventTime}>
+              End Time: {format(new Date(item.endTime), "h:mm a")}
+            </Text>
+          )}
           {userLocation && (
             <Text style={styles.eventDistance}>
               {calculateDistance(
