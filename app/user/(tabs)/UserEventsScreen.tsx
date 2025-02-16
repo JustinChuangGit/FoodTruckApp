@@ -280,12 +280,14 @@ export default function UserEventsScreen() {
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
         <Text style={styles.headerText}>Events</Text>
-        <TouchableOpacity
-          onPress={() => router.push("/sharedScreens/createNewEventScreen")}
-        >
-          <FontAwesome name="plus" size={24} color={munchColors.primary} />
-        </TouchableOpacity>
       </View>
+
+      <TouchableOpacity
+        onPress={() => router.push("/sharedScreens/createNewEventScreen")}
+        style={styles.addEventButton}
+      >
+        <Text style={styles.addEventButtonText}>Add Event</Text>
+      </TouchableOpacity>
 
       {loading ? (
         <Text style={styles.loadingText}>Loading events...</Text>
@@ -328,93 +330,6 @@ export default function UserEventsScreen() {
           }
         />
       )}
-      <Modal visible={modalVisible} animationType="slide" transparent={true}>
-        {selectedEvent && (
-          <View style={styles.modalContainer}>
-            <View style={styles.modalContent}>
-              <TouchableOpacity
-                style={styles.closeButton}
-                onPress={closeEventModal}
-              >
-                <FontAwesome name="times" size={24} color="#fff" />
-              </TouchableOpacity>
-
-              {/* Map */}
-              <MapView
-                style={styles.map}
-                initialRegion={{
-                  latitude: selectedEvent.region.latitude,
-                  longitude: selectedEvent.region.longitude,
-                  latitudeDelta: selectedEvent.region.latitudeDelta,
-                  longitudeDelta: selectedEvent.region.longitudeDelta,
-                }}
-                showsUserLocation={true}
-              >
-                <Marker
-                  coordinate={{
-                    latitude: selectedEvent.region.latitude,
-                    longitude: selectedEvent.region.longitude,
-                  }}
-                  title={selectedEvent.eventTitle}
-                  description={selectedEvent.locationText}
-                >
-                  {/* Custom Styled Marker */}
-                  <View style={styles.customMarker}>
-                    <FontAwesome
-                      name="map-marker"
-                      size={30}
-                      color={munchColors.primary}
-                    />
-                  </View>
-                </Marker>
-              </MapView>
-
-              <View style={styles.modalTextContainer}>
-                {/* Event Details */}
-                <Text style={styles.modalTitle}>
-                  {selectedEvent.eventTitle}
-                </Text>
-                <Text style={styles.modalDate}>
-                  {format(new Date(selectedEvent.date), "EEEE, MMM d, yyyy")}
-                </Text>
-                {selectedEvent.startTime && selectedEvent.endTime && (
-                  <Text style={styles.modalTime}>
-                    {format(new Date(selectedEvent.startTime), "h:mm a")} -{" "}
-                    {format(new Date(selectedEvent.endTime), "h:mm a")}
-                  </Text>
-                )}
-                {userLocation && (
-                  <Text style={styles.eventDistance}>
-                    {calculateDistance(
-                      userLocation?.latitude,
-                      userLocation?.longitude,
-                      selectedEvent.region.latitude,
-                      selectedEvent.region.longitude,
-                      units
-                    )}
-                  </Text>
-                )}
-                <Text style={styles.modalDescription}>
-                  {selectedEvent.description}
-                </Text>
-                <Text style={styles.modalLocation}>
-                  {formatAddress(selectedEvent.locationText ?? "")}
-                </Text>
-                <TouchableOpacity
-                  style={styles.getDirectionsButton}
-                  onPress={
-                    () => openMaps() // Open maps when button is pressed
-                  }
-                >
-                  <Text style={styles.getDirectionsButtonText}>
-                    Get Directions
-                  </Text>
-                </TouchableOpacity>
-              </View>
-            </View>
-          </View>
-        )}
-      </Modal>
     </SafeAreaView>
   );
 }
@@ -597,5 +512,23 @@ const styles = StyleSheet.create({
     height: 90,
     borderRadius: 8,
     marginRight: 10,
+  },
+  addEventButton: {
+    position: "absolute",
+    bottom: 20,
+    alignSelf: "center", // This centers the button horizontally
+    backgroundColor: munchColors.primary,
+    width: 300,
+    height: 50,
+    borderRadius: munchStyles.smallRadius,
+    zIndex: 10,
+  },
+
+  addEventButtonText: {
+    color: "#fff",
+    fontSize: 18,
+    fontWeight: "bold",
+    textAlign: "center",
+    lineHeight: 50,
   },
 });

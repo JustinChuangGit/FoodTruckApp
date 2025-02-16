@@ -280,12 +280,14 @@ export default function VendorEventsScreen() {
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
         <Text style={styles.headerText}>Events</Text>
-        <TouchableOpacity
-          onPress={() => router.push("/sharedScreens/createNewEventScreen")}
-        >
-          <FontAwesome name="plus" size={24} color={munchColors.primary} />
-        </TouchableOpacity>
       </View>
+
+      <TouchableOpacity
+        onPress={() => router.push("/sharedScreens/createNewEventScreen")}
+        style={styles.addEventButton}
+      >
+        <Text style={styles.addEventButtonText}>Add Event</Text>
+      </TouchableOpacity>
 
       {loading ? (
         <Text style={styles.loadingText}>Loading events...</Text>
@@ -596,5 +598,23 @@ const styles = StyleSheet.create({
     height: 90,
     borderRadius: 8,
     marginRight: 10,
+  },
+  addEventButton: {
+    position: "absolute",
+    bottom: 20,
+    alignSelf: "center", // This centers the button horizontally
+    backgroundColor: munchColors.primary,
+    width: 300,
+    height: 50,
+    borderRadius: munchStyles.smallRadius,
+    zIndex: 10,
+  },
+
+  addEventButtonText: {
+    color: "#fff",
+    fontSize: 18,
+    fontWeight: "bold",
+    textAlign: "center",
+    lineHeight: 50,
   },
 });
