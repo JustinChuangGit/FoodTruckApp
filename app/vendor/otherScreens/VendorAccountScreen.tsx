@@ -31,6 +31,13 @@ export default function VendorAccountScreen() {
       <TouchableOpacity style={styles.header} onPress={() => router.back()}>
         <FontAwesome name="chevron-left" size={24} color="black" />
         <Text style={styles.headerText}>Account</Text>
+        <TouchableOpacity
+          onPress={() =>
+            router.push("/vendor/otherScreens/AdminApproveEventScreen")
+          }
+        >
+          <FontAwesome name="qrcode" size={24} color="black" />
+        </TouchableOpacity>
       </TouchableOpacity>
 
       {/* Menu Options */}

@@ -32,6 +32,13 @@ export default function VendorLayout() {
             headerShown: false,
           }}
         />
+        <Stack.Screen
+          name="otherScreens/AdminApproveEventScreen"
+          options={{
+            title: "Approve Events",
+            headerShown: false,
+          }}
+        />
       </Stack>
     </Provider>
   );
