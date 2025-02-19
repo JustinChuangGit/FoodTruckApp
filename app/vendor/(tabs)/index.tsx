@@ -144,6 +144,11 @@ export default function Index() {
         return event;
       })
     : upcomingEvents;
+  const todayEvents = eventsWithDistance.filter(
+    (event) =>
+      new Date(event.date).setHours(0, 0, 0, 0) ===
+      new Date().setHours(0, 0, 0, 0)
+  );
 
   useEffect(() => {
     (async () => {
@@ -277,20 +282,24 @@ export default function Index() {
     setActiveCarousel("event");
     setSelectedEvent(event);
     setSelectedVendor(null);
-    const index = eventsWithDistance.findIndex(
-      (event) => event.id === event.id
-    );
-    setEventCarouselIndex(index);
-    if (mapRef.current && event.region) {
-      mapRef.current.animateToRegion(
-        {
-          latitude: event.region.latitude,
-          longitude: event.region.longitude,
-          latitudeDelta: 0.01,
-          longitudeDelta: 0.01,
-        },
-        500 // animation duration in ms
-      );
+
+    const index = todayEvents.findIndex((e) => e.id === event.id);
+    console.log("Event index:", index);
+
+    if (index !== -1) {
+      setEventCarouselIndex(index);
+
+      if (mapRef.current && event.region) {
+        mapRef.current.animateToRegion(
+          {
+            latitude: event.region.latitude,
+            longitude: event.region.longitude,
+            latitudeDelta: 0.01,
+            longitudeDelta: 0.01,
+          },
+          500 // animation duration in ms
+        );
+      }
     }
     // Push to the event details page with parameters.
     router.push({
@@ -436,7 +445,7 @@ export default function Index() {
             />
           ))}
 
-          {eventsWithDistance.map((event, index) => (
+          {todayEvents.map((event, index) => (
             <EventMarker
               key={event.id || `event-${index}`}
               event={event}
@@ -496,10 +505,10 @@ export default function Index() {
           <Carousel
             width={width * 0.9}
             height={250}
-            data={eventsWithDistance}
+            data={todayEvents}
             renderItem={({ index }) => (
               <EventMapInfoCard
-                event={eventsWithDistance[index]}
+                event={todayEvents[index]}
                 userLocation={location}
                 onClose={() => setSelectedEvent(null)}
                 onPress={(event) => {
@@ -509,7 +518,7 @@ export default function Index() {
             )}
             onSnapToItem={(index) => {
               setEventCarouselIndex(index);
-              const newEvent = eventsWithDistance[index];
+              const newEvent = todayEvents[index];
               setSelectedEvent(newEvent);
               if (mapRef.current && newEvent.region) {
                 mapRef.current.animateToRegion(
@@ -519,7 +528,7 @@ export default function Index() {
                     latitudeDelta: 0.01,
                     longitudeDelta: 0.01,
                   },
-                  500 // duration in ms
+                  500 // Animation duration
                 );
               }
             }}

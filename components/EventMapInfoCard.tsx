@@ -125,13 +125,13 @@ const EventMapInfoCard: React.FC<EventMapInfoCardProps> = ({
         onPress={() => onPress(event)}
       >
         <View style={styles.imageContainer}>
-          {loading && (
+          {/* {loading && (
             <ActivityIndicator
               size="small"
               color="#007bff"
               style={styles.loadingIndicator}
             />
-          )}
+          )} */}
           <Image
             key={event.id}
             source={eventImage}
