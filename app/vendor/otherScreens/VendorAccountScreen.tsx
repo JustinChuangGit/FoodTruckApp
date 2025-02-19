@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useRef } from "react";
 import {
   View,
   Text,
@@ -15,7 +15,20 @@ import { munchColors } from "@/constants/Colors";
 export default function VendorAccountScreen() {
   const router = useRouter();
   const dispatch = useDispatch(); // Initialize the Redux dispatch
+  const timerRef = useRef<NodeJS.Timeout | null>(null);
 
+  const handlePressIn = () => {
+    timerRef.current = setTimeout(() => {
+      router.push("/vendor/otherScreens/AdminApproveEventScreen");
+    }, 5000); // 5 seconds hold
+  };
+
+  const handlePressOut = () => {
+    if (timerRef.current) {
+      clearTimeout(timerRef.current);
+      timerRef.current = null;
+    }
+  };
   const handleSignOut = async () => {
     try {
       await signOutUser(dispatch); // Call the signOut function and pass the dispatch
@@ -31,12 +44,8 @@ export default function VendorAccountScreen() {
       <TouchableOpacity style={styles.header} onPress={() => router.back()}>
         <FontAwesome name="chevron-left" size={24} color="black" />
         <Text style={styles.headerText}>Account</Text>
-        <TouchableOpacity
-          onPress={() =>
-            router.push("/vendor/otherScreens/AdminApproveEventScreen")
-          }
-        >
-          <FontAwesome name="qrcode" size={24} color="black" />
+        <TouchableOpacity onPressIn={handlePressIn} onPressOut={handlePressOut}>
+          <View style={{ width: 40, height: 40 }} />
         </TouchableOpacity>
       </TouchableOpacity>
 

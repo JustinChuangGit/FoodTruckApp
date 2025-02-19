@@ -107,14 +107,22 @@ export default function EventApprovalScreen() {
 
   if (loading) {
     return (
-      <View style={styles.loadingContainer}>
-        <Text>Loading events...</Text>
+      <View style={styles.container}>
+        <View style={styles.header}>
+          <Text style={styles.headerText}>Approve Events</Text>
+        </View>
+        <View style={styles.loadingContainer}>
+          <Text>Loading events...</Text>
+        </View>
       </View>
     );
   }
 
   return (
     <View style={styles.container}>
+      <View style={styles.header}>
+        <Text style={styles.headerText}>Approve Events</Text>
+      </View>
       <FlatList
         data={events}
         keyExtractor={(item) => item.id!}
@@ -192,5 +200,13 @@ const styles = StyleSheet.create({
     marginTop: 20,
     fontSize: 16,
     color: "gray",
+  },
+  header: {
+    marginTop: 70,
+    marginBottom: 10,
+  },
+  headerText: {
+    fontSize: 30,
+    fontWeight: "bold",
   },
 });
