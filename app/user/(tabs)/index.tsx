@@ -239,8 +239,6 @@ export default function Index() {
       new Date().setHours(0, 0, 0, 0)
   );
 
-  console.log("Today's events:", todayEvents);
-
   const combinedData: CombinedData[] = [
     {
       type: "eventRow" as const,
