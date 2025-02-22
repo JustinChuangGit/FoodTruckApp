@@ -18,11 +18,9 @@ import { collection, getDocs, getDoc, doc } from "firebase/firestore"; // Import
 import { db } from "@/services/firestore"; // Import the Firestore instance
 import { ref } from "firebase/storage";
 import { checkReferralCode } from "./firestore";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-
 
 const auth = initializeAuth(app, {
-  persistence: getReactNativePersistence(AsyncStorage),
+  persistence: getReactNativePersistence(ReactNativeAsyncStorage),
 });
 // Type definitions
 interface UserSignupData {

@@ -2,7 +2,7 @@
   "expo": {
     "name": "MNCH",
     "slug": "FoodTruckApp",
-    "version": "1.0.6",
+    "version": "1.0.8",
     "orientation": "portrait",
     "icon": "./assets/images/appstore.png",
     "scheme": "myapp",
@@ -23,6 +23,7 @@
         "ITSAppUsesNonExemptEncryption": false,
         "NSLocationWhenInUseUsageDescription": "This app needs access to your location to show nearby food trucks."
       }
+      
     },
     "android": {
       "package": "com.jc.munch",
@@ -51,14 +52,7 @@
           "project": "javascript-react",
           "organization": "mnch-22"
         }
-      ],
-      [
-        "expo-tracking-transparency",
-        {
-          "userTrackingPermission": "This identifier will be used to deliver personalized ads to you."
-        }
       ]
-
     ],
     "experiments": {
       "typedRoutes": true
@@ -69,6 +63,6 @@
         "projectId": "85c3be11-c802-41b0-b1e1-d598b22324a8"
       }
     },
-    "owner": "MNCH"
+    "owner": "justinchuang"
   }
 }
