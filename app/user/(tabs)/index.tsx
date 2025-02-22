@@ -39,6 +39,7 @@ import EventMapInfoCard from "@/components/EventMapInfoCard";
 import { requestTrackingPermissionsAsync } from "expo-tracking-transparency";
 import { useDispatch } from "react-redux";
 import { updateLocation } from "../../../redux/authSlice";
+import { munchColors } from "@/constants/Colors";
 
 const PermissionScreen = ({
   onRequestPermissions,
@@ -897,7 +898,7 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   permissionButton: {
-    backgroundColor: "#007bff",
+    backgroundColor: munchColors.primary,
     paddingVertical: 12,
     paddingHorizontal: 20,
     borderRadius: 8,
