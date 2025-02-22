@@ -7,6 +7,7 @@ import {
   Dimensions,
   TouchableOpacity,
   Animated,
+  Linking,
 } from "react-native";
 import MapView, { Marker, PROVIDER_DEFAULT } from "react-native-maps";
 import * as Location from "expo-location";
@@ -39,7 +40,27 @@ import EventMarker from "@/components/EventMarker";
 import EventMapInfoCard from "@/components/EventMapInfoCard";
 import { FontAwesome } from "@expo/vector-icons";
 import { munchColors } from "@/constants/Colors";
+import { requestTrackingPermissionsAsync } from "expo-tracking-transparency";
 
+const PermissionScreen = ({
+  onRequestPermissions,
+}: {
+  onRequestPermissions: () => void;
+}) => {
+  return (
+    <SafeAreaView style={styles.permissionContainer}>
+      <Text style={styles.permissionText}>
+        Please grant Location and App Tracking permissions to continue.
+      </Text>
+      <TouchableOpacity
+        style={styles.permissionButton}
+        onPress={onRequestPermissions}
+      >
+        <Text style={styles.permissionButtonText}>Grant Permissions</Text>
+      </TouchableOpacity>
+    </SafeAreaView>
+  );
+};
 const { width } = Dimensions.get("window");
 
 function getNearbyVendors(
@@ -106,6 +127,47 @@ export default function Index() {
     "vendor" | "event" | null
   >(null);
 
+  const [hasLocationPermission, setHasLocationPermission] = useState(false);
+  const [hasTrackingPermission, setHasTrackingPermission] = useState(false);
+  const checkPermissions = async () => {
+    // Check Location Permission
+    let { status: locStatus } = await Location.getForegroundPermissionsAsync();
+    if (locStatus !== "granted") {
+      const result = await Location.requestForegroundPermissionsAsync();
+      if (result.status !== "granted") {
+        Alert.alert(
+          "Location Permission Denied",
+          "Please enable location permissions in Settings.",
+          [{ text: "Open Settings", onPress: () => Linking.openSettings() }]
+        );
+        return;
+      }
+      locStatus = result.status;
+    }
+    setHasLocationPermission(true);
+    const { coords } = await Location.getCurrentPositionAsync({});
+    setLocation(coords);
+    const { latitude, longitude } = coords;
+    dispatch(updateLocation({ latitude, longitude }));
+
+    // Check Tracking Permission
+    const trackingResult = await requestTrackingPermissionsAsync();
+    if (trackingResult.status !== "granted") {
+      Alert.alert(
+        "App Tracking Permission Denied",
+        "Please enable app tracking permissions in Settings.",
+        [{ text: "Open Settings", onPress: () => Linking.openSettings() }]
+      );
+      return;
+    }
+    setHasTrackingPermission(true);
+  };
+
+  // Run the permission check once on mount
+  useEffect(() => {
+    checkPermissions();
+  }, []);
+
   useEffect(() => {
     (async () => {
       try {
@@ -149,22 +211,6 @@ export default function Index() {
       new Date(event.date).setHours(0, 0, 0, 0) ===
       new Date().setHours(0, 0, 0, 0)
   );
-
-  useEffect(() => {
-    (async () => {
-      const { status } = await Location.requestForegroundPermissionsAsync();
-      if (status !== "granted") {
-        Alert.alert("Permission Denied", "Location permission is required.");
-        return;
-      }
-      const { coords } = await Location.getCurrentPositionAsync({});
-      const { latitude, longitude } = coords;
-      setLocation(coords);
-
-      // Dispatch the action to update the location in Redux
-      dispatch(updateLocation({ latitude, longitude }));
-    })();
-  }, []);
 
   useEffect(() => {
     const unsubscribe = onSnapshot(
@@ -418,189 +464,204 @@ export default function Index() {
 
   return (
     <SafeAreaView style={styles.container}>
-      <TouchableOpacity
-        style={styles.accountScreenButtonContainer}
-        onPress={() => router.push("/vendor/otherScreens/VendorAccountScreen")}
-      >
-        <FontAwesome name="gear" size={32} color="#FFF" />
-      </TouchableOpacity>
-      {location && (
-        <MapView
-          ref={mapRef}
-          style={styles.map}
-          provider={PROVIDER_DEFAULT}
-          showsUserLocation={true}
-          initialRegion={{
-            latitude: location.latitude,
-            longitude: location.longitude,
-            latitudeDelta: 0.01,
-            longitudeDelta: 0.01,
-          }}
-        >
-          {vendors.map((vendor) => (
-            <VendorMarker
-              key={vendor.uid}
-              vendor={vendor}
-              onPress={() => handleMarkerPress(vendor)}
-            />
-          ))}
-
-          {todayEvents.map((event, index) => (
-            <EventMarker
-              key={event.id || `event-${index}`}
-              event={event}
-              onPress={(event) => {
-                handleEventMarkerPress(event, index);
+      {!hasLocationPermission || !hasTrackingPermission ? (
+        <PermissionScreen onRequestPermissions={checkPermissions} />
+      ) : (
+        // Main content that uses all your hooks:
+        <>
+          <TouchableOpacity
+            style={styles.accountScreenButtonContainer}
+            onPress={() =>
+              router.push("/vendor/otherScreens/VendorAccountScreen")
+            }
+          >
+            <FontAwesome name="gear" size={32} color="#FFF" />
+          </TouchableOpacity>
+          {location && (
+            <MapView
+              ref={mapRef}
+              style={styles.map}
+              provider={PROVIDER_DEFAULT}
+              showsUserLocation={true}
+              initialRegion={{
+                latitude: location.latitude,
+                longitude: location.longitude,
+                latitudeDelta: 0.01,
+                longitudeDelta: 0.01,
               }}
-            />
-          ))}
-
-          {selectedVendor && (
-            <Marker
-              coordinate={{
-                latitude: selectedVendor.latitude,
-                longitude: selectedVendor.longitude,
-              }}
-              zIndex={999} // Higher zIndex for selected
             >
-              {/* Animated Marker */}
-              <Animated.View
-                style={[
-                  styles.selectedMarker,
-                  { transform: [{ scale: scaleAnim }] },
-                ]}
-              >
-                <View style={styles.selectedMarkerInner} />
-              </Animated.View>
-            </Marker>
+              {vendors.map((vendor) => (
+                <VendorMarker
+                  key={vendor.uid}
+                  vendor={vendor}
+                  onPress={() => handleMarkerPress(vendor)}
+                />
+              ))}
+
+              {todayEvents.map((event, index) => (
+                <EventMarker
+                  key={event.id || `event-${index}`}
+                  event={event}
+                  onPress={(event) => {
+                    handleEventMarkerPress(event, index);
+                  }}
+                />
+              ))}
+
+              {selectedVendor && (
+                <Marker
+                  coordinate={{
+                    latitude: selectedVendor.latitude,
+                    longitude: selectedVendor.longitude,
+                  }}
+                  zIndex={999} // Higher zIndex for selected
+                >
+                  {/* Animated Marker */}
+                  <Animated.View
+                    style={[
+                      styles.selectedMarker,
+                      { transform: [{ scale: scaleAnim }] },
+                    ]}
+                  >
+                    <View style={styles.selectedMarkerInner} />
+                  </Animated.View>
+                </Marker>
+              )}
+            </MapView>
           )}
-        </MapView>
-      )}
 
-      {activeCarousel === "vendor" && selectedVendor && (
-        <View style={styles.carouselContainer}>
-          <Carousel
-            width={width * 0.9}
-            height={250}
-            data={vendors}
-            renderItem={({ index }) => (
-              <VendorMapInfoCard
-                vendor={vendors[index]}
-                userLocation={location}
-                onClose={handleCardClose}
-                onPress={(vendor) => handleCardPress(vendor)} // Pass the vendor to handleCardPress
-              />
-            )}
-            onSnapToItem={(index) => {
-              setCarouselIndex(index);
-              handleMarkerPress(vendors[index]);
-            }}
-            defaultIndex={carouselIndex}
-          />
-        </View>
-      )}
-
-      {activeCarousel === "event" && selectedEvent && (
-        <View style={styles.carouselContainer}>
-          <Carousel
-            width={width * 0.9}
-            height={250}
-            data={todayEvents}
-            renderItem={({ index }) => (
-              <EventMapInfoCard
-                event={todayEvents[index]}
-                userLocation={location}
-                onClose={() => setSelectedEvent(null)}
-                onPress={(event) => {
-                  handleEventPress(event);
-                }}
-              />
-            )}
-            onSnapToItem={(index) => {
-              setEventCarouselIndex(index);
-              const newEvent = todayEvents[index];
-              setSelectedEvent(newEvent);
-              if (mapRef.current && newEvent.region) {
-                mapRef.current.animateToRegion(
-                  {
-                    latitude: newEvent.region.latitude,
-                    longitude: newEvent.region.longitude,
-                    latitudeDelta: 0.01,
-                    longitudeDelta: 0.01,
-                  },
-                  500 // Animation duration
-                );
-              }
-            }}
-            defaultIndex={eventCarouselIndex}
-          />
-        </View>
-      )}
-
-      <BottomSheet
-        ref={bottomSheetRef}
-        index={2}
-        snapPoints={snapPoints}
-        enableOverDrag={false}
-        topInset={100}
-      >
-        <BottomSheetView style={styles.bottomSheetContent}>
-          {" "}
-          <Text style={styles.dragSectionHeader}>{userName}</Text>{" "}
-          <Text style={styles.dragSectionSubheader}>Manage your store</Text>
-          <HorizontalLine />{" "}
-          <BottomSheetFlatList
-            data={SECTIONDATA}
-            showsVerticalScrollIndicator={false}
-            keyExtractor={(item) => item.id}
-            renderItem={({ item }) => (
-              <BottomSheetView>
-                {vendorPaid ? (
-                  <TouchableOpacity
-                    onPress={() => user && toggleVendorActive(user.uid)}
-                  >
-                    <Animated.View
-                      style={[
-                        styles.toggleButton,
-                        { backgroundColor: buttonBackgroundColor },
-                      ]}
-                    >
-                      <Text style={styles.toggleButtonText}>
-                        {isVendorActive ? "Close Up Shop" : "Go Live"}
-                      </Text>
-                    </Animated.View>
-                  </TouchableOpacity>
-                ) : (
-                  <TouchableOpacity
-                    onPress={() => {
-                      Alert.alert(
-                        "Please allow up to 24 hours for your account to be approved \n\n If you believe this is an error, please contact support"
-                      );
-                    }}
-                    style={[styles.toggleButton, { backgroundColor: "grey" }]}
-                  >
-                    <Text style={styles.toggleButtonText}>
-                      Your Account Status Is Pending
-                    </Text>
-                  </TouchableOpacity>
-                )}
-                <CouponManager />
-                {upcomingEvents.length > 0 && (
-                  <EventListRow
-                    section={{ title: "Events", events: eventsWithDistance }}
-                    onEventPress={(event) => handleEventPress(event)}
+          {activeCarousel === "vendor" && selectedVendor && (
+            <View style={styles.carouselContainer}>
+              <Carousel
+                width={width * 0.9}
+                height={250}
+                data={vendors}
+                renderItem={({ index }) => (
+                  <VendorMapInfoCard
+                    vendor={vendors[index]}
+                    userLocation={location}
+                    onClose={handleCardClose}
+                    onPress={(vendor) => handleCardPress(vendor)} // Pass the vendor to handleCardPress
                   />
                 )}
-                <MyRow section={item} onCardPress={handleCardPress} />
-              </BottomSheetView>
-            )}
-            contentContainerStyle={{
-              paddingHorizontal: 0, // Remove extra padding here
-              paddingBottom: 16, // Optional for spacing at the bottom
-            }}
-          />
-        </BottomSheetView>
-      </BottomSheet>
+                onSnapToItem={(index) => {
+                  setCarouselIndex(index);
+                  handleMarkerPress(vendors[index]);
+                }}
+                defaultIndex={carouselIndex}
+              />
+            </View>
+          )}
+
+          {activeCarousel === "event" && selectedEvent && (
+            <View style={styles.carouselContainer}>
+              <Carousel
+                width={width * 0.9}
+                height={250}
+                data={todayEvents}
+                renderItem={({ index }) => (
+                  <EventMapInfoCard
+                    event={todayEvents[index]}
+                    userLocation={location}
+                    onClose={() => setSelectedEvent(null)}
+                    onPress={(event) => {
+                      handleEventPress(event);
+                    }}
+                  />
+                )}
+                onSnapToItem={(index) => {
+                  setEventCarouselIndex(index);
+                  const newEvent = todayEvents[index];
+                  setSelectedEvent(newEvent);
+                  if (mapRef.current && newEvent.region) {
+                    mapRef.current.animateToRegion(
+                      {
+                        latitude: newEvent.region.latitude,
+                        longitude: newEvent.region.longitude,
+                        latitudeDelta: 0.01,
+                        longitudeDelta: 0.01,
+                      },
+                      500 // Animation duration
+                    );
+                  }
+                }}
+                defaultIndex={eventCarouselIndex}
+              />
+            </View>
+          )}
+
+          <BottomSheet
+            ref={bottomSheetRef}
+            index={2}
+            snapPoints={snapPoints}
+            enableOverDrag={false}
+            topInset={100}
+          >
+            <BottomSheetView style={styles.bottomSheetContent}>
+              {" "}
+              <Text style={styles.dragSectionHeader}>{userName}</Text>{" "}
+              <Text style={styles.dragSectionSubheader}>Manage your store</Text>
+              <HorizontalLine />{" "}
+              <BottomSheetFlatList
+                data={SECTIONDATA}
+                showsVerticalScrollIndicator={false}
+                keyExtractor={(item) => item.id}
+                renderItem={({ item }) => (
+                  <BottomSheetView>
+                    {vendorPaid ? (
+                      <TouchableOpacity
+                        onPress={() => user && toggleVendorActive(user.uid)}
+                      >
+                        <Animated.View
+                          style={[
+                            styles.toggleButton,
+                            { backgroundColor: buttonBackgroundColor },
+                          ]}
+                        >
+                          <Text style={styles.toggleButtonText}>
+                            {isVendorActive ? "Close Up Shop" : "Go Live"}
+                          </Text>
+                        </Animated.View>
+                      </TouchableOpacity>
+                    ) : (
+                      <TouchableOpacity
+                        onPress={() => {
+                          Alert.alert(
+                            "Please allow up to 24 hours for your account to be approved \n\n If you believe this is an error, please contact support"
+                          );
+                        }}
+                        style={[
+                          styles.toggleButton,
+                          { backgroundColor: "grey" },
+                        ]}
+                      >
+                        <Text style={styles.toggleButtonText}>
+                          Your Account Status Is Pending
+                        </Text>
+                      </TouchableOpacity>
+                    )}
+                    <CouponManager />
+                    {upcomingEvents.length > 0 && (
+                      <EventListRow
+                        section={{
+                          title: "Events",
+                          events: eventsWithDistance,
+                        }}
+                        onEventPress={(event) => handleEventPress(event)}
+                      />
+                    )}
+                    <MyRow section={item} onCardPress={handleCardPress} />
+                  </BottomSheetView>
+                )}
+                contentContainerStyle={{
+                  paddingHorizontal: 0, // Remove extra padding here
+                  paddingBottom: 16, // Optional for spacing at the bottom
+                }}
+              />
+            </BottomSheetView>
+          </BottomSheet>
+        </>
+      )}
     </SafeAreaView>
   );
 }
@@ -758,5 +819,27 @@ const styles = StyleSheet.create({
     top: 60,
     right: 30,
     zIndex: 999,
+  },
+  permissionContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    padding: 16,
+    backgroundColor: "#fff",
+  },
+  permissionText: {
+    fontSize: 18,
+    textAlign: "center",
+    marginBottom: 20,
+  },
+  permissionButton: {
+    backgroundColor: munchColors.primary,
+    paddingVertical: 12,
+    paddingHorizontal: 20,
+    borderRadius: 8,
+  },
+  permissionButtonText: {
+    color: "#fff",
+    fontSize: 16,
   },
 });
