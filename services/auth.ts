@@ -7,7 +7,9 @@ import {
   getReactNativePersistence,
   updatePassword,
   reauthenticateWithCredential,
-  EmailAuthProvider
+  EmailAuthProvider,
+  getAuth,
+  Auth,
 } from "firebase/auth";
 import { app } from "../firebaseConfig"; // Adjust the path if needed
 import { saveUserData, getUserData } from "./firestore"; // Adjust the path as needed
@@ -18,10 +20,27 @@ import { collection, getDocs, getDoc, doc } from "firebase/firestore"; // Import
 import { db } from "@/services/firestore"; // Import the Firestore instance
 import { ref } from "firebase/storage";
 import { checkReferralCode } from "./firestore";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
-const auth = initializeAuth(app, {
-  persistence: getReactNativePersistence(ReactNativeAsyncStorage),
-});
+
+// Extend the global namespace to include our flag.
+declare global {
+  // eslint-disable-next-line no-var
+  var __authInitialized: boolean | undefined;
+}
+
+let auth: Auth;
+
+if (!global.__authInitialized) {
+  auth = initializeAuth(app, {
+    persistence: getReactNativePersistence(AsyncStorage),
+  });
+  global.__authInitialized = true;
+} else {
+  auth = getAuth(app);
+}
+
+export { auth };
 // Type definitions
 interface UserSignupData {
   email: string;
@@ -96,7 +115,6 @@ export const signIn = async (dispatch: AppDispatch, email: string, password: str
         email: user.email || "",
         ...userData,
       };
-      console.log("---------------------------------Firestore User Data:", userData); // 🔍 Debugging Log
 
     } else {
       // If not in `users`, try `vendors` collection

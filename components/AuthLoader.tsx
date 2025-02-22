@@ -6,11 +6,11 @@ import { useDispatch } from "react-redux";
 import { setUser, clearUser } from "../redux/authSlice";
 import { useRouter } from "expo-router";
 import { getUserData } from "../services/firestore"; // Adjust the path if needed
+import { auth } from "@/services/auth";
 
 export default function AuthLoader() {
   const dispatch = useDispatch();
   const router = useRouter();
-  const auth = getAuth(app);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
