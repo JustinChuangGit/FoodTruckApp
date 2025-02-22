@@ -6,6 +6,7 @@ import { PersistGate } from "redux-persist/integration/react";
 import { store, persistor } from "../redux/store";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import * as Sentry from "@sentry/react-native";
+import AuthLoader from "@/components/AuthLoader";
 
 Sentry.init({
   dsn: "https://747134d92cb68b3dfbc573de941569c0@o4508744923873280.ingest.us.sentry.io/4508744929378304",
@@ -22,6 +23,7 @@ export default function RootLayout() {
     <GestureHandlerRootView style={{ flex: 1 }}>
       <Provider store={store}>
         <PersistGate loading={null} persistor={persistor}>
+          <AuthLoader />
           <Stack>
             <Stack.Screen name="auth" options={{ headerShown: false }} />
             <Stack.Screen name="user" options={{ headerShown: false }} />
