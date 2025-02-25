@@ -50,7 +50,7 @@ const PermissionScreen = ({
   return (
     <SafeAreaView style={styles.permissionContainer}>
       <Text style={styles.permissionText}>
-        Please grant Location and App Tracking permissions to continue.
+        Please grant Location permissions to continue.
       </Text>
       <TouchableOpacity
         style={styles.permissionButton}
@@ -128,7 +128,6 @@ export default function Index() {
   >(null);
 
   const [hasLocationPermission, setHasLocationPermission] = useState(false);
-  const [hasTrackingPermission, setHasTrackingPermission] = useState(false);
   const checkPermissions = async () => {
     // Check Location Permission
     let { status: locStatus } = await Location.getForegroundPermissionsAsync();
@@ -137,8 +136,7 @@ export default function Index() {
       if (result.status !== "granted") {
         Alert.alert(
           "Location Permission Denied",
-          "Please enable location permissions in Settings.",
-          [{ text: "Open Settings", onPress: () => Linking.openSettings() }]
+          "Please enable location permissions in Settings."
         );
         return;
       }
@@ -149,18 +147,6 @@ export default function Index() {
     setLocation(coords);
     const { latitude, longitude } = coords;
     dispatch(updateLocation({ latitude, longitude }));
-
-    // Check Tracking Permission
-    const trackingResult = await requestTrackingPermissionsAsync();
-    if (trackingResult.status !== "granted") {
-      Alert.alert(
-        "App Tracking Permission Denied",
-        "Please enable app tracking permissions in Settings.",
-        [{ text: "Open Settings", onPress: () => Linking.openSettings() }]
-      );
-      return;
-    }
-    setHasTrackingPermission(true);
   };
 
   // Run the permission check once on mount
@@ -464,7 +450,7 @@ export default function Index() {
 
   return (
     <SafeAreaView style={styles.container}>
-      {!hasLocationPermission || !hasTrackingPermission ? (
+      {!hasLocationPermission ? (
         <PermissionScreen onRequestPermissions={checkPermissions} />
       ) : (
         // Main content that uses all your hooks:
