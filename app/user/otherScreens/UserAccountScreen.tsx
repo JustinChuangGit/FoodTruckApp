@@ -72,9 +72,9 @@ export default function UserAccountScreen() {
         </TouchableOpacity>
         <TouchableOpacity
           style={styles.menuItem}
-          onPress={() => router.push("/sharedScreens/deleteAccountScreen")}
+          onPress={() => router.push("sharedScreens/deleteAccountScreen")}
         >
-          <Text style={styles.menuText}>Report A Bug</Text>
+          <Text style={styles.menuText}>Delete Account</Text>
           <FontAwesome
             name="chevron-right"
             size={16}
