@@ -2,7 +2,7 @@
   "expo": {
     "name": "MNCH",
     "slug": "FoodTruckApp",
-    "version": "1.0.9",
+    "version": "1.0.10",
     "orientation": "portrait",
     "icon": "./assets/images/appstore.png",
     "scheme": "myapp",
@@ -21,9 +21,9 @@
       },
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false,
-        "NSLocationWhenInUseUsageDescription": "This app needs access to your location to show nearby food trucks."
+        "NSLocationWhenInUseUsageDescription": "This app needs access to your location to show nearby food trucks.",
+        "NSUserTrackingUsageDescription": "This needs to track location, and collect data to improve the app."
       }
-      
     },
     "android": {
       "package": "com.jc.munch",

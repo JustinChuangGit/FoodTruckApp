@@ -70,6 +70,17 @@ export default function UserAccountScreen() {
             style={styles.rightChevron}
           />
         </TouchableOpacity>
+        <TouchableOpacity
+          style={styles.menuItem}
+          onPress={() => router.push("/sharedScreens/deleteAccountScreen")}
+        >
+          <Text style={styles.menuText}>Report A Bug</Text>
+          <FontAwesome
+            name="chevron-right"
+            size={16}
+            style={styles.rightChevron}
+          />
+        </TouchableOpacity>
       </View>
 
       {/* Sign Out Button */}

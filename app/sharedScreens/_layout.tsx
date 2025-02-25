@@ -47,6 +47,13 @@ export default function SharedScreensLayout() {
           headerShown: false,
         }}
       />
+      <Stack.Screen
+        name="deleteAccountScreen"
+        options={{
+          title: "Delete Account",
+          headerShown: false,
+        }}
+      />
     </Stack>
   );
 }
