@@ -24,11 +24,11 @@ import VendorMarker from "../../../components/VendorMarker";
 import VendorMapInfoCard from "../../../components/VendorMapInfoCard";
 import { Vendor, LocationCoordinates } from "@/constants/types";
 import { collection, onSnapshot } from "firebase/firestore";
-import { db } from "@/services/firestore";
+import { db, updateTrackingEnabled } from "@/services/firestore";
 import { Section } from "@/constants/types";
 import { router } from "expo-router";
 import { useSelector } from "react-redux";
-import { selectUser } from "../../../redux/authSlice"; // Update the path as needed
+import { selectUser, updateTrackingPermission } from "../../../redux/authSlice"; // Update the path as needed
 import { doc, setDoc, deleteDoc } from "firebase/firestore";
 import { useDispatch } from "react-redux";
 import { updateLocation } from "@/redux/authSlice"; // Adjust the path
@@ -147,6 +147,16 @@ export default function Index() {
     setLocation(coords);
     const { latitude, longitude } = coords;
     dispatch(updateLocation({ latitude, longitude }));
+    const trackingResult = await requestTrackingPermissionsAsync();
+    if (trackingResult.status === "granted") {
+      console.log("Tracking permission granted");
+      updateTrackingEnabled(user?.uid ?? "", true);
+      dispatch(updateTrackingPermission(true));
+    } else {
+      console.log("Tracking permission denied");
+      updateTrackingEnabled(user?.uid ?? "", false);
+      dispatch(updateTrackingPermission(false));
+    }
   };
 
   // Run the permission check once on mount

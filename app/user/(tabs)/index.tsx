@@ -24,12 +24,17 @@ import VendorMarker from "../../../components/VendorMarker";
 import VendorMapInfoCard from "../../../components/VendorMapInfoCard";
 import { Vendor, LocationCoordinates } from "@/constants/types";
 import { collection, onSnapshot } from "firebase/firestore";
-import { db, logClickThrough, logImpression } from "@/services/firestore";
+import {
+  db,
+  logClickThrough,
+  logImpression,
+  updateTrackingEnabled,
+} from "@/services/firestore";
 import { Section } from "@/constants/types";
 import { router } from "expo-router";
 import CouponRow from "@/components/couponRow";
 import { useSelector } from "react-redux";
-import { selectUser } from "../../../redux/authSlice"; // Update the path as needed
+import { selectUser, updateTrackingPermission } from "../../../redux/authSlice"; // Update the path as needed
 import { FontAwesome } from "@expo/vector-icons";
 import { getSortedEvents } from "@/services/firestore";
 import { Event } from "@/constants/types";
@@ -221,6 +226,7 @@ export default function Index() {
     "vendor" | "event" | null
   >(null);
   const [hasLocationPermission, setHasLocationPermission] = useState(false);
+
   const checkPermissions = async () => {
     // Check Location Permission
     let { status: locStatus } = await Location.getForegroundPermissionsAsync();
@@ -240,6 +246,17 @@ export default function Index() {
     setLocation(coords);
     const { latitude, longitude } = coords;
     dispatch(updateLocation({ latitude, longitude }));
+
+    const trackingResult = await requestTrackingPermissionsAsync();
+    if (trackingResult.status === "granted") {
+      console.log("Tracking permission granted");
+      updateTrackingEnabled(user?.uid ?? "", true);
+      dispatch(updateTrackingPermission(true));
+    } else {
+      console.log("Tracking permission denied");
+      updateTrackingEnabled(user?.uid ?? "", false);
+      dispatch(updateTrackingPermission(false));
+    }
   };
 
   // Run the permission check once on mount

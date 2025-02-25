@@ -22,6 +22,7 @@
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false,
         "NSLocationWhenInUseUsageDescription": "This app needs access to your location to show nearby food trucks.",
+        "NSUserTrackingUsageDescription": "This needs to track location, and collect data to improve the app."
       }
     },
     "android": {

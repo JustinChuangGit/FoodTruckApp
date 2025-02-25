@@ -827,3 +827,34 @@ export const getSortedEvents = async (): Promise<Event[]> => {
     throw error;
   }
 };
+
+export async function updateTrackingEnabled(uid: string, enabled: boolean) {
+  try {
+    const userDocRef = doc(db, "users", uid);
+    const userDocSnap = await getDoc(userDocRef);
+
+    if (userDocSnap.exists()) {
+      // Update in "users" collection
+      await updateDoc(userDocRef, { trackingEnabled: enabled });
+      console.log(`trackingEnabled set to ${enabled} for UID ${uid} in users collection`);
+      return;
+    }
+
+    const vendorDocRef = doc(db, "vendors", uid);
+    const vendorDocSnap = await getDoc(vendorDocRef);
+
+    if (vendorDocSnap.exists()) {
+      // Update in "vendors" collection
+      await updateDoc(vendorDocRef, { trackingEnabled: enabled });
+      console.log(`trackingEnabled set to ${enabled} for UID ${uid} in vendors collection`);
+      return;
+    }
+
+    // If neither doc exists
+    throw new Error(`No user or vendor document found for UID: ${uid}`);
+
+  } catch (error) {
+    console.error("Error updating trackingEnabled:", error);
+    throw error;
+  }
+}

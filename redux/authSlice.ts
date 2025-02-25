@@ -114,8 +114,27 @@ const authSlice = createSlice({
         });
       }
     },
+    updateTrackingPermission: (state, action: PayloadAction<boolean>) => {
+      // If no user is in the Redux state, log a warning and bail out
+      if (!state.user) {
+        console.warn("No user found in state; cannot update tracking permissions.");
+        return;
+      }
     
+      // Only update if there's a change
+      if (state.user.trackingPermissions !== action.payload) {
+        state.user.trackingPermissions = action.payload;
     
+        console.info(
+          `[Redux] trackingPermissions updated to: ${action.payload}`
+        );
+    
+        console.debug(
+          "[Redux] State after updateTrackingPermission:",
+          JSON.stringify(state, null, 2)
+        );
+      }
+    },
     
   },
 });
@@ -130,6 +149,7 @@ export const {
   redeemCoupon,
   removeActiveCoupon,
   decrementCouponUsesState,  
+  updateTrackingPermission,
 } = authSlice.actions;
 
 // Export selectors
