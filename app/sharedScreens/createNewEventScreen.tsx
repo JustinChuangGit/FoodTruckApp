@@ -12,6 +12,7 @@ import {
   ScrollView,
   Modal,
   Alert,
+  Linking,
 } from "react-native";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import DropDownPicker from "react-native-dropdown-picker";
@@ -87,10 +88,34 @@ export default function CreateNewEventScreen() {
     (async () => {
       const { status } = await Location.requestForegroundPermissionsAsync();
       if (status !== "granted") {
-        console.error("Permission to access location was denied");
+        // Display alert with option to open settings
+        Alert.alert(
+          "Location Permission Denied",
+          "Please enable location permissions in your device settings.",
+          [
+            {
+              text: "Open Settings",
+              onPress: () => {
+                if (Platform.OS === "ios") {
+                  Linking.openSettings();
+                } else {
+                  Linking.openURL("app-settings:");
+                }
+              },
+            },
+            { text: "Cancel", style: "cancel" },
+          ]
+        );
+        setRegion({
+          latitude: 36.7378,
+          longitude: -119.7871,
+          latitudeDelta: 0.1,
+          longitudeDelta: 0.1,
+        });
         setLoading(false);
-        return;
+        return; // Stop here if permission isn't granted
       }
+      // If granted, fetch current position
       const loc = await Location.getCurrentPositionAsync({});
       setRegion({
         latitude: loc.coords.latitude,

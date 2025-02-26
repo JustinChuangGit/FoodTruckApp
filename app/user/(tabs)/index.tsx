@@ -8,6 +8,7 @@ import {
   Animated,
   TouchableOpacity,
   Linking,
+  Platform,
 } from "react-native";
 import MapView, { Marker, PROVIDER_DEFAULT } from "react-native-maps";
 import * as Location from "expo-location";
@@ -52,9 +53,10 @@ const PermissionScreen = ({
   onRequestPermissions: () => void;
 }) => {
   return (
-    <SafeAreaView style={styles.permissionContainer}>
+    <View style={styles.permissionContainer}>
       <Text style={styles.permissionText}>
-        Please grant Location permissions to continue.
+        To view near by food trucks, vendors, and events please allow location
+        services
       </Text>
       <TouchableOpacity
         style={styles.permissionButton}
@@ -62,7 +64,7 @@ const PermissionScreen = ({
       >
         <Text style={styles.permissionButtonText}>Grant Permissions</Text>
       </TouchableOpacity>
-    </SafeAreaView>
+    </View>
   );
 };
 
@@ -230,27 +232,46 @@ export default function Index() {
   const checkPermissions = async () => {
     // Check Location Permission
     let { status: locStatus } = await Location.getForegroundPermissionsAsync();
+
+    // If not granted, request it
     if (locStatus !== "granted") {
       const result = await Location.requestForegroundPermissionsAsync();
+
+      // If still not granted, offer a prompt to go to device Settings
       if (result.status !== "granted") {
         Alert.alert(
           "Location Permission Denied",
-          "Please enable location permissions in Settings."
+          "Please enable location permissions in your device settings.",
+          [
+            {
+              text: "Open Settings",
+              onPress: () => {
+                if (Platform.OS === "ios") {
+                  Linking.openSettings();
+                } else {
+                  Linking.openURL("app-settings:");
+                }
+              },
+            },
+            { text: "Cancel", style: "cancel" },
+          ]
         );
         return;
       }
+
+      // Update the variable if permission is now granted
       locStatus = result.status;
     }
 
     setHasLocationPermission(true);
 
-    // Get current location
+    // If granted, get current location and store it
     const { coords } = await Location.getCurrentPositionAsync({});
     setLocation(coords);
     const { latitude, longitude } = coords;
     dispatch(updateLocation({ latitude, longitude }));
 
-    // Request tracking permission (iOS only)
+    // Request tracking permission (iOS 14+ only)
     const trackingResult = await requestTrackingPermissionsAsync();
     const granted = trackingResult.status === "granted";
 

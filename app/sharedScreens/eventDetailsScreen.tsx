@@ -116,9 +116,28 @@ export default function EventDetailsScreen() {
     (async () => {
       const { status } = await Location.requestForegroundPermissionsAsync();
       if (status !== "granted") {
-        Alert.alert("Permission Denied", "Location permission is required");
+        Alert.alert(
+          "Location Permission Denied",
+          "Please enable location permissions in your device settings.",
+          [
+            {
+              text: "Open Settings",
+              onPress: () => {
+                if (Platform.OS === "ios") {
+                  Linking.openSettings();
+                } else {
+                  Linking.openURL("app-settings:");
+                }
+              },
+            },
+            { text: "Cancel", style: "cancel" },
+          ]
+        );
+        // Important: return so you don’t setUserLocation or wait on location
         return;
       }
+
+      // If permission granted, get current position
       const loc = await Location.getCurrentPositionAsync({});
       setUserLocation({
         latitude: loc.coords.latitude,
