@@ -241,22 +241,22 @@ export default function Index() {
       }
       locStatus = result.status;
     }
+
     setHasLocationPermission(true);
+
+    // Get current location
     const { coords } = await Location.getCurrentPositionAsync({});
     setLocation(coords);
     const { latitude, longitude } = coords;
     dispatch(updateLocation({ latitude, longitude }));
 
+    // Request tracking permission (iOS only)
     const trackingResult = await requestTrackingPermissionsAsync();
-    if (trackingResult.status === "granted") {
-      console.log("Tracking permission granted");
-      updateTrackingEnabled(user?.uid ?? "", true);
-      dispatch(updateTrackingPermission(true));
-    } else {
-      console.log("Tracking permission denied");
-      updateTrackingEnabled(user?.uid ?? "", false);
-      dispatch(updateTrackingPermission(false));
-    }
+    const granted = trackingResult.status === "granted";
+
+    // Update Firestore and Redux accordingly
+    updateTrackingEnabled(user?.uid ?? "", granted);
+    dispatch(updateTrackingPermission(granted));
   };
 
   // Run the permission check once on mount
