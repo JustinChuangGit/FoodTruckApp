@@ -145,9 +145,13 @@ export default function UserVendorInfo() {
                 <Text style={styles.vendorPrice}>{vendorType} </Text>
                 <FontAwesome name="circle" size={8} color="#888" />
                 <Text style={styles.vendorPrice}> {price} </Text>
-                <FontAwesome name="circle" size={8} color="#888" />
-                <Text style={styles.vendorRating}> {rating}</Text>
-                <FontAwesome name="star" size={12} color="#888" />
+                {parseFloat(rating) > 0 && (
+                  <View style={{ flexDirection: "row", alignItems: "center" }}>
+                    <FontAwesome name="circle" size={8} color="#888" />
+                    <Text style={styles.vendorRating}> {rating}</Text>
+                    <FontAwesome name="star" size={12} color="#888" />
+                  </View>
+                )}
               </View>
               <Text style={styles.description}>{description}</Text>
               <View style={styles.tabContainer}>
