@@ -2,7 +2,7 @@
   "expo": {
     "name": "MNCH",
     "slug": "FoodTruckApp",
-    "version": "1.0.12",
+    "version": "1.0.14",
     "orientation": "portrait",
     "icon": "./assets/images/appstore.png",
     "scheme": "myapp",
@@ -22,7 +22,6 @@
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false,
         "NSLocationWhenInUseUsageDescription": "This app needs access to your location to show nearby food trucks.",
-        "NSUserTrackingUsageDescription": "We use your data to provide personalized recommendations and marketing insights. Your permission helps us offer relevant content and better experiences."
       }
     },
     "android": {

@@ -22,6 +22,7 @@ const CardItem: React.FC<CardItemProps> = ({ vendor, onPress }) => {
   const [loading, setLoading] = useState(true); // Track image loading state
   const [isFavorited, setIsFavorited] = useState(false);
   const user = useSelector(selectUser);
+  const [distance, setDistance] = useState<number>(0);
 
   const handleHeartPress = () => {
     setIsFavorited((prev) => !prev);
@@ -29,6 +30,9 @@ const CardItem: React.FC<CardItemProps> = ({ vendor, onPress }) => {
 
   const units = useMemo(() => {
     const locale = Intl.DateTimeFormat().resolvedOptions().locale;
+    setDistance(
+      locale.includes("US") ? vendor.distance! * 0.621371 : vendor.distance!
+    );
     return locale.includes("US") ? "miles" : "km";
   }, []);
 
@@ -82,7 +86,7 @@ const CardItem: React.FC<CardItemProps> = ({ vendor, onPress }) => {
         </View>
         <Text style={styles.vendorRating}>
           {vendor.distance !== undefined
-            ? `${vendor.distance.toFixed(1)} ${units} away`
+            ? `${distance.toFixed(1)} ${units} away`
             : ""}
         </Text>
       </View>

@@ -41,7 +41,7 @@ import EventMarker from "@/components/EventMarker";
 import EventMapInfoCard from "@/components/EventMapInfoCard";
 import { FontAwesome } from "@expo/vector-icons";
 import { munchColors } from "@/constants/Colors";
-import { requestTrackingPermissionsAsync } from "expo-tracking-transparency";
+// import { requestTrackingPermissionsAsync } from "expo-tracking-transparency";
 
 const PermissionScreen = ({
   onRequestPermissions,
@@ -173,8 +173,8 @@ export default function Index() {
     dispatch(updateLocation({ latitude, longitude }));
 
     // Request tracking permission (iOS 14+ only)
-    const trackingResult = await requestTrackingPermissionsAsync();
-    const granted = trackingResult.status === "granted";
+    // const trackingResult = await requestTrackingPermissionsAsync();
+    const granted = false; // For testing purposes, set to false
 
     // Update Firestore and Redux accordingly
     updateTrackingEnabled(user?.uid ?? "", granted);
