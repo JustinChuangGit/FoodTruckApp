@@ -243,6 +243,7 @@ export const updateVendorAccountData = async (
   updates: Partial<{
     price: string;
     vendorType: string;
+    vendorCategory: string;
     name: string;
     description: string;
     image: string | null;

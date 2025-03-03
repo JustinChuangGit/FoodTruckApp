@@ -22,6 +22,7 @@ export interface VendorAccountInfo {
   vendorName: string; // The name of the vendor
   description: string; // A description of the vendor's services/products
   image: string | null; // The URL of the vendor's image/logo (nullable if no image is set)
+  vendorCategory: string; // The category of the vendor, e.g., "Food", "Beverage", etc.
 }
 
 export interface LocationCoordinates {
@@ -60,6 +61,7 @@ export interface User {
   accountCreated?: Date; // Add account created date
   referralCode?: string; // Add referral code
   trackingPermissions?: boolean; // Add tracking permissions
+  vendorCategory?: string; // Add vendor category
 }
 
 export interface Section {
@@ -82,6 +84,7 @@ export interface ActiveVendor {
   description: string; // Vendor's description
   image: string | null; // Vendor's image URL or null if not provided
   coupons: string[]; // Array of coupons
+  vendorCategory: string; // Category of the vendor
 }
 
 export type Coupon = {

@@ -44,7 +44,41 @@ const priceOptions = [
   { title: "$$$", icon: "currency-usd" },
 ];
 
-const vendorTypeOptions = [
+const vendorCategories = [
+  { title: "Food Truck/Trailer" },
+  { title: "Products" },
+  { title: "Produce/Meat" },
+  { title: "Other" },
+];
+
+const vendorProductCategory = [
+  { title: "Clothing" },
+  { title: "Jewelry" },
+  { title: "Art" },
+  { title: "Home Goods" },
+  { title: "Beauty Products" },
+  { title: "Health Products" },
+  { title: "Outdoor Gear" },
+  { title: "Pet Products" },
+  { title: "Toys" },
+  { title: "Books" },
+  { title: "Food Products" },
+  { title: "Beverages" },
+  { title: "Sports" },
+  { title: "Other" },
+];
+
+const vendorProduceCategory = [
+  { title: "Fresh Produce" },
+  { title: "Meat" },
+  { title: "Dairy" },
+  { title: "Eggs" },
+  { title: "Honey" },
+  { title: "Baked Goods" },
+  { title: "Other" },
+];
+
+const FoodTruckCategories = [
   { title: "American" },
   { title: "Italian" },
   { title: "Japanese" },
@@ -60,6 +94,8 @@ const vendorTypeOptions = [
   { title: "Middle Eastern" },
   { title: "Brazilian" },
   { title: "Produce" },
+  { title: "Desserts" },
+  { title: "Beverages" },
   { title: "Other" },
 ];
 
@@ -81,15 +117,19 @@ export default function VendorEditAccountScreen() {
     {
       id: "truck",
       uri: user?.truckImage || null, // Use truckImage from Redux state
-      placeholder: "Please Add Your Truck Image",
+      placeholder: "Add An Image of Booth/Truck",
     },
   ]);
 
   const [price, setPrice] = useState(user?.price || "");
   const [vendorType, setVendorType] = useState(user?.vendorType || "");
+  const [vendorCategory, setSelectedVendorCategory] = useState(
+    user?.vendorCategory || ""
+  );
   const [vendorName, setVendorName] = useState(user?.vendorName || "");
   const [description, setDescription] = useState(user?.description || "");
   const [activeIndex, setActiveIndex] = useState(0); // Track the current active index
+  const [subCategoryList, setSubCategoryList] = useState<string[]>([]);
 
   // Function to pick and upload image
   const pickImage = async (fileName: "logo" | "truck"): Promise<void> => {
@@ -156,6 +196,7 @@ export default function VendorEditAccountScreen() {
     const vendorData: VendorAccountInfo = {
       price,
       vendorType,
+      vendorCategory,
       vendorName,
       description,
       image: images.find((img) => img.id === "logo")?.uri || null, // Save logo image
@@ -195,7 +236,7 @@ export default function VendorEditAccountScreen() {
       )}
       <TouchableOpacity onPress={() => pickImage(item.id)}>
         <Text style={styles.editImageText}>
-          {item.id === "logo" ? "Edit Logo" : "Edit Truck Image"}
+          {item.id === "logo" ? "Edit Logo" : "Edit Booth/Truck Image"}
         </Text>
       </TouchableOpacity>
     </View>
@@ -281,14 +322,22 @@ export default function VendorEditAccountScreen() {
               showsVerticalScrollIndicator={false}
               dropdownStyle={styles.dropdownMenuStyle}
             />
-
             <Text style={styles.label}>Vendor Type</Text>
             <SelectDropdown
-              data={vendorTypeOptions}
-              defaultValue={vendorTypeOptions.find(
-                (option) => option.title === vendorType
+              data={vendorCategories}
+              defaultValue={vendorCategories.find(
+                (option) => option.title === vendorCategory
               )}
-              onSelect={(selectedItem) => setVendorType(selectedItem.title)}
+              onSelect={(selectedItem) => {
+                setSelectedVendorCategory(selectedItem.title);
+                setSubCategoryList(
+                  selectedItem.title === "Food Truck/Trailer"
+                    ? FoodTruckCategories.map((category) => category.title)
+                    : selectedItem.title === "Products"
+                    ? vendorProductCategory.map((category) => category.title)
+                    : vendorProduceCategory.map((category) => category.title)
+                );
+              }}
               renderButton={(selectedItem, isOpened) => (
                 <View style={styles.dropdownButtonStyle}>
                   <Text style={styles.dropdownButtonTxtStyle}>
@@ -314,13 +363,53 @@ export default function VendorEditAccountScreen() {
               dropdownStyle={styles.dropdownMenuStyle}
             />
 
+            <Text style={styles.label}>Vendor Category</Text>
+
+            {vendorCategory === "Other" ? (
+              <TextInput
+                style={[styles.input]}
+                placeholder="Enter custom vendor type"
+                value={vendorType}
+                onChangeText={setVendorType}
+                placeholderTextColor="#A9A9A9"
+              />
+            ) : (
+              <SelectDropdown
+                data={subCategoryList}
+                onSelect={(selectedItem) => setVendorType(selectedItem)}
+                renderButton={(selectedItem, isOpened) => (
+                  <View style={styles.dropdownButtonStyle}>
+                    <Text style={styles.dropdownButtonTxtStyle}>
+                      {selectedItem ? selectedItem : "Select Vendor Type"}
+                    </Text>
+                    <Icon
+                      name={isOpened ? "chevron-up" : "chevron-down"}
+                      style={styles.dropdownButtonArrowStyle}
+                    />
+                  </View>
+                )}
+                renderItem={(item, index, isSelected) => (
+                  <View
+                    style={{
+                      ...styles.dropdownItemStyle,
+                      ...(isSelected && { backgroundColor: "#D2D9DF" }),
+                    }}
+                  >
+                    <Text style={styles.dropdownItemTxtStyle}>{item}</Text>
+                  </View>
+                )}
+                showsVerticalScrollIndicator={false}
+                dropdownStyle={styles.dropdownMenuStyle}
+              />
+            )}
             <Text style={styles.label}>Description</Text>
             <TextInput
               style={[styles.input, styles.textArea]}
               value={description}
               onChangeText={setDescription}
-              placeholder="Enter description"
+              placeholder="Enter description about your store"
               multiline
+              placeholderTextColor={"#A9A9A9"}
             />
             <TouchableOpacity style={styles.saveButton} onPress={handleSave}>
               <Text style={styles.saveButtonText}>Save</Text>

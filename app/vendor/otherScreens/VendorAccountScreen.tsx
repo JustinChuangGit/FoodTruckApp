@@ -57,7 +57,7 @@ export default function VendorAccountScreen() {
             router.push("/vendor/otherScreens/vendorEditMenuScreen")
           }
         >
-          <Text style={styles.menuText}>Edit Menu</Text>
+          <Text style={styles.menuText}>Edit Items</Text>
           <FontAwesome
             name="chevron-right"
             size={16}

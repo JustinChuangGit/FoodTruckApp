@@ -1,5 +1,5 @@
 import { useRouter } from "expo-router";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
@@ -32,9 +32,29 @@ export default function SignupScreen() {
   const [phone, setPhone] = useState("");
   const [mailingAddress, setMailingAddress] = useState("");
   const [referralCode, setReferralCode] = useState("");
+  const [isKeyboardVisible, setKeyboardVisible] = useState(false);
 
   const dispatch = useDispatch<AppDispatch>();
+  useEffect(() => {
+    const keyboardDidShowListener = Keyboard.addListener(
+      "keyboardDidShow",
+      () => {
+        setKeyboardVisible(true);
+      }
+    );
 
+    const keyboardDidHideListener = Keyboard.addListener(
+      "keyboardDidHide",
+      () => {
+        setKeyboardVisible(false);
+      }
+    );
+
+    return () => {
+      keyboardDidShowListener.remove();
+      keyboardDidHideListener.remove();
+    };
+  }, []);
   const handleSignUp = async () => {
     if (password !== confirmPassword) {
       Alert.alert("Passwords do not match!");
@@ -60,6 +80,26 @@ export default function SignupScreen() {
       Alert.alert("Sign Up Failed", (error as Error).message);
     }
   };
+  useEffect(() => {
+    const keyboardDidShowListener = Keyboard.addListener(
+      "keyboardDidShow",
+      () => {
+        setKeyboardVisible(true);
+      }
+    );
+
+    const keyboardDidHideListener = Keyboard.addListener(
+      "keyboardDidHide",
+      () => {
+        setKeyboardVisible(false);
+      }
+    );
+
+    return () => {
+      keyboardDidShowListener.remove();
+      keyboardDidHideListener.remove();
+    };
+  }, []);
 
   return (
     <KeyboardAvoidingView
@@ -67,7 +107,10 @@ export default function SignupScreen() {
       style={styles.container}
     >
       {/* <TouchableWithoutFeedback onPress={Keyboard.dismiss}> */}
-      <ScrollView scrollEnabled={false} contentContainerStyle={{ flexGrow: 1 }}>
+      <ScrollView
+        scrollEnabled={isKeyboardVisible}
+        contentContainerStyle={{ flexGrow: 1 }}
+      >
         <View style={styles.inner}>
           <View style={styles.inputContainer}>
             <View style={styles.headerContainer}>
