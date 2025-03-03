@@ -38,11 +38,19 @@ export default function VendorSignupTriageScreen() {
     }, [user])
   );
 
+  const handleSignUp = () => {
+    if (completedAccountInfo && completedMenu && completedTerms) {
+      router.push("/vendor");
+    } else {
+      alert("Please complete all steps before signing up.");
+    }
+  };
+
   return (
     <View style={styles.container}>
       <View style={styles.logoContainer}>
         <Image
-          source={require("@/assets/images/munchLogo.png")}
+          source={require("@/assets/images/mnchLogo.png")}
           style={styles.logo}
           resizeMode="contain"
         />
@@ -121,10 +129,7 @@ export default function VendorSignupTriageScreen() {
         </TouchableOpacity>
 
         {/* Sign Up Button */}
-        <TouchableOpacity
-          style={styles.buttonContainer}
-          onPress={() => router.push("/vendor")}
-        >
+        <TouchableOpacity style={styles.buttonContainer} onPress={handleSignUp}>
           <Text style={styles.buttonText}>Sign Up</Text>
         </TouchableOpacity>
       </View>
@@ -187,8 +192,8 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   logo: {
-    width: 250,
-    height: 250,
+    width: 200,
+    height: 200,
   },
   triageContainer: {},
   rowSubText: {
