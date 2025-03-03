@@ -113,8 +113,18 @@ export default function VendorAccountScreen() {
             style={styles.rightChevron}
           />
         </TouchableOpacity>
+        <TouchableOpacity
+          style={styles.menuItem}
+          onPress={() => router.push("/sharedScreens/deleteAccountScreen")}
+        >
+          <Text style={styles.menuText}>Delete Account</Text>
+          <FontAwesome
+            name="chevron-right"
+            size={16}
+            style={styles.rightChevron}
+          />
+        </TouchableOpacity>
       </View>
-
       {/* Sign Out Button */}
       <TouchableOpacity style={styles.signOutButton} onPress={handleSignOut}>
         <Text style={styles.signOutText}>Sign out</Text>
