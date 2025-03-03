@@ -90,7 +90,6 @@ export default function UserEventsScreen() {
     longitude: number;
   } | null>(null); // Store user's location
   const units = useUnits();
-  const [distance, setDistance] = useState<string>("");
 
   useEffect(() => {
     (async () => {
@@ -107,29 +106,6 @@ export default function UserEventsScreen() {
       });
     })();
   }, []);
-
-  const openMaps = () => {
-    if (!selectedEvent) {
-      Alert.alert("Error", "Please Try Again");
-      return;
-    }
-    const { latitude, longitude } = selectedEvent.region;
-    const label = encodeURIComponent(selectedEvent.eventTitle);
-
-    let url = "";
-
-    if (Platform.OS === "ios") {
-      // Open in Apple Maps
-      url = `maps://?q=${label}&ll=${latitude},${longitude}`;
-    } else {
-      // Open in Google Maps
-      url = `https://www.google.com/maps/search/?api=1&query=${latitude},${longitude}`;
-    }
-
-    Linking.openURL(url).catch((err) =>
-      console.error("Failed to open maps", err)
-    );
-  };
 
   const loadEvents = async () => {
     try {
@@ -222,7 +198,7 @@ export default function UserEventsScreen() {
     };
 
     const eventImage =
-      eventImageMap[item.eventTitle] ||
+      eventImageMap[item.eventType] ||
       require("@/assets/images/otherEvent.png");
 
     return (

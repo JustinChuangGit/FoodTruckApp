@@ -146,8 +146,7 @@ export default function CreateNewEventScreen() {
   };
 
   const handleCreateEvent = async () => {
-    const eventTitle =
-      eventType === "Other" ? customEventTitle.trim() : eventType; // Trim spaces
+    const eventTitle = customEventTitle.trim(); // Trim spaces
 
     // Validation checks
     if (eventTitle === "") {
@@ -179,6 +178,7 @@ export default function CreateNewEventScreen() {
 
     const newEvent: Event = {
       eventTitle,
+      eventType,
       date: dateValue,
       startTime,
       endTime,
@@ -282,15 +282,14 @@ export default function CreateNewEventScreen() {
                 containerStyle={styles.dropdownContainer}
                 style={styles.dropdown}
               />
-              {eventType === "Other" && (
-                <TextInput
-                  style={styles.input}
-                  placeholder="Enter Event Title"
-                  value={customEventTitle}
-                  onChangeText={setCustomEventTitle}
-                  placeholderTextColor="#999"
-                />
-              )}
+
+              <TextInput
+                style={styles.input}
+                placeholder="Enter Event Title"
+                value={customEventTitle}
+                onChangeText={setCustomEventTitle}
+                placeholderTextColor="#999"
+              />
 
               <View style={styles.autocompleteContainer}>
                 <Text style={styles.label}>Address</Text>

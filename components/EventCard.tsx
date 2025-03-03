@@ -28,8 +28,7 @@ const eventImageMap: { [key: string]: any } = {
 const EventCard: React.FC<EventCardProps> = ({ event, onPress }) => {
   const [loading, setLoading] = useState(false);
   const eventImage =
-    eventImageMap[event.eventTitle] ||
-    require("@/assets/images/otherEvent.png");
+    eventImageMap[event.eventType] || require("@/assets/images/otherEvent.png");
   // Calculate the display date.
   const eventDate = new Date(event.date);
   const dayDiff = differenceInCalendarDays(eventDate, new Date());

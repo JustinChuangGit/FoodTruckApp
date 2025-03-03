@@ -222,7 +222,7 @@ export default function VendorEventsScreen() {
     };
 
     const eventImage =
-      eventImageMap[item.eventTitle] ||
+      eventImageMap[item.eventType] ||
       require("@/assets/images/otherEvent.png");
 
     return (

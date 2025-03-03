@@ -98,6 +98,7 @@ export type Coupon = {
 export type Event = {
   id?: string;
   eventTitle: string;
+  eventType: string;
   date: Date;
   startTime?: Date | null;
   endTime?: Date | null;

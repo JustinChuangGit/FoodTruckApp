@@ -803,7 +803,8 @@ export const fetchEvents = async (): Promise<Event[]> => {
           longitudeDelta: data.region.longitudeDelta ?? 0.01,
         },
         createdBy: data.createdBy,
-        createdAt: data.createdAt?.toDate() || new Date(), // Convert Firestore timestamp
+        createdAt: data.createdAt?.toDate() || new Date(), 
+        eventType: data.eventType,
       };
     });
 
