@@ -130,7 +130,7 @@ export default function VendorSignupTriageScreen() {
 
         {/* Sign Up Button */}
         <TouchableOpacity style={styles.buttonContainer} onPress={handleSignUp}>
-          <Text style={styles.buttonText}>Sign Up</Text>
+          <Text style={styles.buttonText}>Submit</Text>
         </TouchableOpacity>
       </View>
     </View>

@@ -43,23 +43,36 @@ export const saveUserData = async (
 
 // Function to fetch user data
 // Function to fetch user or vendor data
+
 export const getUserData = async (uid: string): Promise<any> => {
   try {
-    // Try to fetch from the "users" collection
-    let userDoc = await getDoc(doc(db, "users", uid));
-    if (userDoc.exists()) {
-      return userDoc.data();
+    // Fetch vendor document
+    const vendorDoc = await getDoc(doc(db, "vendors", uid));
+
+    if (!vendorDoc.exists()) {
+      console.warn("Vendor data not found");
+      return null;
     }
-    // If not found, try to fetch from the "vendors" collection
-    userDoc = await getDoc(doc(db, "vendors", uid));
-    if (userDoc.exists()) {
-      return userDoc.data();
+
+    let userData = vendorDoc.data();
+
+    // Check if the user is a vendor before fetching menu
+    if (userData.isVendor) {
+      const menuCollectionRef = collection(db, "vendors", uid, "menu");
+      const menuSnapshot = await getDocs(menuCollectionRef);
+
+      const menuItems = menuSnapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
+
+      // Attach `menu` to user data (always an array)
+      userData = { ...userData, menu: menuItems || [] };
     }
-    // If no document is found in both collections
-    console.warn("No user or vendor data found");
-    return null;
+
+    return userData;
   } catch (error) {
-    console.error("Error fetching user or vendor data:", error);
+    console.error("Error fetching vendor data:", error);
     throw error;
   }
 };
@@ -809,7 +822,7 @@ export const fetchEvents = async (): Promise<Event[]> => {
       };
     });
 
-    console.log("Fetched Events:", events);
+    // console.log("Fetched Events:", events);
     return events;
   } catch (error) {
     console.error("Error fetching events:", error);

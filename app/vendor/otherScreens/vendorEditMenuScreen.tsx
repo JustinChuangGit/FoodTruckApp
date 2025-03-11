@@ -212,7 +212,7 @@ export default function EditMenuItemsScreen() {
         >
           <FontAwesome name="chevron-left" size={24} color="black" />
         </TouchableOpacity>
-        <Text style={styles.headerText}>Edit Items</Text>
+        <Text style={styles.headerText}>Edit Menu/Items</Text>
       </View>
 
       <HorizontalLine />

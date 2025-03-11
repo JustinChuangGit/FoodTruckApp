@@ -186,6 +186,45 @@ export default function Index() {
     checkPermissions();
   }, []);
 
+  const alertShownRef = useRef(false); // Prevent repeated alerts
+
+  useEffect(() => {
+    if (!user || alertShownRef.current) return; // Ensure user exists and alert isn't shown twice
+
+    let missingFields = [];
+
+    if (!user?.image) missingFields.push("Profile Image");
+    if (!user?.description) missingFields.push("Business Description");
+    if (!user?.vendorType) missingFields.push("Vendor Type");
+    if (!user?.price) missingFields.push("Price Range");
+    if (!user?.name) missingFields.push("Business Name");
+    if (!user?.truckImage) missingFields.push("Cover/Truck Image");
+    if (!user?.menu || user.menu.length === 0) missingFields.push("Menu Items");
+    if (!user?.acceptedTerms) missingFields.push("Accepted Terms & Conditions");
+
+    if (missingFields.length > 0) {
+      alertShownRef.current = true; // Mark alert as shown to prevent duplicate alerts
+
+      Alert.alert(
+        "Complete Your Setup",
+        `Your vendor profile setup isn't finished. You are missing:\n\n${missingFields.join(
+          "\n"
+        )}\n\nWould you like to complete it now?`,
+        [
+          {
+            text: "No, Later",
+            style: "cancel",
+            onPress: () => console.log(user.menu),
+          },
+          {
+            text: "Yes, Take Me There",
+            onPress: () =>
+              router.push("/vendor/otherScreens/vendorSignupTriageScreen"),
+          },
+        ]
+      );
+    }
+  }, [user]);
   useEffect(() => {
     (async () => {
       try {
@@ -429,13 +468,17 @@ export default function Index() {
           return;
         }
 
+        const { coords } = await Location.getCurrentPositionAsync({});
+        setLocation(coords);
+        const { latitude, longitude } = coords;
+
         // Include coupons directly in the vendor data
         const vendorData = {
           uid,
           timestamp: new Date().toISOString(),
           location: {
-            latitude: location.latitude,
-            longitude: location.longitude,
+            latitude: latitude,
+            longitude: longitude,
           },
           menu: user.menu || [], // Include the vendor's menu
           name: user.name, // Include vendor's name
@@ -464,7 +507,10 @@ export default function Index() {
       setVendorActive((prev) => !prev); // Toggle the local state
     } catch (error) {
       console.error("Error toggling vendor active status:", error);
-      Alert.alert("Error", "Failed to toggle vendor status. Please try again.");
+      Alert.alert(
+        "Error",
+        "Failed to toggle vendor status. Please make sure you have entered your product offerings and vendor information. Go to settings in the top right and you can Edit items/menu and add Account Information."
+      );
     }
   };
 
