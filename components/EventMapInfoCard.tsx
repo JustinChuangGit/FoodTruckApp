@@ -142,7 +142,9 @@ const EventMapInfoCard: React.FC<EventMapInfoCardProps> = ({
         </View>
 
         <View style={styles.infoContainer}>
-          <Text style={styles.title}>{event.eventTitle}</Text>
+          <Text style={styles.title} numberOfLines={1} ellipsizeMode="tail">
+            {event.eventTitle}
+          </Text>
           <Text style={styles.date}>{displayDate}</Text>
           {timeDisplay !== "" && <Text style={styles.time}>{timeDisplay}</Text>}
           {distance && (
@@ -187,7 +189,7 @@ const styles = StyleSheet.create({
   },
   imageContainer: {
     width: 120,
-    height: 120,
+    minHeight: 120,
     justifyContent: "center",
     alignItems: "center",
     backgroundColor: "#e0e0e0",
