@@ -118,7 +118,9 @@ const VendorMapInfoCard: React.FC<VendorMapInfoCardProps> = ({
         </View>
 
         <View style={styles.infoContainer}>
-          <Text style={styles.title}>{vendor.vendorName}</Text>
+          <Text style={styles.title} numberOfLines={1} ellipsizeMode="tail">
+            {vendor.vendorName}
+          </Text>
           <View style={styles.descriptionContainer}>
             <Text style={styles.subtitle}>{vendor.description}</Text>
           </View>
@@ -129,9 +131,9 @@ const VendorMapInfoCard: React.FC<VendorMapInfoCardProps> = ({
                 {distance} {units} away
               </Text>
             )}
-            <Text style={styles.rating}>
+            {/* <Text style={styles.rating}>
               <FontAwesome name="star" size={14} color="gold" /> {vendor.rating}
-            </Text>
+            </Text> */}
           </View>
         </View>
       </TouchableOpacity>
