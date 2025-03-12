@@ -118,13 +118,26 @@ export default function EditMenuItemsScreen() {
     const menuCollectionRef = collection(db, `vendors/${vendorUid}/menu`);
     const snapshot = await getDocs(menuCollectionRef);
     return snapshot.docs.map((doc) => ({
-      id: doc.id,
+      id: doc.id, // ✅ Store Firestore document ID
       ...doc.data(),
     })) as MenuItem[];
   };
-  const deleteMenuItem = async (vendorUid: string, itemId: string) => {
-    const itemRef = doc(db, `vendors/${vendorUid}/menu/${itemId}`);
-    await deleteDoc(itemRef);
+
+  const deleteMenuItem = async (vendorUid: string, docId: string) => {
+    try {
+      const itemRef = doc(db, `vendors/${vendorUid}/menu/${docId}`); // ✅ Use Firestore doc ID
+      await deleteDoc(itemRef);
+
+      // Remove from local state
+      setMenuItems((prevItems) =>
+        prevItems.filter((item) => item.id !== docId)
+      );
+
+      console.log(`Menu item '${docId}' deleted successfully`);
+    } catch (error) {
+      console.error("Error deleting menu item:", error);
+      Alert.alert("Error", "Could not delete the menu item.");
+    }
   };
 
   useEffect(() => {
@@ -171,11 +184,11 @@ export default function EditMenuItemsScreen() {
                   try {
                     if (!vendorUid) {
                       console.error("Vendor UID is missing.");
-                      return; // Exit early if vendorUid is undefined
+                      return;
                     }
-                    await deleteMenuItem(vendorUid, item.id); // No need for category reference
-                    const updatedItems = await fetchMenuItems(vendorUid);
-                    setMenuItems(updatedItems);
+
+                    console.log("Deleting item:", item.id); // ✅ Debugging output
+                    await deleteMenuItem(vendorUid, item.id); // ✅ Use Firestore doc ID instead of manually assigned ID
                   } catch (error) {
                     console.error("Error deleting menu item:", error);
                     Alert.alert("Error", "Could not delete the menu item.");
